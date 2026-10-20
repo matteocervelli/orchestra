@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "adlimen-orchestra"
+version = "0.1.0"
+description = "Reusable, reviewable SDLC workflow sources for Nexus Orchestra"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "bandit>=1.8.6,<2",
+  "mypy>=1.18,<2",
+  "pipdeptree>=2.29,<3",
+  "pytest>=9.0,<10",
+  "pytest-cov>=7.0,<8",
+  "radon>=6.0.1,<7",
+  "ruff>=0.14,<0.15",
+  "vulture>=2.14,<3",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/orchestra"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["orchestra"]
+
+[tool.coverage.run]
+branch = true
+source = ["orchestra"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true

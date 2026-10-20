@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {"path": "STATE.md", "classification": "runtime-state", "ignored": true},
+    {"path": "continuation.md", "classification": "runtime-state", "ignored": true},
+    {"path": "ledger.jsonl", "classification": "runtime-state", "ignored": true},
+    {"path": "queue.json", "classification": "runtime-state", "ignored": true},
+    {"path": "logs/child.err", "classification": "runtime-log", "ignored": true},
+    {"path": "answers/answer.json", "classification": "runtime-answer", "ignored": true},
+    {"path": "scratch/spawn-queue.txt", "classification": "runtime-queue", "ignored": true},
+    {"path": "pages/report.html", "classification": "runtime-artifact", "ignored": true},
+    {"path": "sessions/native.json", "classification": "runtime-session", "ignored": true},
+    {"path": ".env", "classification": "credential-config", "ignored": true},
+    {"path": "credentials/slack.json", "classification": "credential", "ignored": true},
+    {"path": "docs/architecture.md", "classification": "reviewable-doc", "ignored": false},
+    {"path": "src/orchestra/ledger_sync.py", "classification": "reviewable-source", "ignored": false}
+  ]
+}
