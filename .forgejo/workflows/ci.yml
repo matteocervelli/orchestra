@@ -2,8 +2,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main, auto/integration, "auto/**"]
   pull_request:
     branches: [auto/integration]
 
@@ -15,20 +13,10 @@ jobs:
       typecheck_target: "src"
     secrets: inherit
 
-  tests-pr:
-    if: github.event_name == 'pull_request'
+  tests:
     uses: matteocervelli/adlimen-cicd/.forgejo/workflows/lib-py-ci-test.yml@v3.6.0
     with:
       caller_event_name: pull_request
-      package_path: "."
-      python_versions: '["3.12"]'
-    secrets: inherit
-
-  tests-push:
-    if: github.event_name == 'push'
-    uses: matteocervelli/adlimen-cicd/.forgejo/workflows/lib-py-ci-test.yml@v3.6.0
-    with:
-      caller_event_name: push
       package_path: "."
       python_versions: '["3.12"]'
     secrets: inherit

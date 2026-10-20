@@ -36,10 +36,11 @@ The live tree remains unchanged.
 - Python 3.12 with `uv`; no new runtime dependency.
 - GitHub remains the canonical issue tracker; Forgejo runs CI.
 - Pull requests target `auto/integration` on both forges.
-- The generic `ci-setup` lib-py topology (separate publish/release callers) is
+- The generic `ci-setup` lib-py topology (separate push, publish, and release callers) is
   intentionally not applied: issue 184 requires one `ci.yml` and explicitly
   forbids automatic deploy/release/publish. The single caller still delegates
-  quality and event-specific tests to `adlimen-cicd@v3.6.0`.
+  PR quality and tests to `adlimen-cicd@v3.6.0`. PR-only execution also avoids
+  duplicate push/PR runs for the same review SHA.
 
 ## File manifest
 

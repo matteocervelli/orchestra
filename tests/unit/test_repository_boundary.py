@@ -75,7 +75,7 @@ def test_forgejo_ci_is_single_and_pinned_to_approved_release() -> None:
     workflow = ROOT / ".forgejo" / "workflows" / "ci.yml"
     source = workflow.read_text(encoding="utf-8")
     pins = [line.strip() for line in source.splitlines() if "uses:" in line]
-    assert len(pins) == 3
+    assert len(pins) == 2
     assert all(
         "matteocervelli/adlimen-cicd/.forgejo/workflows/" in pin
         and pin.endswith("@v3.6.0")
