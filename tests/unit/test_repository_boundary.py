@@ -4,13 +4,6 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FORBIDDEN_TRACKED = {
-    "STATE.md",
-    "continuation.md",
-    "ledger.jsonl",
-    "queue.json",
-}
-FORBIDDEN_PARTS = {"answers", "credentials", "logs", "pages", "scratch", "sessions"}
 
 
 def git(*args: str) -> subprocess.CompletedProcess[str]:
@@ -20,6 +13,33 @@ def git(*args: str) -> subprocess.CompletedProcess[str]:
         capture_output=True,
         text=True,
     )
+
+
+def ignored_tracked_paths(repository: Path) -> list[str]:
+    tracked = subprocess.run(
+        ["git", "-C", str(repository), "ls-files", "-z"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    ignored = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repository),
+            "check-ignore",
+            "--no-index",
+            "-z",
+            "--stdin",
+        ],
+        input=tracked.stdout,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if ignored.returncode not in {0, 1}:
+        ignored.check_returncode()
+    return [path for path in ignored.stdout.split("\0") if path]
 
 
 def test_runtime_and_secret_paths_are_ignored() -> None:
@@ -52,15 +72,25 @@ def test_runtime_and_secret_paths_are_ignored() -> None:
 
 
 def test_no_runtime_artifact_is_tracked() -> None:
-    result = git("ls-files", "-z")
-    assert result.returncode == 0
-    tracked = [Path(path) for path in result.stdout.split("\0") if path]
-    violations = [
-        str(path)
-        for path in tracked
-        if path.name in FORBIDDEN_TRACKED or FORBIDDEN_PARTS.intersection(path.parts)
-    ]
-    assert violations == []
+    assert ignored_tracked_paths(ROOT) == []
+
+
+def test_ignore_policy_detects_force_tracked_secret(tmp_path: Path) -> None:
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    subprocess.run(["git", "-C", str(repository), "init", "-q"], check=True)
+    (repository / ".gitignore").write_text("*token*\n", encoding="utf-8")
+    (repository / "local-token.txt").write_text("synthetic\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repository), "add", ".gitignore"],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(repository), "add", "--force", "local-token.txt"],
+        check=True,
+    )
+
+    assert ignored_tracked_paths(repository) == ["local-token.txt"]
 
 
 def test_no_deploy_or_release_workflow_exists() -> None:
