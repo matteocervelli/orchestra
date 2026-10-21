@@ -10,6 +10,11 @@ All notable changes to Orchestra are documented here.
   Forgejo-only CI, reviewable launcher and Slack/ledger sources, documentation,
   tests, and synthetic boundary fixtures.
 
+### Changed
+
+- Reconcile the initial promotion changelog with the included implementation
+  commits and current Nexus dependency status.
+
 ### Fixed
 
 - Avoid duplicate nonterminal Forgejo CI runs in the reusable pipeline.

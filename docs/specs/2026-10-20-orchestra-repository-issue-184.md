@@ -25,9 +25,9 @@ The live tree remains unchanged.
   Slack thread, and ledger reconciliation source plus tests, docs, and synthetic
   fixtures. It contains no copied live tasks, state, ledger, logs, answers,
   pages, tokens, or sessions.
-- REQ-06: Because `nexus#64` remains open and PR #191 is draft, the extracted
-  launchers remain inert. This change does not install, activate, or connect
-  them to `/data/dev/artifacts/orchestra`.
+- REQ-06: Although PR #191 has merged to Nexus `auto/integration`, `nexus#64`
+  remains open, so the extracted launchers remain inert. This change does not
+  install, activate, or connect them to `/data/dev/artifacts/orchestra`.
 
 ## Approved decisions
 
