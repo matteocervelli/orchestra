@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from test_runtime_fixture import private_python
 
 from orchestra.security.process import (
     ProtocolLaunch,
@@ -146,7 +147,7 @@ def capability_fixture(tmp_path: Path, monkeypatch):
     from orchestra.security.profile import CATALOG
     from orchestra.security.request import RuntimeBindings
 
-    python = Path(sys.executable).resolve()
+    python = private_python(tmp_path)
     git_path = Path("/usr/bin/git").resolve()
     artifact = tmp_path / "artifact"
     artifact.mkdir(mode=0o700)
@@ -335,7 +336,7 @@ def protocol_launch(
     cap: int = 65536,
     deadline: float = 2.0,
 ) -> ProtocolLaunch:
-    python = Path(sys.executable).resolve()
+    python = private_python(tmp_path)
     binding = admit_executable(
         python,
         hashlib.sha256(python.read_bytes()).hexdigest(),

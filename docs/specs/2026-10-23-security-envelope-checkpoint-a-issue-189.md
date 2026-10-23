@@ -547,6 +547,34 @@ unchanged. Installed artifacts must include the admission module and reject
 its absence/tampering. Independent rereview and new exact hashes remain required.
 
 
+## Approved CI fixture portability correction — 2026-10-23
+
+Parent released the freeze after Orchestra96f5716dc73e34427e665d278c335bc87bf343de
+CI task248352 reported20 fixture failures at the required executable mode022
+guard. Local reproduction with a private group-writable Python copy confirms
+the host-dependent positive-fixture assumption; production admission is correct.
+Only this spec, tests/unit/security/test_process.py and
+tests/unit/security/test_runtime_fixture.py may change in this wave. The new
+test module owns the single private-interpreter helper and four new regression
+cases; test_process imports that helper using the existing pytest sibling-import
+convention. Preserve all 37 preexisting process cases without duplication; the
+new positive test imports process helpers inside its body to avoid an import
+cycle. This cohesive split keeps each test module below 500 lines.
+Runtime/process/workflows/Nexus/dependencies remain byte-identical.
+
+Positive process/capability fixtures must use a copied, independently-inoded,
+owner-only executable under their private temporary runtime/bin directory,
+with pyvenv.cfg resolving the existing interpreter's base stdlib. No hardlink,
+shared chmod, PYTHONHOME/LD_LIBRARY_PATH override, installation or guard bypass.
+This shares the real existing stdlib/extensions for synthetic tests; it is NOT
+complete runtime provisioning or OS immutability proof. Binary-only relocation
+is insufficient on the observed uv Python3.12.13 (missing encodings); the proper
+layout was actually executed with both -I -S -B and -I -B, including hashlib,
+zlib and ssl. Test positive admission/execution with a writable host input while
+retaining explicit group/world-writable executable rejection. Observe RED before
+fixture implementation, then full native tests/coverage/quality. Retain the
+diagnostic temporary directory; no cleanup, commit/ship or B authority follows.
+
 ## File Manifest
 
 Parent amendment 2026-10-23: add runtime.py solely to split executable identity/
@@ -571,6 +599,7 @@ mandatory and covered by missing/tampered module negatives.
 - `tests/unit/security/test_inventory.py`
 - `tests/unit/security/test_lock_metadata.py`
 - `tests/unit/security/test_process.py`
+- `tests/unit/security/test_runtime_fixture.py`
 - `pyproject.toml`
 - `uv.lock`
 - `docs/codebase/INDEX.md`
