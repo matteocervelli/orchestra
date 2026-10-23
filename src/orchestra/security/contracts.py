@@ -232,32 +232,44 @@ class Receipt:
     error_code: str | None
 
     def __post_init__(self) -> None:
-        _require(type(self.key) is ReceiptKey and self.state in STATES)
-        _require(self.applicability in {"required", "not_applicable"})
-        _hex(self.input_digest, 64)
-        if self.native_digest is not None:
-            _hex(self.native_digest, 64)
-        if self.exit_code is not None:
-            _integer(self.exit_code, -255, 255)
-        for value in (self.stdout_bytes, self.stderr_bytes, self.omitted_count):
-            _integer(value)
-        for count in (self.scanned_count, self.finding_count):
-            if count is not None:
-                _integer(count)
-        _tuple(self.findings, Finding)
-        _require(
-            all(
-                type(v) is bool
-                for v in (self.timed_out, self.stdout_truncated, self.stderr_truncated)
-            )
-        )
-        _require(self.error_code is None or self.error_code in ERROR_CODES)
-        if self.finding_count is not None:
-            _require(self.finding_count == len(self.findings) + self.omitted_count)
+        _validate_receipt_fields(self)
         if self.applicability == "not_applicable":
             _validate_na(self)
         else:
             _validate_required(self)
+
+
+def _validate_receipt_fields(item: Receipt) -> None:
+    _require(type(item.key) is ReceiptKey and item.state in STATES)
+    _require(item.applicability in {"required", "not_applicable"})
+    _hex(item.input_digest, 64)
+    if item.native_digest is not None:
+        _hex(item.native_digest, 64)
+    if item.exit_code is not None:
+        _integer(item.exit_code, -255, 255)
+    _validate_receipt_counts(item)
+    _tuple(item.findings, Finding)
+    _require(
+        all(
+            type(value) is bool
+            for value in (
+                item.timed_out,
+                item.stdout_truncated,
+                item.stderr_truncated,
+            )
+        )
+    )
+    _require(item.error_code is None or item.error_code in ERROR_CODES)
+    if item.finding_count is not None:
+        _require(item.finding_count == len(item.findings) + item.omitted_count)
+
+
+def _validate_receipt_counts(item: Receipt) -> None:
+    for value in (item.stdout_bytes, item.stderr_bytes, item.omitted_count):
+        _integer(value)
+    for count in (item.scanned_count, item.finding_count):
+        if count is not None:
+            _integer(count)
 
 
 def _validate_na(item: Receipt) -> None:
@@ -304,26 +316,38 @@ def _validate_required(item: Receipt) -> None:
     dependency = family in {"python-export", "python-audit", "javascript-audit", "osv"}
     _require((item.key.scope is not None) == dependency)
     _require(item.key.batch == 0 or family == "bandit")
-    if item.tool_version is not None:
-        _require(
-            re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]{0,63}", item.tool_version)
-            is not None
-        )
+    _validate_tool_version(item.tool_version)
     _require(item.timed_out == (item.state == "timeout"))
-    if item.stdout_bytes > LIMIT:
-        _require(item.stdout_truncated)
-    if item.stderr_bytes > LIMIT:
-        _require(item.stderr_truncated)
+    _validate_truncation(item.stdout_bytes, item.stdout_truncated)
+    _validate_truncation(item.stderr_bytes, item.stderr_truncated)
     if item.state == "complete":
-        _require(item.tool_version == version and item.native_digest is not None)
-        _require(item.scanned_count is not None and item.finding_count is not None)
-        _require(item.error_code is None and not item.omitted_count)
-        _require(not item.stdout_truncated and not item.stderr_truncated)
-        _require(item.exit_code == (findings_exit if item.findings else 0))
-        if family == "patterns":
-            _validate_patterns(item)
+        _validate_complete_receipt(item, family, version, findings_exit)
     else:
         _require(item.error_code is not None)
+
+
+def _validate_tool_version(tool_version: str | None) -> None:
+    if tool_version is not None:
+        _require(
+            re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]{0,63}", tool_version) is not None
+        )
+
+
+def _validate_truncation(byte_count: int, truncated: bool) -> None:
+    if byte_count > LIMIT:
+        _require(truncated)
+
+
+def _validate_complete_receipt(
+    item: Receipt, family: str, version: str, findings_exit: int
+) -> None:
+    _require(item.tool_version == version and item.native_digest is not None)
+    _require(item.scanned_count is not None and item.finding_count is not None)
+    _require(item.error_code is None and not item.omitted_count)
+    _require(not item.stdout_truncated and not item.stderr_truncated)
+    _require(item.exit_code == (findings_exit if item.findings else 0))
+    if family == "patterns":
+        _validate_patterns(item)
 
 
 def _validate_patterns(item: Receipt) -> None:
@@ -376,45 +400,53 @@ class SecurityEnvelope:
     gaps: tuple[Gap, ...]
 
     def __post_init__(self) -> None:
-        _require(self.schema == "orchestra.security-envelope/v1")
-        for value in (self.scan_id, self.work_unit_id, self.attempt_id):
-            _require(isinstance(value, str) and str(UUID(value)) == value)
-        for value in (self.repository, self.profile_id):
-            _text(value, 100)
-        for value in (
-            self.producer_revision,
-            self.head_sha,
-            self.base_sha,
-            self.merge_base_sha,
-        ):
-            _hex(value, 40)
-        for value in (
-            self.producer_digest,
-            self.profile_digest,
-            self.context_digest,
-            self.scope_digest,
-            self.changed_digest,
-            self.plan_digest,
-        ):
-            _hex(value, 64)
-        _require(type(self.complete) is bool)
-        _tuple(self.receipts, Receipt)
-        _tuple(self.gaps, Gap)
-        keys = [r.key for r in self.receipts]
-        _require(len(set(keys)) == len(keys))
-        for family in FAMILIES:
-            family_receipts = [r for r in self.receipts if r.key.family == family]
-            if any(r.applicability == "not_applicable" for r in family_receipts):
-                _require(len(family_receipts) == 1)
-            batches = sorted(r.key.batch for r in family_receipts if family == "bandit")
-            _require(not batches or batches == list(range(len(batches))))
+        _validate_envelope_fields(self)
+        _validate_envelope_receipts(self)
         if self.complete:
-            _require(
-                not self.gaps and {r.key.family for r in self.receipts} == FAMILIES
-            )
-            _require(
-                all(r.state in {"complete", "not_applicable"} for r in self.receipts)
-            )
+            _validate_complete_envelope(self)
+
+
+def _validate_envelope_fields(item: SecurityEnvelope) -> None:
+    _require(item.schema == "orchestra.security-envelope/v1")
+    for value in (item.scan_id, item.work_unit_id, item.attempt_id):
+        _require(isinstance(value, str) and str(UUID(value)) == value)
+    for value in (item.repository, item.profile_id):
+        _text(value, 100)
+    for value in (
+        item.producer_revision,
+        item.head_sha,
+        item.base_sha,
+        item.merge_base_sha,
+    ):
+        _hex(value, 40)
+    for value in (
+        item.producer_digest,
+        item.profile_digest,
+        item.context_digest,
+        item.scope_digest,
+        item.changed_digest,
+        item.plan_digest,
+    ):
+        _hex(value, 64)
+    _require(type(item.complete) is bool)
+    _tuple(item.receipts, Receipt)
+    _tuple(item.gaps, Gap)
+
+
+def _validate_envelope_receipts(item: SecurityEnvelope) -> None:
+    keys = [receipt.key for receipt in item.receipts]
+    _require(len(set(keys)) == len(keys))
+    for family in FAMILIES:
+        family_receipts = [r for r in item.receipts if r.key.family == family]
+        if any(r.applicability == "not_applicable" for r in family_receipts):
+            _require(len(family_receipts) == 1)
+        batches = sorted(r.key.batch for r in family_receipts if family == "bandit")
+        _require(not batches or batches == list(range(len(batches))))
+
+
+def _validate_complete_envelope(item: SecurityEnvelope) -> None:
+    _require(not item.gaps and {r.key.family for r in item.receipts} == FAMILIES)
+    _require(all(r.state in {"complete", "not_applicable"} for r in item.receipts))
 
 
 def _record[T](cls: type[T], value: object, **converted: object) -> T:
