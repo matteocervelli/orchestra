@@ -60,28 +60,11 @@ ADVICE_RE = re.compile("\\s*\\bConsiglio:\\s*")
 
 
 def fallback_title(it: dict[Any, Any], raw: str) -> str:
-    "Deterministic Italian title from what the item is; never the raw English title."
-    repo = it.get("repo") or "orchestra"
-    label = " · ".join(
-        REPO_LABEL.get(REPOS.get(r, r), REPOS.get(r, r))
-        for r in it.get("repos") or [repo]
-    )
-    ids = [it["id"], *it.get("slugs", [])]
-    pr, issue = (
-        (it.get("pr") or {}).get("number"),
-        (it.get("issue") or {}).get("number"),
-    )
-    ref = f"PR #{pr}" if pr else f"Issue #{issue}" if issue else ""
-    kind = ""
-    if any(i.startswith("review-") for i in ids):
-        kind = "Revisione indipendente"
-    elif any(re.search("-fix\\d*($|-)", i) for i in ids):
-        kind = "Correzione dopo la revisione"
-    else:
-        m = PREFIX_RE.search(raw or "")
-        if m:
-            kind = PREFIX_IT[m.group(1).lower()]
-    if not kind and (not ref):
+    """Deterministic Italian title; never infer a translation of raw text."""
+    label = _fallback_repo_label(it)
+    ref = _fallback_reference(it)
+    kind = _fallback_kind(it, raw)
+    if not kind and not ref:
         kind = "lavoro"
     return " · ".join(x for x in (label, kind, ref) if x)
 
@@ -101,44 +84,21 @@ def is_nothing(needs: str) -> bool:
 
 def fill_text(it: dict[Any, Any], curated: set[str], asking: bool) -> None:
     """Fill missing card text and record actual fallback fields."""
-    supplied = it.pop("title_it", "")
-    if "title_it" in curated and isinstance(supplied, str) and supplied.strip():
-        title = supplied
-    elif "title" in curated and str(it.get("title") or "").strip():
-        title = str(it["title"])
-    else:
-        title = meaningful_title(supplied)
+    title = _selected_title(it, curated)
     auto = [] if title else ["title_it"]
     it["title"] = title or fallback_title(it, it["raw_title"])
     if not it["problem"].strip():
         it["problem"] = it["title"]
     if not it["solution"].strip():
-        finished = any(
-            c.get("end") or c.get("exit") is not None for c in it.get("children", [])
-        )
-        if it["status"] == "Backlog" and finished:
-            it["solution"] = (
-                "È già stata avviata un'esecuzione; Orchestra deve ve"
-                "rificarne esito e seguito prima di dichiarare il lav"
-                "oro concluso."
-            )
-        else:
-            it["solution"] = SOLUTION.get(
-                it["status"],
-                "Dettagli nel resoconto dell'agente, nel pannello di dettaglio.",
-            )
+        it["solution"] = _solution_fallback(it)
         auto.append("solution")
     if not it["needs"].strip():
-        if asking:
-            it["needs"] = SERVE_NEEDS
+        it["needs"], automatic = _needs_fallback(it, asking)
+        if automatic:
             auto.append("needs")
-        elif it.get("blocked"):
-            it["needs"] = f"Niente per ora: è bloccata ({it['blocked']})."
-        else:
-            it["needs"] = NOTHING.get(it["status"], NOTHING_DONE)
-    for k in ("problem", "solution"):
-        if k not in curated and k not in auto:
-            auto.append(k)
+    for key in ("problem", "solution"):
+        if key not in curated and key not in auto:
+            auto.append(key)
     it["auto"] = sorted(auto)
 
 
@@ -184,12 +144,7 @@ def ask_of(
 
 def split_advice(a: dict[Any, Any], needs: str) -> dict[Any, Any]:
     """Normalize one ask and separate inline advice."""
-    question = str(a.get("question") or needs)
-    rec = str(a.get("rec") or "")
-    if not rec:
-        parts = ADVICE_RE.split(question, maxsplit=1)
-        if len(parts) == 2 and parts[0].strip() and parts[1].strip():
-            question, rec = (parts[0].strip(), parts[1].strip())
+    question, rec = _question_and_advice(a, needs)
     out: dict[str, Any] = {
         "id": str(a.get("id") or ""),
         "question": question,
@@ -213,25 +168,12 @@ def clean_options(raw: object) -> list[dict[Any, Any]]:
     """Normalize bounded ask choices and reject duplicates/reserved values."""
     out: list[dict[Any, Any]] = []
     seen: set[str] = set()
-    for o in raw if isinstance(raw, list) else []:
-        if not isinstance(o, dict):
+    for candidate in raw if isinstance(raw, list) else []:
+        option = _clean_option(candidate, seen)
+        if option is None:
             continue
-        value, label = (o.get("value"), o.get("label"))
-        if (
-            not (isinstance(value, str) and OPTION_VALUE_RE.fullmatch(value))
-            or value == "other"
-        ):
-            continue
-        if not isinstance(label, str) or not label.strip() or value in seen:
-            continue
-        seen.add(value)
-        out.append(
-            {
-                "value": value,
-                "label": label.strip()[:MAX_OPTION_LABEL],
-                "recommended": o.get("recommended") is True,
-            }
-        )
+        seen.add(option["value"])
+        out.append(option)
         if len(out) == MAX_OPTIONS:
             break
     return out
@@ -239,19 +181,109 @@ def clean_options(raw: object) -> list[dict[Any, Any]]:
 
 def validate(data: dict[Any, Any]) -> list[str]:
     """Check structure; this does not prove semantic request freshness."""
-    errs = []
-    for it in data.get("items", []):
-        for k in ("title", "problem", "solution", "needs"):
-            if not str(it.get(k) or "").strip():
-                errs.append(f"{it['id']}: empty {k}")
-        if it.get("status") not in STATUSES:
-            errs.append(f"{it['id']}: unknown status {it.get('status')!r}")
-        if it.get("your_call") or it.get("serve_te"):
-            if not it.get("ask"):
-                errs.append(f"{it['id']}: your_call without ask")
-            for a in it.get("ask") or []:
-                if not str(a.get("question") or "").strip():
-                    errs.append(f"{it['id']}: ask without question")
-                if not str(a.get("rec") or "").strip():
-                    errs.append(f"{it['id']}: ask without rec")
-    return errs
+    return [error for item in data.get("items", []) for error in _item_errors(item)]
+
+
+def _fallback_repo_label(it: dict[Any, Any]) -> str:
+    repo = it.get("repo") or "orchestra"
+    return " · ".join(
+        REPO_LABEL.get(REPOS.get(r, r), REPOS.get(r, r))
+        for r in it.get("repos") or [repo]
+    )
+
+
+def _fallback_reference(it: dict[Any, Any]) -> str:
+    pr = (it.get("pr") or {}).get("number")
+    issue = (it.get("issue") or {}).get("number")
+    return f"PR #{pr}" if pr else f"Issue #{issue}" if issue else ""
+
+
+def _fallback_kind(it: dict[Any, Any], raw: str) -> str:
+    ids = [it["id"], *it.get("slugs", [])]
+    if any(i.startswith("review-") for i in ids):
+        return "Revisione indipendente"
+    if any(re.search(r"-fix\d*($|-)", i) for i in ids):
+        return "Correzione dopo la revisione"
+    prefix = PREFIX_RE.search(raw or "")
+    return PREFIX_IT[prefix.group(1).lower()] if prefix else ""
+
+
+def _selected_title(it: dict[Any, Any], curated: set[str]) -> str:
+    supplied = it.pop("title_it", "")
+    if "title_it" in curated and isinstance(supplied, str) and supplied.strip():
+        return supplied
+    if "title" in curated and str(it.get("title") or "").strip():
+        return str(it["title"])
+    return meaningful_title(supplied)
+
+
+def _solution_fallback(it: dict[Any, Any]) -> str:
+    finished = any(
+        c.get("end") or c.get("exit") is not None for c in it.get("children", [])
+    )
+    if it["status"] == "Backlog" and finished:
+        return (
+            "È già stata avviata un'esecuzione; Orchestra deve verificarne "
+            "esito e seguito prima di dichiarare il lavoro concluso."
+        )
+    return SOLUTION.get(
+        it["status"], "Dettagli nel resoconto dell'agente, nel pannello di dettaglio."
+    )
+
+
+def _needs_fallback(it: dict[Any, Any], asking: bool) -> tuple[str, bool]:
+    if asking:
+        return SERVE_NEEDS, True
+    if it.get("blocked"):
+        return f"Niente per ora: è bloccata ({it['blocked']}).", False
+    return NOTHING.get(it["status"], NOTHING_DONE), False
+
+
+def _question_and_advice(a: dict[Any, Any], needs: str) -> tuple[str, str]:
+    question, rec = str(a.get("question") or needs), str(a.get("rec") or "")
+    if not rec:
+        parts = ADVICE_RE.split(question, maxsplit=1)
+        if len(parts) == 2 and parts[0].strip() and parts[1].strip():
+            return parts[0].strip(), parts[1].strip()
+    return question, rec
+
+
+def _clean_option(raw: object, seen: set[str]) -> dict[str, Any] | None:
+    if not isinstance(raw, dict):
+        return None
+    value, label = raw.get("value"), raw.get("label")
+    if (
+        not (isinstance(value, str) and OPTION_VALUE_RE.fullmatch(value))
+        or value == "other"
+    ):
+        return None
+    if not isinstance(label, str) or not label.strip() or value in seen:
+        return None
+    return {
+        "value": value,
+        "label": label.strip()[:MAX_OPTION_LABEL],
+        "recommended": raw.get("recommended") is True,
+    }
+
+
+def _item_errors(it: dict[Any, Any]) -> list[str]:
+    errors: list[str] = []
+    for key in ("title", "problem", "solution", "needs"):
+        if not str(it.get(key) or "").strip():
+            errors.append(f"{it['id']}: empty {key}")
+    if it.get("status") not in STATUSES:
+        errors.append(f"{it['id']}: unknown status {it.get('status')!r}")
+    return errors + _human_text_errors(it)
+
+
+def _human_text_errors(it: dict[Any, Any]) -> list[str]:
+    errors: list[str] = []
+    if not (it.get("your_call") or it.get("serve_te")):
+        return errors
+    if not it.get("ask"):
+        errors.append(f"{it['id']}: your_call without ask")
+    for ask in it.get("ask") or []:
+        for field in ("question", "rec"):
+            if not str(ask.get(field) or "").strip():
+                errors.append(f"{it['id']}: ask without {field}")
+    return errors

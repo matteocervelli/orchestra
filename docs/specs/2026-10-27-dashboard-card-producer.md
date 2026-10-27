@@ -98,6 +98,20 @@ supplies only `STATUSES`/`CLOSED` needed here. The rest of the status engine,
   Runtime application is dashboard-owned and remains separate from this source
   phase; launcher hook application remains I1b-owned.
 
+- **REQ-10 — Explicit repository authority.** Display aliases are not a complete
+  project registry. Keep FULL, REPOS, refs and short_repo unchanged. A separate
+  explicit allowlist for owner matteocervelli includes the six existing canonical
+  projects (app-himalaia, app-ratio, adlimen-ui, claude-dotfiles, nexus, atrium)
+  and exactly six independently verified names: orchestra, adlimen-cicd,
+  adlimen-infra, adlimen-harness, adlimen-auth and limen-assistant. Support those
+  canonical names both alone and owner-qualified. Verification here is GitHub
+  full_name metadata, not proof of every Forgejo namespace or PR existence; an
+  alternate Forgejo owner is not authorized by this change. Do not invent infra/harness/auth
+  aliases or accept unknown repositories, foreign owners, mismatched hosts/routes/
+  numbers/repositories, dependency-as-primary or invalid provenance. Runtime
+  delivery for this fix is only common.py against its fresh live before-hash;
+  exclude the CI refactor, identity candidate and launcher.
+
 ## Architecture and extraction manifest
 
 Keep a modular, inert Python package with explicit filesystem roots. No new
@@ -255,6 +269,23 @@ exported files under isolated consumer Ruff: only E741 on wi_common.py's existin
 O binding is allowed, with no global E741 suppression. Source quality remains the
 repository profile. Verify symbol identity and unchanged retained function AST.
 The root's two legacy quality fixtures are outside this implementation lane.
+
+### Unresolved identity integration boundary
+
+The optional identity candidate remains blocked: upstream Assembly may replace a
+historical curated ID before groups receives it, losing the route to its note/pin;
+the exact-ID consumer does not resolve aliases. Isolated grouping tests do not
+prove end-to-end old-link or curation preservation. The CI refactor preserves that
+existing behavior and does not authorize candidate application. Its full-producer
+reproducer and migration/consumer remedy belong to a separate reviewed follow-up.
+The operational audit `dashboard-goal-identity-compatibility-audit-20261027`
+reproduces this on the real three-item pre-collapse Assembly slice; preserving
+2791/2791 already-collapsed IDs is not acceptance evidence. The next contract must
+bind historical raw-source owners to opaque published keys, use a same-generation
+sanitized capsule supplied by the authorized producer before collapse (including
+already-extracted child.card, never transcripts/session logs), and compare active
+baseline versus candidate asks, steps, flags and exact-ID/action routes. This
+follow-up adds no live hook, fetch, migration or identity activation.
 
 ## Data and function contracts
 
@@ -547,3 +578,21 @@ Existing card reconciliation
 and qualified alias changes remain owner-reviewed proposals, never automatic
 cleanup. Source commit/push/draft PR are authorized after gates; no merge,
 provider call, runtime write or frozen-candidate edit is part of this phase.
+
+## CI source quality follow-up
+
+The source PR keeps all public signatures and behavior while separating title
+selection/fallbacks, locked note I/O, metadata parsing, qualified identities, page
+projection, primary/alias assembly and audit reporting into private helpers. No
+new files, framework, dependency, whitelist or threshold change is required. The
+legacy known_prs argument is explicitly discarded for compatibility; qualified
+primary evidence remains authoritative. Helpers and closures must stay at Radon
+grade B or below; Vulture runs at the shared CI confidence of 80.
+
+Validation includes Python 3.12 unit tests with branch-aware coverage at least 80,
+contract cases for text/asks/options/references/details, and the explicit-path
+quality module CLI. This is a SOURCE-only revision: no runtime bundle/delta is
+regenerated or applied, and it does not supersede the operational receipt for a
+previously composed runtime snapshot. A future refresh requires its own reviewed
+source-to-runtime hash comparison. Existing identity/caller adoption boundaries
+remain unchanged.

@@ -222,3 +222,93 @@ def test_two_curated_objects_with_same_primary_remain_distinct() -> None:
     }
     mapping, _ = groups(rows, {name: {"priority": "P1"} for name in rows}, {}, {})
     assert mapping == {name: [name] for name in rows}
+
+
+def test_explicit_references_keep_repo_and_forge_boundaries() -> None:
+    from orchestra.dashboard.identity import explicit_refs
+
+    text = (
+        "PR nexus #207; issue nexus #12; Forgejo PR nexus #33; "
+        "https://github.com/matteocervelli/nexus/issues/19 "
+        "https://github.com/another-owner/nexus/pull/99 PR ratio #50"
+    )
+    assert explicit_refs(text, "nexus") == {"pr": {207}, "issue": {12, 19}}
+    assert explicit_refs("PR #12", "orchestra") == {"pr": set(), "issue": set()}
+
+
+def test_legacy_reference_context_is_distinct_from_primary_identity_proof() -> None:
+    from orchestra.dashboard.common import refs, repository_authority, short_repo
+    from orchestra.dashboard.identity import card_ids, repo_of, root_task
+
+    assert refs("nexus #207, #208; ratio #7, #8") == [
+        ("nexus", 207),
+        ("nexus", 208),
+        ("ratio", 7),
+        ("ratio", 8),
+    ]
+    assert refs("PR nexus #207; nexus #208", pr_prefix=True) == [("nexus", 207)]
+    assert refs("#9", default="nexus") == [("nexus", 9)]
+    assert short_repo("owner/app-ratio") == "ratio"
+    assert (
+        repository_authority("matteocervelli/app-ratio") == "matteocervelli/app-ratio"
+    )
+    assert repository_authority("another-owner/nexus") is None
+    assert root_task("candidate-review-fix2-next3") == "candidate"
+    row = {
+        **ambiguous_item(),
+        "aliases": ["pr-nexus-207", "issue-nexus-19", "candidate-review"],
+    }
+    assert card_ids(row) == {"pr-nexus-324", "pr-nexus-207", "issue-nexus-19"}
+    generic = {"repo": "orchestra", "slugs": ["ratio-review"]}
+    assert repo_of(generic, {}, {"ratio-review": {"text": ""}}) == "ratio"
+    assert (
+        repo_of({**generic, "slugs": ["sample"]}, {}, {"sample": {"text": "nexus #7"}})
+        == "nexus"
+    )
+
+
+def test_qualified_task_primary_and_authoritative_issue_link_preserve_object_id() -> (
+    None
+):
+    import json
+
+    from orchestra.dashboard.provenance import parse_task_provenance
+
+    declaration = {
+        "kind": "primary_integration",
+        "relation": "primary",
+        "subject": {
+            "repo": "nexus",
+            "pr": {
+                "host": "github.com",
+                "repo": "matteocervelli/nexus",
+                "number": 207,
+                "url": "https://github.com/matteocervelli/nexus/pull/207",
+            },
+        },
+    }
+    text = (
+        "# Rivedere il risultato della proposta\n```json orchestra-task-meta\n"
+        + json.dumps(
+            {"schema": "orchestra-task-meta/v1", "work_provenance": declaration}
+        )
+        + "\n```\n"
+    )
+    parsed, errors = parse_task_provenance(text)
+    assert errors == []
+    row = {**ambiguous_item(), "slugs": ["sample"]}
+    tasks = {"sample": {"work_provenance": parsed}}
+    assert identity(row, {}, tasks, {("nexus", 207): 19}) == ("nexus", 19, 207)
+    qualified_issue = {
+        "number": 22,
+        "url": "https://github.com/matteocervelli/nexus/issues/22",
+    }
+    assert identity(
+        {**row, "issue": qualified_issue}, {}, tasks, {("nexus", 207): 19}
+    ) == ("nexus", 22, 207)
+    assert identity(row, {"repo": "another-owner/nexus"}, tasks, {}) == (
+        "nexus",
+        None,
+        None,
+    )
+    assert row["id"] == "pr-nexus-324"
