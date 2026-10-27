@@ -22,3 +22,8 @@ Dashboard regression files (`test_dashboard_*.py`) use invented tmp_path data:
   imports, explicit CLI inputs and separate non-ready identity candidates.
 These tests do not claim runtime activation, real API link resolution, semantic
 truth of reports or provider/network verification.
+
+Source quality CI also runs Vulture at confidence 80 and Radon with closures,
+rejecting any grade above B. Unit coverage includes public text/choice contracts,
+reference authority, bound child-detail evidence and the explicit-path quality
+module CLI; the shared Python 3.12 branch-aware coverage threshold remains 80%.
