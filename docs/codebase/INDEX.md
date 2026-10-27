@@ -1,5 +1,7 @@
 # Codebase map
 
+Operator workflow: [dashboard producer](../guides/dashboard-producer.md).
+
 | Path | Responsibility |
 | --- | --- |
 | `src/orchestra/` | Python source extracted for review and reuse. |
@@ -26,3 +28,14 @@ there is no success stub. The [checkpoint spec](../specs/2026-10-23-security-env
 retains mandatory B→D adapters, consumer/policy, fenced evidence and exact-pair
 CI. Synthetic subprocess tests do not certify immutable runtime mounts, OS
 isolation, scoped registry coverage or live activation.
+
+## Dashboard producer source
+
+`src/orchestra/dashboard/` contains inert canonical title, note-lock, task-header,
+card-text, provenance and quality helpers. Identity/collapse is a separate dormant
+candidate; core export does not replace runtime grouping.
+`scripts/dashboard_producer_title.py` requires an explicit root/item/title/phase;
+`scripts/export_dashboard_producer.py` creates hash-checked review bundles outside
+the donor tree and never applies them. See the
+[producer contract](../specs/2026-10-27-dashboard-card-producer.md) and
+[relative donor provenance](../provenance/dashboard-card-producer-20261027.json).
