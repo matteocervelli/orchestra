@@ -92,18 +92,20 @@
     "review B1: present invalid child provenance fails closed; absent child remains unchanged",
     "generated adapters: explicit self aliases, hoisted canonical imports, remove only extracted unused imports",
     "authorized reader exception: exact filename-matching legacy Task wrapper, inner parentheses retained",
-    "applied-B1 delta uses AFTER manifest hashes; original donor full patch is provenance only"
+    "applied-B1 delta uses AFTER manifest hashes; original donor full patch is provenance only",
+    "CI-only responsibility refactor with preserved public signatures; known_prs explicitly discarded for compatibility; no runtime refresh generated",
+    "REQ-10 explicit owner/project allowlist independent of legacy display aliases; isolated common-only runtime candidate"
   ],
   "canonical_files": {
     "src/orchestra/dashboard/__init__.py": "5fbf458033b1df4fe3ffdab5f33deba3bb47da157f8f1b61adf3e5bf9186c011",
-    "src/orchestra/dashboard/common.py": "bfbdb0ff0f882115bb99e3649afc64317e6beef44da0ee490a07f297c2f352fd",
-    "src/orchestra/dashboard/curation.py": "93dd1df637f2ee49bc9fefda77ae86e9d3685d03f44d3a7ceedc88bdfe88ea05",
-    "src/orchestra/dashboard/identity.py": "498b89ba2ea344d8f9b07be26f89ed104c3d6502c2e55f87bf8edc40f48c670a",
-    "src/orchestra/dashboard/notes.py": "e526ae9e53a3daf1007fcb20b40a19a66e760ab68268cf3cba1e359d640bffc0",
-    "src/orchestra/dashboard/provenance.py": "0308b09a6cba4c1bc0c035f0e037e74ea2b1a05f94592158b6774445bcfbfb55",
-    "src/orchestra/dashboard/quality.py": "d76696a6836e1fa21527d7fdcd9377269bde4303c2fbbe36dfe4caf2e3812996",
+    "src/orchestra/dashboard/common.py": "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
+    "src/orchestra/dashboard/curation.py": "fa889ac1e22cf64c73f98ecae876c2f773ac4e8a227aeae7b24dc36097401c36",
+    "src/orchestra/dashboard/identity.py": "bba87d782420968ed670361b4b5b35a3488400860b616f10e6b23a018661733e",
+    "src/orchestra/dashboard/notes.py": "799a2c36f9046a65186fbc5b7246fdbe7074060cb37b1573f4340f15c1d351d2",
+    "src/orchestra/dashboard/provenance.py": "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+    "src/orchestra/dashboard/quality.py": "f52ec8aa8068e57805745aca7dde4f3b8203a15d7552cbaf786ea7f4b68f802d",
     "src/orchestra/dashboard/sources.py": "73eb8e0b9511cd2d6df9143f73924ff84cc5acad57e67f69afaed61cd89d28b2",
-    "src/orchestra/dashboard/text.py": "cd653d07df558d97de9ccc7d687c8ab61e384521bc6c8e91695f44b35c494505",
+    "src/orchestra/dashboard/text.py": "105e9a0b385030a9c841138fd799c553a49c127406b796ae26e39dbb883ee661",
     "src/orchestra/dashboard/titles.py": "79d89d781de596534a83e32f57864a05bf689d6d533e9f72e39cef4223f34d07"
   },
   "runtime_export": {
@@ -114,5 +116,27 @@
     "identity_candidate_flag": "--include-identity-candidate",
     "applied": false,
     "runtime_ready": false
+  },
+  "source_revision": {
+    "basis": "e7363b1",
+    "reason": "CI source quality follow-up plus explicit repository authority",
+    "runtime_refresh_generated": false,
+    "full_runtime_refresh_generated": false
+  },
+  "repository_authority_scope": {
+    "owner": "matteocervelli",
+    "additional_canonical_names": [
+      "orchestra",
+      "adlimen-cicd",
+      "adlimen-infra",
+      "adlimen-harness",
+      "adlimen-auth",
+      "limen-assistant"
+    ],
+    "verification": "GitHub repository full_name metadata; not cross-forge namespace equivalence",
+    "runtime_candidate_targets": [
+      "bin/orchestra_dashboard/common.py"
+    ],
+    "includes_ci_refactor": false
   }
 }

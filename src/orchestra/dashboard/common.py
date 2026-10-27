@@ -66,10 +66,35 @@ STATUSES = [
 CLOSED = ("Integration", "Main", "Deployed", "Dropped")
 
 
+_CANONICAL_REPOSITORIES = frozenset(
+    {
+        "app-himalaia",
+        "app-ratio",
+        "adlimen-ui",
+        "claude-dotfiles",
+        "nexus",
+        "atrium",
+        "orchestra",
+        "adlimen-cicd",
+        "adlimen-infra",
+        "adlimen-harness",
+        "adlimen-auth",
+        "limen-assistant",
+    }
+)
+
+
 def repository_authority(repo: str) -> str | None:
-    """Known repo aliases assert only the configured owner's repository."""
+    """Assert only explicitly registered projects owned by the configured owner."""
     if "/" in repo:
         owner, name = repo.split("/", 1)
-        return repo if owner == "matteocervelli" and name in FULL.values() else None
+        return (
+            repo
+            if owner == "matteocervelli" and name in _CANONICAL_REPOSITORIES
+            else None
+        )
     short = short_repo(repo)
-    return "matteocervelli/" + FULL[short] if short in FULL else None
+    canonical = FULL.get(short, short)
+    return (
+        "matteocervelli/" + canonical if canonical in _CANONICAL_REPOSITORIES else None
+    )

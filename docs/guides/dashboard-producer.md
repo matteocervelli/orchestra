@@ -30,6 +30,62 @@ approval or completion state. Do not modify already-running tasks to manufacture
 adoption evidence. Confirm real caller adoption with new-task receipts; the
 presence of this CLI alone does not provide universal prevention.
 
+## Declare the task's primary subject
+
+Place exactly one metadata block immediately after the task heading, with only
+blank lines in between. Do not supply `source` or `validation`: the reader assigns
+origin. For a local review, name the actual artifact being reviewed. This example
+refers to the existing producer contract in this repository:
+
+````markdown
+# Rivedere il contratto del produttore delle card
+
+```json orchestra-task-meta
+{"schema":"orchestra-task-meta/v1","work_provenance":{"kind":"local_artifact_review","subject":{"repo":"orchestra","artifact":"docs/specs/2026-10-27-dashboard-card-producer.md"},"relation":"primary"}}
+```
+````
+
+Use that role only when the primary deliverable is this artifact review. Do not
+relabel integration work to suppress a missing-PR warning. Classification does
+not certify review, merge, delivery or an independent approval.
+
+For primary integration, first obtain a current, checked PR receipt with exact
+host, owner/repository, integer number and matching URL. The following builds the
+same accepted task block from that verified object, without inventing a PR:
+
+```python
+import json
+
+from orchestra.dashboard.provenance import parse_task_provenance, qualified_pr
+
+# canonical_repo and verified_primary come from the checked receipt.
+primary = qualified_pr(verified_primary, canonical_repo)
+if primary is None:
+    raise ValueError("Receipt does not match the configured repository authority")
+metadata = {
+    "schema": "orchestra-task-meta/v1",
+    "work_provenance": {
+        "kind": "primary_integration",
+        "subject": {"repo": canonical_repo, "pr": primary},
+        "relation": "primary",
+    },
+}
+task_text = (
+    "# Integrare la correzione dei titoli delle card\n\n```json orchestra-task-meta\n"
+    + json.dumps(metadata, ensure_ascii=False)
+    + "\n```\n"
+)
+_, errors = parse_task_provenance(task_text)
+if errors:
+    raise ValueError(errors)
+```
+
+The qualifier validates shape and the explicit configured owner/project list; it
+does not fetch a repository or prove PR existence, approval or completion. A
+Forgejo repository under another namespace is a separate relationship requiring
+its own verified scope; this registry does not rewrite or authorize that owner.
+Display aliases and bare task/card numbers remain insufficient primary evidence.
+
 ## Preserve curated text
 
 Nonblank note titles win even without `pin`. For other text keys, a value present
@@ -75,5 +131,23 @@ consumer API. Verify served curated fields and legacy task headings afterwards.
 The default core does not replace identity/dedupe adapters. Their optional
 candidate requires a separate identity dry run and proof that old exact-ID links,
 asks, steps, priority and answers survive; retaining aliases alone is insufficient.
+Verify the whole assembly → note merge → exact-ID consumer path: grouping tests
+alone do not prove that an upstream assembly retained a historical curated ID or
+its note/pin. The identity candidate remains blocked on that integration proof.
+The operational identity compatibility audit reproduced a loss before collapse;
+a positive check on already-collapsed cards cannot replace that baseline. A next
+review needs an authorized, sanitized pre-collapse capsule with extracted cards
+only (never session logs) and baseline/candidate ask, step and route comparisons.
 Launcher lifecycle hooks and real caller adoption also remain separate from a
 rendering update. No bundle or draft PR authorizes merge, deploy or cutover.
+
+## Validate a source revision
+
+Shared CI checks Vulture at confidence 80, Radon grade B or below (including
+closures), and Python 3.12 unit tests with at least 80% branch-aware coverage.
+Tests distinguish text fallback, explicit choices, qualified references and bound
+detail enrichment; a structural pass still does not establish semantic freshness.
+
+A source refactor does not rewrite an installed runtime package. Previously
+reviewed runtime composition remains a separate snapshot with its own hashes;
+source CI or PR approval does not authorize a new runtime export/application.

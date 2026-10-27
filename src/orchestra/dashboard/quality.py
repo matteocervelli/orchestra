@@ -29,106 +29,32 @@ def _norm(value: object) -> str:
 
 def findings(item: dict[Any, Any]) -> list[dict[Any, Any]]:
     """Report deficits without changing asks, answers, states or visibility."""
-    rows: list[dict[Any, Any]] = []
-
-    def add(code: str, message: str, severity: str = "warning") -> None:
-        if not any(row["code"] == code for row in rows):
-            rows.append({"code": code, "severity": severity, "message": message})
-
     human = bool(item.get("your_call"))
     severity = "error" if human else "warning"
-    if "title_it" in (item.get("auto") or []) or generic_title(
-        str(item.get("title") or "")
-    ):
-        add(
-            "generic_title",
-            "Titolo da curare con oggetto e risultato specifici.",
-            severity,
+    rows = _title_findings(item, severity)
+    asks = _open_asks(item)
+    rows.extend(_duplicate_ask_findings(asks, severity))
+    if human and not asks:
+        rows.append(
+            _finding(
+                "missing_question",
+                "Richiesta a Matteo senza una domanda aperta.",
+                "error",
+            )
         )
-    asks = [
-        a
-        for a in item.get("ask") or []
-        if isinstance(a, dict) and (not a.get("answered"))
-    ]
-    ask_ids = Counter(
-        a["id"] for a in asks if isinstance(a.get("id"), str) and a["id"].strip()
-    )
-    if any(count > 1 for count in ask_ids.values()):
-        add(
-            "duplicate_ask_id",
-            (
-                "Domande aperte con lo stesso identificatore: "
-                "preservare e distinguere le richieste."
-            ),
-            severity,
-        )
-    if human and (not asks):
-        add("missing_question", "Richiesta a Matteo senza una domanda aperta.", "error")
     if human:
         for ask in asks:
-            question, rec = (_norm(ask.get("question")), _norm(ask.get("rec")))
-            if not question or GENERIC_QUESTION in question:
-                add(
-                    "generic_question",
-                    "Recuperare la domanda concreta dalle fonti.",
-                    "error",
-                )
-            if not rec or rec.startswith("nessuno, scegli tu:"):
-                add(
-                    "missing_recommendation",
-                    "Manca una raccomandazione motivata o un limite esplicito.",
-                    "error",
-                )
-            if question.startswith("orchestra:"):
-                add(
-                    "technical_question",
-                    "Il testo assegna lavoro a Orchestra, non una decisione a Matteo.",
-                    "error",
-                )
-            if ask.get("kind") in ("approve UI", "approve mockup"):
-                pages = item.get("pages") or {}
-                if not any(pages.get(k) for k in ("display", "mockup", "post")):
-                    add(
-                        "missing_visual_evidence",
-                        "Approvazione visiva priva di una proposta collegata.",
-                        "error",
-                    )
-    children = item.get("children") or []
-    if any(
-        c.get("end") or c.get("exit") is not None
-        for c in children
-        if isinstance(c, dict)
-    ) and "nessun agente l'ha ancora presa" in str(item.get("solution") or ""):
-        add(
-            "execution_contradiction",
-            "Una esecuzione esiste: non descrivere il lavoro come mai iniziato.",
-            severity,
-        )
-    if item.get("status") in PENDING:
-        if not qualified_pr(
-            item.get("pr"), str(item.get("repo") or "")
-        ) and not local_review(item):
-            add(
-                "pipeline_without_pr",
-                (
-                    "Stato avanzato senza richiesta di integrazione prima"
-                    "ria: verificare la provenienza."
-                ),
-            )
-        if (
-            item.get("status") in ("Integration", "Main")
-            and _norm(item.get("needs")) == "niente: già fatto"
-        ):
-            add(
-                "integration_not_delivery",
-                "Integrazione o main non dimostrano rilascio e verifica operativa.",
-            )
+            rows.extend(_human_ask_findings(ask, item))
+    rows.extend(_execution_findings(item, severity))
+    rows.extend(_pipeline_findings(item))
     if (item.get("work_provenance") or {}).get("validation") == "conflict":
-        add(
-            "conflicting_work_provenance",
-            "La provenienza richiede verifica delle fonti.",
+        rows.append(
+            _finding(
+                "conflicting_work_provenance",
+                "La provenienza richiede verifica delle fonti.",
+            )
         )
-    return rows
+    return _unique_findings(rows)
 
 
 def audit(
@@ -139,37 +65,11 @@ def audit(
     for item in items:
         issues = findings(item)
         if issues:
-            affected.append(
-                {
-                    "id": item["id"],
-                    "repo": item.get("repo"),
-                    "title": item.get("title"),
-                    "status": item.get("status"),
-                    "your_call": bool(item.get("your_call")),
-                    "issues": issues,
-                    "atrium": board_url + item["id"],
-                    "owner": "orchestra",
-                    "next_action": (
-                        "Curare e verificare le fonti prima di chiedere una decisione."
-                    ),
-                }
-            )
-    errors = sum(
-        row["your_call"] and any(f["severity"] == "error" for f in row["issues"])
-        for row in affected
-    )
+            affected.append(_affected_item(item, issues, board_url))
     return {
         "coverage": {"structure": "checked", "semantic_freshness": "not_verified"},
         "generated": data.get("generated"),
-        "summary": {
-            "cards_checked": len(items),
-            "human_cards_checked": sum(bool(i.get("your_call")) for i in items),
-            "human_cards_with_errors": errors,
-            "cards_with_findings": len(affected),
-            "findings_by_code": dict(
-                Counter(f["code"] for row in affected for f in row["issues"])
-            ),
-        },
+        "summary": _quality_summary(items, affected),
         "items": affected,
     }
 
@@ -249,40 +149,11 @@ def detail_matches_board(
 def load_board(path: Path) -> dict[Any, Any]:
     data = json.loads(path.read_text())
     details = path.parent / "work-items-detail"
-    enriched = []
     snapshot_digest = board_digest(data)
-    for item in data.get("items", []):
-        iid = item.get("id", "")
-        if (
-            not iid
-            or any(
-                c
-                not in (
-                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-"
-                )
-                for c in iid
-            )
-            or iid in (".", "..")
-        ):
-            enriched.append(item)
-            continue
-        detail = details / f"{iid}.json"
-        try:
-            row = json.loads(detail.read_text())
-        except (OSError, ValueError):
-            row = {}
-        if not isinstance(row, dict) or not detail_matches_board(
-            row, data, str(iid), snapshot_digest=snapshot_digest
-        ):
-            row = {}
-        combined = {**row, **item}
-        combined["your_call"] = bool(item.get("your_call"))
-        combined["ask"] = item.get("ask") or []
-        if row.get("children") and all(
-            set(c) <= {"slug"} for c in item.get("children", [])
-        ):
-            combined["children"] = row["children"]
-        enriched.append(combined)
+    enriched = [
+        _enrich_board_item(item, details, data, snapshot_digest)
+        for item in data.get("items", [])
+    ]
     return {**data, "items": enriched}
 
 
@@ -309,6 +180,237 @@ def main(
         )
     )
     return 1 if report["summary"]["human_cards_with_errors"] else 0
+
+
+def _finding(code: str, message: str, severity: str = "warning") -> dict[str, Any]:
+    return {"code": code, "severity": severity, "message": message}
+
+
+def _unique_findings(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out, seen = [], set()
+    for row in rows:
+        if row["code"] not in seen:
+            out.append(row)
+            seen.add(row["code"])
+    return out
+
+
+def _title_findings(item: dict[str, Any], severity: str) -> list[dict[str, Any]]:
+    if "title_it" in (item.get("auto") or []) or generic_title(
+        str(item.get("title") or "")
+    ):
+        return [
+            _finding(
+                "generic_title",
+                "Titolo da curare con oggetto e risultato specifici.",
+                severity,
+            )
+        ]
+    return []
+
+
+def _open_asks(item: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        ask
+        for ask in item.get("ask") or []
+        if isinstance(ask, dict) and not ask.get("answered")
+    ]
+
+
+def _duplicate_ask_findings(
+    asks: list[dict[str, Any]], severity: str
+) -> list[dict[str, Any]]:
+    ids = Counter(
+        ask["id"]
+        for ask in asks
+        if isinstance(ask.get("id"), str) and ask["id"].strip()
+    )
+    if any(count > 1 for count in ids.values()):
+        return [
+            _finding(
+                "duplicate_ask_id",
+                "Domande aperte con lo stesso identificatore: "
+                "preservare e distinguere le richieste.",
+                severity,
+            )
+        ]
+    return []
+
+
+def _human_ask_findings(
+    ask: dict[str, Any], item: dict[str, Any]
+) -> list[dict[str, Any]]:
+    rows = []
+    question, rec = _norm(ask.get("question")), _norm(ask.get("rec"))
+    if not question or GENERIC_QUESTION in question:
+        rows.append(
+            _finding(
+                "generic_question",
+                "Recuperare la domanda concreta dalle fonti.",
+                "error",
+            )
+        )
+    if not rec or rec.startswith("nessuno, scegli tu:"):
+        rows.append(
+            _finding(
+                "missing_recommendation",
+                "Manca una raccomandazione motivata o un limite esplicito.",
+                "error",
+            )
+        )
+    if question.startswith("orchestra:"):
+        rows.append(
+            _finding(
+                "technical_question",
+                "Il testo assegna lavoro a Orchestra, non una decisione a Matteo.",
+                "error",
+            )
+        )
+    if _missing_visual_evidence(ask, item):
+        rows.append(
+            _finding(
+                "missing_visual_evidence",
+                "Approvazione visiva priva di una proposta collegata.",
+                "error",
+            )
+        )
+    return rows
+
+
+def _missing_visual_evidence(ask: dict[str, Any], item: dict[str, Any]) -> bool:
+    if ask.get("kind") not in ("approve UI", "approve mockup"):
+        return False
+    pages = item.get("pages") or {}
+    return not any(pages.get(key) for key in ("display", "mockup", "post"))
+
+
+def _finished_children(item: dict[str, Any]) -> bool:
+    return any(
+        child.get("end") or child.get("exit") is not None
+        for child in item.get("children") or []
+        if isinstance(child, dict)
+    )
+
+
+def _execution_findings(item: dict[str, Any], severity: str) -> list[dict[str, Any]]:
+    if _finished_children(item) and "nessun agente l'ha ancora presa" in str(
+        item.get("solution") or ""
+    ):
+        return [
+            _finding(
+                "execution_contradiction",
+                "Una esecuzione esiste: non descrivere il lavoro come mai iniziato.",
+                severity,
+            )
+        ]
+    return []
+
+
+def _pipeline_findings(item: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    if item.get("status") not in PENDING:
+        return rows
+    if not qualified_pr(
+        item.get("pr"), str(item.get("repo") or "")
+    ) and not local_review(item):
+        rows.append(
+            _finding(
+                "pipeline_without_pr",
+                (
+                    "Stato avanzato senza richiesta di integrazione primaria: "
+                    "verificare la provenienza."
+                ),
+            )
+        )
+    if (
+        item.get("status") in ("Integration", "Main")
+        and _norm(item.get("needs")) == "niente: già fatto"
+    ):
+        rows.append(
+            _finding(
+                "integration_not_delivery",
+                "Integrazione o main non dimostrano rilascio e verifica operativa.",
+            )
+        )
+    return rows
+
+
+def _affected_item(
+    item: dict[str, Any], issues: list[dict[str, Any]], board_url: str
+) -> dict[str, Any]:
+    return {
+        "id": item["id"],
+        "repo": item.get("repo"),
+        "title": item.get("title"),
+        "status": item.get("status"),
+        "your_call": bool(item.get("your_call")),
+        "issues": issues,
+        "atrium": board_url + item["id"],
+        "owner": "orchestra",
+        "next_action": (
+            "Curare e verificare le fonti prima di chiedere una decisione."
+        ),
+    }
+
+
+def _human_error_count(affected: list[dict[str, Any]]) -> int:
+    return sum(
+        row["your_call"]
+        and any(issue["severity"] == "error" for issue in row["issues"])
+        for row in affected
+    )
+
+
+def _quality_summary(
+    items: list[dict[str, Any]], affected: list[dict[str, Any]]
+) -> dict[str, Any]:
+    return {
+        "cards_checked": len(items),
+        "human_cards_checked": sum(bool(item.get("your_call")) for item in items),
+        "human_cards_with_errors": _human_error_count(affected),
+        "cards_with_findings": len(affected),
+        "findings_by_code": dict(
+            Counter(issue["code"] for row in affected for issue in row["issues"])
+        ),
+    }
+
+
+def _safe_detail_id(iid: Any) -> bool:
+    allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-"
+    return not (
+        not iid or any(char not in allowed for char in iid) or iid in (".", "..")
+    )
+
+
+def _load_bound_detail(
+    details: Path, iid: Any, data: dict[str, Any], digest: str
+) -> dict[str, Any]:
+    try:
+        row = json.loads((details / f"{iid}.json").read_text())
+    except (OSError, ValueError):
+        row = {}
+    if not isinstance(row, dict) or not detail_matches_board(
+        row, data, str(iid), snapshot_digest=digest
+    ):
+        return {}
+    return row
+
+
+def _enrich_board_item(
+    item: dict[str, Any], details: Path, data: dict[str, Any], digest: str
+) -> dict[str, Any]:
+    iid = item.get("id", "")
+    if not _safe_detail_id(iid):
+        return item
+    row = _load_bound_detail(details, iid, data, digest)
+    combined = {**row, **item}
+    combined["your_call"] = bool(item.get("your_call"))
+    combined["ask"] = item.get("ask") or []
+    if row.get("children") and all(
+        set(child) <= {"slug"} for child in item.get("children", [])
+    ):
+        combined["children"] = row["children"]
+    return combined
 
 
 if __name__ == "__main__":

@@ -16,3 +16,7 @@ not approval authority. Detail enrichment needs exact item, unique microsecond
 generation and compact-board digest binding. Default core bundles exclude identity
 and collapse adapters. A separately reviewed candidate preserves opaque curated
 IDs because the observed Atrium consumer performs exact-ID lookup.
+
+Dashboard private helpers separate admission, parsing, qualified identity, page
+projection, alias assembly and audit reporting. Public entrypoints retain their
+contracts; helpers neither fetch evidence nor gain approval/state authority.

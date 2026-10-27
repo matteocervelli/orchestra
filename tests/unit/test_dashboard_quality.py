@@ -173,3 +173,122 @@ def test_empty_and_answered_ids_do_not_collide_as_open_questions() -> None:
     ):
         row = {**local_item(), "ask": questions}
         assert "duplicate_ask_id" not in {issue["code"] for issue in findings(row)}
+
+
+def test_quality_module_cli_keeps_explicit_path_contract(tmp_path: Any) -> None:
+    import json
+    import subprocess
+    import sys
+
+    board = tmp_path / "work-items.json"
+    board.write_text(
+        json.dumps({"generated": "2026-10-27T20:00:00.000001Z", "items": []})
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "orchestra.dashboard.quality", str(board), "--json"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    assert report["summary"]["cards_checked"] == 0
+    assert report["coverage"]["structure"] == "checked"
+
+
+def test_human_readiness_reports_distinct_deficits_once_without_mutation() -> None:
+    from copy import deepcopy
+
+    row = {
+        **local_item(),
+        "your_call": True,
+        "auto": ["title_it"],
+        "children": [{"exit": "0"}],
+        "solution": "Da pianificare: nessun agente l'ha ancora presa in carico.",
+        "ask": [
+            {
+                "id": "first",
+                "question": "Guarda il dettaglio e decidi come procedere",
+                "rec": "",
+            },
+            {
+                "id": "second",
+                "question": "Orchestra: correggere il problema",
+                "rec": "nessuno, scegli tu: manca proposta",
+                "kind": "approve UI",
+            },
+        ],
+    }
+    original = deepcopy(row)
+    issues = findings(row)
+    assert [issue["code"] for issue in issues] == [
+        "generic_title",
+        "generic_question",
+        "missing_recommendation",
+        "technical_question",
+        "missing_visual_evidence",
+        "execution_contradiction",
+    ]
+    assert all(issue["severity"] == "error" for issue in issues)
+    assert row == original
+
+
+def test_audit_counts_human_errors_separately_from_delivery_warnings() -> None:
+    from orchestra.dashboard.quality import audit
+
+    pipeline = {
+        "id": "pipeline",
+        "repo": "nexus",
+        "title": "Verificare la consegna del risultato",
+        "status": "Integration",
+        "needs": "Niente: già fatto.",
+    }
+    human = {
+        "id": "decision",
+        "title": "Scegliere il seguito della proposta",
+        "status": "Doing",
+        "your_call": True,
+        "ask": [],
+    }
+    report = audit({"items": [pipeline, human]}, board_url="/synthetic?item=")
+    assert report["summary"]["cards_with_findings"] == 2
+    assert report["summary"]["human_cards_with_errors"] == 1
+    assert report["summary"]["findings_by_code"] == {
+        "pipeline_without_pr": 1,
+        "integration_not_delivery": 1,
+        "missing_question": 1,
+    }
+    assert report["items"][0]["atrium"] == "/synthetic?item=pipeline"
+
+
+def test_bound_detail_restores_execution_evidence_but_not_stale_asks(
+    tmp_path: Any,
+) -> None:
+    import json
+
+    from orchestra.dashboard.quality import bind_detail, load_board
+
+    compact = {
+        "id": "sample",
+        "status": "Doing",
+        "children": [{"slug": "sample-child"}],
+    }
+    board = {
+        "generated": "2026-10-27T20:00:00.000001Z",
+        "items": [compact, {"id": "../unsafe", "status": "Doing"}],
+    }
+    path = tmp_path / "work-items.json"
+    path.write_text(json.dumps(board))
+    directory = tmp_path / "work-items-detail"
+    directory.mkdir()
+    detail = {
+        **compact,
+        "children": [{"slug": "sample-child", "exit": "0"}],
+        "your_call": True,
+        "ask": [{"id": "stale"}],
+    }
+    (directory / "sample.json").write_text(json.dumps(bind_detail(detail, board)))
+    loaded = load_board(path)
+    assert loaded["items"][0]["children"][0]["exit"] == "0"
+    assert loaded["items"][0]["your_call"] is False and loaded["items"][0]["ask"] == []
+    assert loaded["items"][1] == board["items"][1]
