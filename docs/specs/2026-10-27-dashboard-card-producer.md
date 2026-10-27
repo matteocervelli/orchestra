@@ -477,6 +477,7 @@ implementation target.
 - src/orchestra/dashboard/curation.py
 - src/orchestra/dashboard/quality.py
 - src/orchestra/dashboard/identity.py
+- src/orchestra/dashboard/history.py
 - src/orchestra/dashboard/provenance.py
 - scripts/dashboard_producer_title.py
 - scripts/export_dashboard_producer.py
@@ -485,6 +486,7 @@ implementation target.
 - tests/unit/test_dashboard_text.py
 - tests/unit/test_dashboard_quality.py
 - tests/unit/test_dashboard_identity.py
+- tests/unit/test_dashboard_history.py
 - tests/unit/test_dashboard_provenance.py
 - tests/unit/test_dashboard_runtime_export.py
 - docs/codebase/INDEX.md
@@ -596,3 +598,116 @@ regenerated or applied, and it does not supersede the operational receipt for a
 previously composed runtime snapshot. A future refresh requires its own reviewed
 source-to-runtime hash comparison. Existing identity/caller adoption boundaries
 remain unchanged.
+
+## REQ-11 — F1 explicit historical source ownership (milestone 1)
+
+The reviewed SOURCE baseline is bf8839a. Historical published IDs are opaque
+routing keys, not PR evidence. This milestone changes only inert SOURCE identity
+and collapse with explicit caller injection; the runtime mapper, notes and frozen
+harness remain untouched. The earlier identity activation block is not cleared
+by source tests alone.
+
+`groups(..., *, historical_bindings=None)` and canonical
+`collapse(..., historical_bindings=None, compute=..., effective_note=...,
+issue_ref=...)` preserve all existing calls/default behavior. An explicit sequence
+(including an empty sequence) enables historical mode. Each record has exactly
+three string keys: `kind` (`task` or `pr`), `key` (exact task slug or complete
+qualified primary PR URL), `owner` (existing opaque published ID, safe for current
+exact-ID consumer routes). Duplicate equal records are idempotent; source keys
+with different owners raise a structured `HistoricalBindingConflict` before any
+assembly/note mutation. Invalid records raise the same fail-closed exception.
+No package I/O, snapshot reader, environment lookup or inferred binding is added.
+The injected sequence is caller-trusted ownership evidence; it is never derived
+from free text, dependency refs, aliases, title, bare numbers or child reports.
+
+Task keys match only exact raw `slugs`; PR keys match the raw source's own
+qualified `pr` object, not a dependency or a task's declaration of its result.
+Both owner and PR URL (host/owner/repository/route/number) are validated. A raw
+item matching multiple distinct owners, a target occupied by an unrelated raw
+item, or conflicting trusted primary evidence raises with source/owner evidence.
+A shared PR does not merge distinct bound owners. Within one bound owner,
+different qualified primaries conflict rather than selecting a winning state.
+Unbound new raw items retain their own IDs even when a primary is known; no
+automatic PR grouping runs in historical mode. Missing raw targets are valid:
+collapse creates that output ID, includes it among real/note aliases, and reaches
+its existing curated note. Target identity never establishes a primary number. Historical mode never adds
+number-derived primary aliases to aliases/note routing. A raw alias pointing at
+another curated owner (outside this explicitly bound group) conflicts before
+mutation; it cannot transfer that owner's asks or pin.
+
+Grouping preflight validates the complete plan before collapse writes `asm.items`.
+For an explicit group, incompatible nonempty protected top-level values
+(ask/steps/approval/pin/hide/status/priority/answers/actual pr/issue/branch/review) fail conservatively rather
+than selecting or dropping values. Compatible values present in only one member
+are preserved. Actual PR payload differences (including state/head) conflict even
+when URLs agree. Historical collapse skips winning-state selection and implicit
+issue reconstruction, preserving supplied source objects for either forge. Child records, including independent `card.ask`, `card.steps` and
+flags, remain separate and unchanged. Existing effective-note/ask/step routing
+callbacks continue to govern their original owner keys; no answers, approval,
+status, pin or stage is synthesized from a PR/binding. Source rows and notes are
+not mutated.
+
+Additional manifest: `src/orchestra/dashboard/history.py` owns only strict binding
+validation/planning; existing identity.py and curation.py delegate to it. Extend
+existing identity tests plus dedicated `tests/unit/test_dashboard_history.py`
+(to keep each test module below500 lines), source provenance JSON and
+existing guide/test map. A bounded real replay script/receipt lives in external
+scratch, not committed operational fixtures. No new runtime adapter or capture
+is implemented in milestone 1. A later dormant delta must explicitly inject the
+reviewed binding sequence; current exporter core remains excluded from identity.
+
+Phase 1: amend contract/readiness; RED real frozen Assembly PR207 + employee task
++ review207 slice. Only selected public task/PR metadata and root-exported
+ledger slice may be read; selected historical notes are used without printing or
+committing their content. Execute a copied bounded slice, never import/run the
+178-line harness top-level, read whole postcollapse details, call child_runs or
+write frozen evidence. Baseline active mapper must produce separate324/207 first.
+Candidate RED must lose324/note/pin/consumer exact lookup before implementation;
+then explicit task→324, PR URL→207, review task→207 reaches GREEN with both IDs.
+Actual frozen consumer find_item AST is reused for exact-ID lookup.
+
+Phase 2: synthetic TDD for strict schema, duplicate/conflicting source owners,
+missing raw target, target collision, distinct historical owners with shared PR,
+new unbound tasks, qualified/invalid/dependency primary references, note/title/
+pin/needs and independent child ask/step/flag preservation. Assert no input
+mutation and atomic failure. Preserve the existing400 assertions and thresholds.
+Phase 3: focused/full CI, lint/types/security, stable hashes and parent independent
+review. No commit/push or runtime application by this writer. A complete same-
+generation sanitized pre-collapse capsule and full detail/action/archive parity
+remain separate activation requirements; bounded Nexus replay is not that proof.
+
+## Deferred lanes outside milestone 1
+
+Qualified result projection is postcollapse display/reference work, not a
+historical ownership fix. With `pr=null`, Atrium's current summary drops pr_no
+and Table PrCell renders blank; producer-only projection does not establish full
+consumer compatibility. No PR state/head/CI/delivery is inferred from five
+read-only metadata records, and no merged PR clears an ask.
+
+Public repository normalization/filter aliases are another separate slice:
+canonical complete repo after identity/collapse/stage must agree across board,
+detail/archive/quality without regrouping or changing FULL legacy inference.
+Unknown projects/foreign owners cannot become legitimate projects. Old filter
+URL aliases require an explicit consumer contract; canonical output alone is
+insufficient. No such normalization or consumer edit is included here.
+
+Capture milestone 3 is design-only/default OFF until separate review: a caller
+may later export already-in-memory, bounded, whitelisted sanitized pre-collapse
+records with generation/digest, no logs/provider reads or automatic live hook.
+
+
+### REQ-11 B1 — reached owner repository barrier
+
+Preflight validates each reached historical owner note's plain `repo` against
+the already established raw source/primary repository, using canonical
+repository authority, not only its suffix or the previous raw repo argument.
+A nonempty owner repo must resolve to the same known owner/project authority;
+`nexus` and `matteocervelli/nexus` are equivalent here. Foreign namespace
+`foreign/nexus` and different canonical project `app-himalaia` both conflict
+before collapse or curate. This changes neither FULL/REPOS nor normalization,
+primary hydration, caller I/O or runtime. Add four regression cases (two
+negative, two positive), plus absent-owner-repo fallback, exercising grouping,
+collapse, curate and atomic input/
+assembly preservation. Only existing identity.py/history tests/provenance/spec
+change for this review fix. Old freeze/patch/receipts remain historical evidence;
+a separately hash-bound SOURCE-only delta and new freeze supersede them for B1.

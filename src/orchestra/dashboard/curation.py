@@ -6,6 +6,7 @@ import copy
 from typing import Any
 
 from .common import FULL, STATUSES
+from .history import HistoricalBindings, protected_values
 from .identity import groups
 from .provenance import github_primary
 from .titles import note_title
@@ -46,12 +47,17 @@ def collapse(
     notes: dict[str, Any],
     tasks: dict[str, Any],
     *,
+    historical_bindings: HistoricalBindings | None = None,
     compute: Any,
     effective_note: Any,
     issue_ref: Any,
 ) -> dict[str, Any]:
     mapping, identities = groups(
-        asm.items, notes, tasks, {ref: asm.pr_issue(ref) for ref in asm.pr_by}
+        asm.items,
+        notes,
+        tasks,
+        {ref: asm.pr_issue(ref) for ref in asm.pr_by},
+        historical_bindings=historical_bindings,
     )
     collapsed, effective = {}, dict(notes)
     for target, members in mapping.items():
@@ -65,7 +71,14 @@ def collapse(
             compute=compute,
             effective_note=effective_note,
             issue_ref=issue_ref,
+            historical=historical_bindings is not None,
         )
+        if historical_bindings is not None:
+            collapsed[target].update(
+                copy.deepcopy(
+                    protected_values([asm.items[iid] for iid in members], target)
+                )
+            )
     asm.items = collapsed
     return effective
 
@@ -267,19 +280,21 @@ def _collapse_group(
     compute: Any,
     effective_note: Any,
     issue_ref: Any,
+    historical: bool = False,
 ) -> dict[str, Any]:
     parts = [asm.items[iid] for iid in members]
     it: dict[str, Any] = copy.deepcopy(parts[0])
     repo, issue, _ = ref
     real = _real_aliases(parts, members, target)
     proven = _proven_prs(parts, repo)
-    primary = _primary_aliases(proven, asm, members, repo)
-    aliases = _note_aliases(real, primary, parts, target, notes)
+    primary = [] if historical else _primary_aliases(proven, asm, members, repo)
+    aliases = real if historical else _note_aliases(real, primary, parts, target, notes)
     it["id"], it["aliases"] = target, unique(real + primary)
     it["_note_aliases"] = aliases
     it["repo"] = FULL.get(repo, repo)
-    it["issue"] = issue_ref(it["repo"], issue) if issue else None
+    it["issue"] = issue_ref(it["repo"], issue) if issue and not historical else None
     _merge_part_rows(it, parts)
-    _assign_primary(it, parts, proven, repo, compute, asm.probes)
+    if not historical:
+        _assign_primary(it, parts, proven, repo, compute, asm.probes)
     _finish_collapse_notes(it, aliases, target, notes, effective, effective_note)
     return it
