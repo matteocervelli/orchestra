@@ -251,7 +251,7 @@ def test_applied_delta_uses_after_hash_and_preserves_retained_function_ast(
         }
     ]
     assert report["files"][0]["before_sha256"] != expected["bin/wi_text.py"]
-    assert len(report["unchanged_package_paths"]) == 10
+    assert len(report["unchanged_package_paths"]) == 11
     assert report["package_changes"] == []
     assert report["apply_artifact"] == "delta.diff" and report["applied"] is False
     checked = subprocess.run(

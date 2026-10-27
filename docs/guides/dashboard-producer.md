@@ -151,3 +151,39 @@ detail enrichment; a structural pass still does not establish semantic freshness
 A source refactor does not rewrite an installed runtime package. Previously
 reviewed runtime composition remains a separate snapshot with its own hashes;
 source CI or PR approval does not authorize a new runtime export/application.
+
+
+### Explicit historical ownership (F1 SOURCE milestone)
+
+The inert canonical `groups` and `collapse` APIs accept keyword-only
+`historical_bindings`. Omit it to retain the previous API behavior. Pass an
+explicit sequence (including `[]`) to preserve new raw IDs and apply only
+reviewed source ownership, for example:
+
+```python
+bindings = [
+    {"kind": "task", "key": "employee-task", "owner": "opaque-old-card"},
+    {"kind": "pr", "key": verified_primary_url, "owner": "opaque-pr-card"},
+]
+mapping, identities = groups(items, notes, tasks, pr_issues,
+                             historical_bindings=bindings)
+```
+
+`verified_primary_url` must be the exact qualified source PR URL with verified
+host/owner/repository/number. These records come from a coherent previous public
+snapshot supplied by the caller; task prose, bare numbers and dependencies do
+not establish ownership. The package never loads bindings itself. Same-source
+multiple owners, unrelated target collisions, conflicting primary/protected
+values or aliases reaching another curated owner raise
+`HistoricalBindingConflict` before assembly mutation. The exception exposes
+`reason`, `source` and `owners`; callers must retain that diagnostic and block
+activation rather than catch it and fall back to inference. Different published
+owners remain separate even with the same PR, and an absent raw target is created
+so its historical note and exact-ID link remain reachable.
+
+This SOURCE milestone does not activate identity, wire a runtime caller, migrate
+notes, normalize repository filters or project qualified result metadata. The
+bounded frozen Nexus replay proves324/207 ownership and note reachability only.
+Full same-generation pre-collapse child-card/ask/step/flag and live/archive action
+compatibility still require a separately reviewed sanitized capsule. Capture is
+not implemented and no live hook is installed.

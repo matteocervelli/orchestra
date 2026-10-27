@@ -6,6 +6,12 @@ import re
 from typing import Any
 
 from .common import FULL, refs, repository_authority, short_repo
+from .history import (
+    HistoricalBindings,
+    historical_groups,
+    validate_note_owners,
+    validate_primaries,
+)
 
 SUFFIX = re.compile("-(?:fix\\d*|next\\d*|cx|impl|followup|review|unified)$")
 URL = re.compile("https://github\\.com/(?:[\\w.-]+/)([\\w.-]+)/(issues|pull)/(\\d+)")
@@ -74,11 +80,24 @@ def groups(
     notes: dict[str, Any],
     tasks: dict[str, Any],
     pr_issues: dict[Any, Any],
+    *,
+    historical_bindings: HistoricalBindings | None = None,
 ) -> tuple[dict[str, list[str]], dict[str, tuple[str, int | None, int | None]]]:
     identities = {
         iid: identity(it, notes.get(iid, {}), tasks, pr_issues, set(pr_issues))
         for iid, it in items.items()
     }
+    if historical_bindings is not None:
+        mapping = historical_groups(items, historical_bindings)
+        validate_primaries(
+            mapping,
+            items,
+            lambda iid, owner: _historical_primary(
+                items[iid], notes, tasks, iid, owner
+            ),
+        )
+        validate_note_owners(mapping, items, notes)
+        return mapping, identities
     by_primary: dict[tuple[str, int | None, int | None], list[str]] = {}
     result: dict[str, list[str]] = {}
     for iid, ref in identities.items():
@@ -256,3 +275,40 @@ def _group_anchor(
         if canonical in members
         else min(members, key=lambda value: (len(value), value))
     )
+
+
+def _historical_primary(
+    item: dict[str, Any],
+    notes: dict[str, Any],
+    tasks: dict[str, Any],
+    iid: str,
+    owner: str,
+) -> tuple[dict[str, Any] | None, bool]:
+    repo = repo_of(item, notes.get(iid, {}), tasks)
+    primaries = []
+    for key in dict.fromkeys((iid, owner)):
+        note = notes.get(key, {})
+        if not _historical_repo_valid(item, note, repo):
+            return None, True
+        primary, conflict = _primary_reference(item, note, tasks, repo)
+        if conflict:
+            return None, True
+        if primary and primary not in primaries:
+            primaries.append(primary)
+    return (primaries[0] if primaries else None), len(primaries) > 1
+
+
+def _historical_repo_valid(
+    item: dict[str, Any], note: dict[str, Any], repo: str
+) -> bool:
+    from .provenance import qualified_pr
+
+    asserted = str(note.get("repo") or item.get("repo") or "")
+    if "/" in asserted and not repository_authority(asserted):
+        return False
+    if note.get("repo") and (
+        not (expected := repository_authority(repo))
+        or repository_authority(asserted) != expected
+    ):
+        return False
+    return not item.get("pr") or qualified_pr(item["pr"], repo) is not None

@@ -94,13 +94,15 @@
     "authorized reader exception: exact filename-matching legacy Task wrapper, inner parentheses retained",
     "applied-B1 delta uses AFTER manifest hashes; original donor full patch is provenance only",
     "CI-only responsibility refactor with preserved public signatures; known_prs explicitly discarded for compatibility; no runtime refresh generated",
-    "REQ-10 explicit owner/project allowlist independent of legacy display aliases; isolated common-only runtime candidate"
+    "REQ-10 explicit owner/project allowlist independent of legacy display aliases; isolated common-only runtime candidate",
+    "REQ-11 explicit historical source ownership; no hidden I/O, runtime adapter or note migration"
   ],
   "canonical_files": {
     "src/orchestra/dashboard/__init__.py": "5fbf458033b1df4fe3ffdab5f33deba3bb47da157f8f1b61adf3e5bf9186c011",
     "src/orchestra/dashboard/common.py": "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
-    "src/orchestra/dashboard/curation.py": "fa889ac1e22cf64c73f98ecae876c2f773ac4e8a227aeae7b24dc36097401c36",
-    "src/orchestra/dashboard/identity.py": "bba87d782420968ed670361b4b5b35a3488400860b616f10e6b23a018661733e",
+    "src/orchestra/dashboard/curation.py": "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+    "src/orchestra/dashboard/history.py": "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+    "src/orchestra/dashboard/identity.py": "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
     "src/orchestra/dashboard/notes.py": "799a2c36f9046a65186fbc5b7246fdbe7074060cb37b1573f4340f15c1d351d2",
     "src/orchestra/dashboard/provenance.py": "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
     "src/orchestra/dashboard/quality.py": "f52ec8aa8068e57805745aca7dde4f3b8203a15d7552cbaf786ea7f4b68f802d",
@@ -138,5 +140,17 @@
       "bin/orchestra_dashboard/common.py"
     ],
     "includes_ci_refactor": false
+  },
+  "historical_binding_source_revision": {
+    "basis": "bf8839a94152bb09ebb8dbe1a6c68e7199ae0e80",
+    "requirement": "REQ-11",
+    "milestone": 1,
+    "runtime_ready": false,
+    "runtime_caller_wired": false,
+    "capture_implemented": false,
+    "change": "explicit caller-injected source ownership; conservative atomic preflight; historical target note reachability",
+    "new_module": "src/orchestra/dashboard/history.py",
+    "full_pre_collapse_proven": false,
+    "review_B1": "reached owner repo authority equals raw source repository; absent repo fallback unchanged"
   }
 }

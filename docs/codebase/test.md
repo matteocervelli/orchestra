@@ -27,3 +27,11 @@ Source quality CI also runs Vulture at confidence 80 and Radon with closures,
 rejecting any grade above B. Unit coverage includes public text/choice contracts,
 reference authority, bound child-detail evidence and the explicit-path quality
 module CLI; the shared Python 3.12 branch-aware coverage threshold remains 80%.
+
+
+`test_dashboard_history.py` covers explicit historical source→opaque ownership,
+missing raw targets, atomic conflicts/collisions, new raw task IDs, independent
+child cards, protected fields and qualified PR objects for both forges. It uses
+invented fixtures only. A separate external frozen Nexus slice exercises real
+Assembly inputs and exact-ID consumer lookup without executing full build/log
+readers; it is not committed as runtime data or claimed as full activation proof.
