@@ -10,3 +10,10 @@
 - Shell scripts use strict mode and receive their root through
   `ORCHESTRA_ROOT`; tests never point it at the live operational directory.
 - Runtime artifacts are ignored and rejected if tracked.
+
+- Dashboard helpers receive filesystem roots explicitly and accept only bounded
+  JSON task metadata. Task/note origin is assigned by the reader; reports cannot
+  claim trusted origin. Missing or conflicting proof remains conservative.
+- Runtime donor provenance contains relative source paths and hashes only. Export
+  produces a review artifact; a CLI flag does not authorize application. Core
+  support helpers preserve existing refs/short_repo semantics.

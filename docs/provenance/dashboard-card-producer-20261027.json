@@ -1,0 +1,118 @@
+{
+  "schema": "orchestra-dashboard-source/v1",
+  "donors": [
+    {
+      "donor": "bin/wi_common.py",
+      "sha256": "afe8f39b1467103b26562230f160dcf5c88344ab4f85be6ab6f74924cd74a570",
+      "symbols": [
+        "REPOS",
+        "FULL",
+        "REF_RE",
+        "short_repo",
+        "refs"
+      ],
+      "canonical": "src/orchestra/dashboard/common.py"
+    },
+    {
+      "donor": "bin/wi_status.py",
+      "sha256": "90455aa0162af44836acac6d19602689844e4f17126619bd5ee10af46a6b40a9",
+      "symbols": [
+        "STATUSES",
+        "CLOSED"
+      ],
+      "canonical": "src/orchestra/dashboard/common.py"
+    },
+    {
+      "donor": "bin/wi_sources.py",
+      "sha256": "755e7721dc5a79ece5646a8a680d280a71749f0f71330106b9d474e8b18905a1",
+      "symbols": [
+        "tasks"
+      ],
+      "canonical": "src/orchestra/dashboard/sources.py"
+    },
+    {
+      "donor": "bin/wi_notes.py",
+      "sha256": "cc9e2c42c49c940fd39954dbee0b8100feaa9f2e36539b83ced44611f925c13f",
+      "symbols": [
+        "notes_lock"
+      ],
+      "canonical": "src/orchestra/dashboard/notes.py"
+    },
+    {
+      "donor": "bin/workitems.py",
+      "sha256": "54e22f44d70b9951defd542535d2041dbe6256999dd99adda9e5574975c2b9b9",
+      "symbols": [
+        "TEXT_KEYS",
+        "curate"
+      ],
+      "canonical": "src/orchestra/dashboard/curation.py"
+    },
+    {
+      "donor": "bin/wi_text.py",
+      "sha256": "34bf4e3101fac1fa834108e3ca16e0f5828a4aef54e0cad3f7ca1d2ce7be57fe",
+      "symbols": "all public and private helpers; explicit-root CLI adaptation",
+      "canonical": "src/orchestra/dashboard/text.py"
+    },
+    {
+      "donor": "bin/wi_identity.py",
+      "sha256": "6fcae367a975082525ae32f19e9395290d1032a12bd0627a60f62f7a7a80841a",
+      "symbols": "all public and private helpers; explicit-root CLI adaptation",
+      "canonical": "src/orchestra/dashboard/identity.py"
+    },
+    {
+      "donor": "bin/wi_quality.py",
+      "sha256": "a0a78bdd08b4deb9970b4ceff23dc86fc8197a99c117f25fbdf99c035f45fa0b",
+      "symbols": "all public and private helpers; explicit-root CLI adaptation",
+      "canonical": "src/orchestra/dashboard/quality.py"
+    },
+    {
+      "donor": "bin/wi_dedupe.py",
+      "sha256": "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+      "symbols": [
+        "unique",
+        "collapse"
+      ],
+      "canonical": "src/orchestra/dashboard/curation.py"
+    }
+  ],
+  "adaptations": [
+    "relative package imports",
+    "explicit roots",
+    "explicit container annotations",
+    "quality CLI path required",
+    "single title policy and lossless missing-title transaction",
+    "task metadata parser with reader-assigned origin",
+    "curated note.title and note.title_it precedence",
+    "microsecond publication plus board digest binding",
+    "explicit known repository owner and forge separation",
+    "stable opaque curated identity candidate; core excludes identity adapters",
+    "runtime URL context remains in compatibility wrapper, not canonical source",
+    "explicit edited_fields text projection; blank uses existing fill_text fallback",
+    "duplicate nonblank open ask IDs are reported without altering asks",
+    "review B1: present invalid child provenance fails closed; absent child remains unchanged",
+    "generated adapters: explicit self aliases, hoisted canonical imports, remove only extracted unused imports",
+    "authorized reader exception: exact filename-matching legacy Task wrapper, inner parentheses retained",
+    "applied-B1 delta uses AFTER manifest hashes; original donor full patch is provenance only"
+  ],
+  "canonical_files": {
+    "src/orchestra/dashboard/__init__.py": "5fbf458033b1df4fe3ffdab5f33deba3bb47da157f8f1b61adf3e5bf9186c011",
+    "src/orchestra/dashboard/common.py": "bfbdb0ff0f882115bb99e3649afc64317e6beef44da0ee490a07f297c2f352fd",
+    "src/orchestra/dashboard/curation.py": "93dd1df637f2ee49bc9fefda77ae86e9d3685d03f44d3a7ceedc88bdfe88ea05",
+    "src/orchestra/dashboard/identity.py": "498b89ba2ea344d8f9b07be26f89ed104c3d6502c2e55f87bf8edc40f48c670a",
+    "src/orchestra/dashboard/notes.py": "e526ae9e53a3daf1007fcb20b40a19a66e760ab68268cf3cba1e359d640bffc0",
+    "src/orchestra/dashboard/provenance.py": "0308b09a6cba4c1bc0c035f0e037e74ea2b1a05f94592158b6774445bcfbfb55",
+    "src/orchestra/dashboard/quality.py": "d76696a6836e1fa21527d7fdcd9377269bde4303c2fbbe36dfe4caf2e3812996",
+    "src/orchestra/dashboard/sources.py": "73eb8e0b9511cd2d6df9143f73924ff84cc5acad57e67f69afaed61cd89d28b2",
+    "src/orchestra/dashboard/text.py": "cd653d07df558d97de9ccc7d687c8ab61e384521bc6c8e91695f44b35c494505",
+    "src/orchestra/dashboard/titles.py": "79d89d781de596534a83e32f57864a05bf689d6d533e9f72e39cef4223f34d07"
+  },
+  "runtime_export": {
+    "core_excludes": [
+      "bin/wi_identity.py",
+      "bin/wi_dedupe.py"
+    ],
+    "identity_candidate_flag": "--include-identity-candidate",
+    "applied": false,
+    "runtime_ready": false
+  }
+}

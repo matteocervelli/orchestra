@@ -18,8 +18,8 @@ fixtures only. It is not Orchestra's runtime state store or scheduler.
 Changes are proposed to `auto/integration` on both forges. The initial source
 extraction is tracked by
 [`matteocervelli/nexus#184`](https://github.com/matteocervelli/nexus/issues/184).
-It stays inactive until the P0 dispatch proof in `matteocervelli/nexus#64` is
-merged and closed.
+Live dispatch remains separately gated. Installing reviewed consumer helpers
+does not activate a scheduler or change Nexus dispatch authority.
 
 ## Development
 
@@ -42,3 +42,8 @@ replace Nexus orchestration and are not connected to the live
 Runtime state, logs, answers, task queues, pages, credentials, tokens, sessions,
 and machine-local configuration must remain outside this repository. See
 [`docs/architecture.md`](docs/architecture.md).
+
+The [dashboard producer guide](docs/guides/dashboard-producer.md) explains title
+admission, curated text, provenance checks and hash-bound consumer updates.
+The core consumer fixes have been applied separately by their runtime owner;
+caller adoption, launcher hooks and identity migration have distinct gates.
