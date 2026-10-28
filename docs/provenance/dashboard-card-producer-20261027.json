@@ -99,16 +99,26 @@
   ],
   "canonical_files": {
     "src/orchestra/dashboard/__init__.py": "5fbf458033b1df4fe3ffdab5f33deba3bb47da157f8f1b61adf3e5bf9186c011",
+    "src/orchestra/dashboard/collector.py": "1944831ec5e73bfea0f5f86934dec1eae125ca6748d0b818338417bbe4d6a97c",
     "src/orchestra/dashboard/common.py": "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
     "src/orchestra/dashboard/curation.py": "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
     "src/orchestra/dashboard/history.py": "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
     "src/orchestra/dashboard/identity.py": "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
     "src/orchestra/dashboard/notes.py": "799a2c36f9046a65186fbc5b7246fdbe7074060cb37b1573f4340f15c1d351d2",
     "src/orchestra/dashboard/provenance.py": "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
-    "src/orchestra/dashboard/quality.py": "f52ec8aa8068e57805745aca7dde4f3b8203a15d7552cbaf786ea7f4b68f802d",
+    "src/orchestra/dashboard/quality.py": "491ef4c9ce642902d6d66a879ced601bf34a1b521564347660b2c5fea1e3aec5",
+    "src/orchestra/dashboard/repository.py": "c14012185c1a434e26acf8cfcb7d1248987378648c8399e9c9daa0ae88a9b97e",
+    "src/orchestra/dashboard/shadow.py": "8942b74eeaf0f13dd9edfe56bbd84cc1872155900d555e9502387e14b0292d6d",
+    "src/orchestra/dashboard/shadow_graph.py": "e08a62dc491833f3de36738dc90bd2f4e37424df5c1f46141e8c823b3e24fc52",
+    "src/orchestra/dashboard/shadow_prior.py": "bfaa0381e7e5a8438e98170622cc65201c65f078bf111c140ffc5a511a76039c",
+    "src/orchestra/dashboard/shadow_probe.py": "dc2eb5c102e39cbd3e696128342423d77d0456c4143be8b9c1b582a88a36bd67",
+    "src/orchestra/dashboard/shadow_profile.py": "8ab21fdd2f437307ca5b487c817e644d9ed97cdf3a48250cf17ea6461355179d",
+    "src/orchestra/dashboard/shadow_schema.py": "d5d8d57b3e7050ad4479970d09a27230aa93b1dac01422c292da4fdf4ab26828",
+    "src/orchestra/dashboard/shadow_store.py": "083dbecaa8bc671303e7d5386e0381e54d076e1c7a56a7eca3854ece964b312e",
     "src/orchestra/dashboard/sources.py": "73eb8e0b9511cd2d6df9143f73924ff84cc5acad57e67f69afaed61cd89d28b2",
     "src/orchestra/dashboard/text.py": "105e9a0b385030a9c841138fd799c553a49c127406b796ae26e39dbb883ee661",
-    "src/orchestra/dashboard/titles.py": "79d89d781de596534a83e32f57864a05bf689d6d533e9f72e39cef4223f34d07"
+    "src/orchestra/dashboard/titles.py": "79d89d781de596534a83e32f57864a05bf689d6d533e9f72e39cef4223f34d07",
+    "src/orchestra/dashboard/shadow_profile_pins.json": "cc4e1369fc61d8fa52621e4e1f10847a0799cb795fd8bc3914502b36e49f6faa"
   },
   "runtime_export": {
     "core_excludes": [
@@ -152,5 +162,215 @@
     "new_module": "src/orchestra/dashboard/history.py",
     "full_pre_collapse_proven": false,
     "review_B1": "reached owner repo authority equals raw source repository; absent repo fallback unchanged"
+  },
+  "shadow_boundary_source": {
+    "basis": "2a42a2b6964fb39725cfca58a5877b7e633e7a12",
+    "contract_sha256": "1de1ea57eba746da3b3dd06c0cc3284e6e55d4ffb2d2dc136e5c49aeca1382a9",
+    "clarification_sha256": "56284c92156bb6fdf9a4129df528b72eaede5e37e4a8987ecce3907fbaf73663",
+    "profile": "m3s-full-boundary/1",
+    "default_enabled": false,
+    "runtime_ready": false,
+    "runtime_caller_wired": false,
+    "prior_reader_implemented": false,
+    "proof": "full declared boundary on synthetic SOURCE fixtures; no runtime corpus admission or apply",
+    "private_receipt": "metadata only; committed capability retained in authorized caller memory; JSON reconstruction is not trusted transport",
+    "offline_export_hook": "shadow_adapter explicitly supplied SOURCE only; default bundle callers unchanged",
+    "collector_composed": false,
+    "observer_failure": "setup failure runs baseline once; normal body exception object/context preserved without retry; test-only fixed code-entry counts",
+    "stdlib_admission": "finite actual member/code identities and deepcopy dispatch, rechecked before use; not a general Python sandbox"
+  },
+  "shadow_source_donors": [
+    {
+      "source": "bin/wi_common.py",
+      "sha256": "9fddd1658632f8ed6a0267bf910e3e50c144a3a88114706e2030618d674547b6",
+      "symbols": [
+        "clip",
+        "iso"
+      ]
+    },
+    {
+      "source": "bin/wi_identity.py",
+      "sha256": "6fcae367a975082525ae32f19e9395290d1032a12bd0627a60f62f7a7a80841a",
+      "symbols": [
+        "SUFFIX",
+        "URL",
+        "KEYWORD",
+        "root_task",
+        "explicit_refs",
+        "repo_of",
+        "identity",
+        "groups"
+      ]
+    },
+    {
+      "source": "bin/wi_dedupe.py",
+      "sha256": "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+      "symbols": [
+        "unique",
+        "merge_steps",
+        "merge_notes",
+        "card_steps",
+        "effective_note",
+        "collapse"
+      ]
+    },
+    {
+      "source": "bin/wi_assembly.py",
+      "sha256": "fbba30c034ef56cb177fc83ffecb0e651afd0783287ec5e792137726f8cec7e4",
+      "symbols": [
+        "new_item",
+        "issue_ref",
+        "Assembly"
+      ]
+    },
+    {
+      "source": "bin/wi_sources.py",
+      "sha256": "db4f54c2f816ee2726edf1ffb1c0241cd164ccf9da99311297b32b78e90c0320",
+      "symbols": [
+        "STEP_LIMITS",
+        "_step",
+        "clean_steps"
+      ]
+    },
+    {
+      "source": "bin/wi_status.py",
+      "sha256": "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "symbols": [
+        "DEPLOY_RULE",
+        "TAG_PATTERN",
+        "ALREADY_DONE",
+        "NOT_NEEDED",
+        "SUPERSEDED",
+        "IN_EFFECT_KINDS",
+        "blocked_reason",
+        "done_status",
+        "lo_is_done",
+        "deployed",
+        "merged_stage",
+        "fixed_after_block",
+        "open_pr_status",
+        "no_pr_status",
+        "compute"
+      ]
+    },
+    {
+      "source": "bin/wi_probes.py",
+      "sha256": "59cfa6ea5725c257c25a6832a59b62c016469d787c316a990c6eb17887469b5d",
+      "symbols": [
+        "Probes"
+      ]
+    },
+    {
+      "source": "bin/workitems.py",
+      "sha256": "304b641de96c34503c789289fe1151f8f6588bdeabc18d4639ef24f0f01e1675",
+      "symbols": [
+        "Ctx"
+      ]
+    },
+    {
+      "source": "bin/wi_fields.py",
+      "sha256": "a8767633bd978f21f1ea833b769a0b858b13533adbe5259414adb08519bac1d4",
+      "symbols": [
+        "AnswerRec"
+      ]
+    }
+  ],
+  "shadow_binding_followup": {
+    "basis_freeze_sha256": "87f3edd769be8723590a08e1fbc40611bf4bb322c1e24a3944deae2d69a0c689",
+    "findings": [
+      "B1",
+      "B2",
+      "NB1"
+    ],
+    "source_only": true,
+    "runtime_ready": false,
+    "dependency_callers": 113,
+    "dependency_lookups": 396,
+    "pin_resource_sha256": "9e2d18bb904eefd752b3952d3a519680fdf0f207fb995be9c77236b12a6594f1",
+    "derivation": "declared SOURCE AST imports/definitions and pinned code global names; never observed caller bindings or current expected output",
+    "recheck": "actual caller/name/kind/target; builtin, stdlib, function and class namespace slots; class constructor binding",
+    "qpr_hosts": [
+      "github.com",
+      "git.adlimen.dev"
+    ]
+  },
+  "shadow_local_import_followup": {
+    "basis_freeze_sha256": "afcc8ade44a93162802fdba26f537ea41c5413e560278282793b691a1ce54382",
+    "finding": "B2-R",
+    "source_only": true,
+    "runtime_ready": false,
+    "dependency_callers": 113,
+    "dependency_lookups": 400,
+    "local_import_callers": 4,
+    "local_import_exports": 5,
+    "pin_resource_sha256": "cc4e1369fc61d8fa52621e4e1f10847a0799cb795fd8bc3914502b36e49f6faa",
+    "derivation": "declared SOURCE AST ImportFrom and definitions; never observed caller bindings or current expected output",
+    "recheck": "cached builtin __import__; SOURCE relative-package/spec metadata; already-loaded pure provenance module identity and exported function role/slot/code; no importer invoked for admission"
+  },
+  "repository_composition": {
+    "base": "2c40d2a8943667942bb69b9321d6265ff1eb812e",
+    "included_collector": "ec33bdb39d5950b2686ffe8b1810afbc2c9f4a37",
+    "m3s_source_commit": "cd2148b5e38ec24424aafc2e0ea1107e83899dc7",
+    "m3s_freeze_sha256": "20f99874292ba2c36f4dcedcd2b7b48b73607a916d1878d3b18a2db52a891164",
+    "package_files": [
+      "__init__.py",
+      "collector.py",
+      "common.py",
+      "curation.py",
+      "history.py",
+      "identity.py",
+      "notes.py",
+      "provenance.py",
+      "quality.py",
+      "repository.py",
+      "shadow.py",
+      "shadow_graph.py",
+      "shadow_prior.py",
+      "shadow_probe.py",
+      "shadow_profile.py",
+      "shadow_profile_pins.json",
+      "shadow_schema.py",
+      "shadow_store.py",
+      "sources.py",
+      "text.py",
+      "titles.py"
+    ],
+    "package_count": 21,
+    "helper_sha256": "c14012185c1a434e26acf8cfcb7d1248987378648c8399e9c9daa0ae88a9b97e",
+    "compat_exporter_sha256": "176c3fccaced3b647fdbdaf61024cae3ec66987e17bd21de2fcb25197959b2b8",
+    "producer_exporter_sha256": "9cc44f42dfe0a5d41315f61c2363f7a9e2282a6b5f2691b4a563fa0ae503290f",
+    "expected_existing_source": {
+      "bin/preview_recipes.py": "240ef73f884294b91495cd5e5b4135611f6d30edca0d4f92cd337694b136f7a0",
+      "bin/action_dedupe.py": "b1032aa4b5666f6609695ae59bc460ca1178669a5506a133a11acff396bbe2cb",
+      "bin/orchestra_dashboard/common.py": "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a"
+    },
+    "before_vector_limit": "Pinned SOURCE expectations, not a claim current runtime matches. Every other pre-existing package target requires explicit caller hash binding; helper must be absent. CLI fails closed otherwise.",
+    "publication": "Outer copies after final item selection, before partition/digest/details. Raw audit once at original position; only emitted affected repo canonicalized.",
+    "publisher_fixture_origin": {
+      "source": "bin/workitems.py",
+      "full_source_sha256": "304b641de96c34503c789289fe1151f8f6588bdeabc18d4639ef24f0f01e1675",
+      "python": "3.12.13",
+      "host_authoring_python": "3.15",
+      "fixture": "tests/unit/test_dashboard_repository_projection.py",
+      "normalization": "Remove only pre-existing core generated/snapshot_digest assignments and _detail_item keywords before applying emitter; main unchanged. AST/source only, no operational import/build.",
+      "functions": {
+        "publish": {
+          "source_function_ast_sha256": "f0accf0843aaab003f15e1a0b0cf30fc63457bea7f4aea15a0e20ea7db048bce",
+          "fixture_ast_sha256": "e94eb2179a2e48596ae075c88a8fa92dff22b55a36195de8cf7634cc5f98a5fc",
+          "fixture_constant": "RAW_PUBLISH",
+          "matches_static_source_extraction": true
+        },
+        "main": {
+          "source_function_ast_sha256": "6ab9b8768747996a7f004b19a7708bb49e12d20e3a91a50356bba2b3afcd4b4e",
+          "fixture_ast_sha256": "d2b65217c84862a2789d0d139e6e25719f8afbcc28a4c983cad058cceb11b450",
+          "fixture_constant": "RAW_MAIN",
+          "matches_static_source_extraction": true
+        }
+      }
+    },
+    "legacy_908f_included": false,
+    "runtime_ready": false,
+    "applied": false,
+    "rollout_gate": "Independent composition review, same before vector, API/UI/legacy old-URL/callchips consumer proof and loaded-process/activation consent; no output-only compatibility claim."
   }
 }

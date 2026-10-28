@@ -20,3 +20,5 @@ IDs because the observed Atrium consumer performs exact-ID lookup.
 Dashboard private helpers separate admission, parsing, qualified identity, page
 projection, alias assembly and audit reporting. Public entrypoints retain their
 contracts; helpers neither fetch evidence nor gain approval/state authority.
+
+Public repository normalization is terminal inside exported publish, after all upstream state processing and before live/archive partition, board digest and detail stamps. It copies only outer records; raw_live remains the audit input at the original single call position. Only affected-item repo is normalized in quality output. Auditing an already canonical board is a different input. The opt-in unified export compares proposals against one hash-bound SOURCE donor vector and does not apply them. Old URL consumer compatibility and M3S activation remain separate gates.

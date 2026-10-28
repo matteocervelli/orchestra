@@ -1,0 +1,3410 @@
+{
+  "defaults": {
+    "canonical.common.refs": [
+      [
+        "tuple",
+        [
+          [
+            "bool",
+            false
+          ],
+          [
+            "NoneType",
+            null
+          ]
+        ]
+      ],
+      {}
+    ],
+    "canonical.common.repository_authority": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.common.short_repo": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._apply_edited_text": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._apply_pages": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._apply_text_fields": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._assign_primary": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._collapse_group": [
+      [
+        "NoneType",
+        null
+      ],
+      {
+        "historical": [
+          "bool",
+          false
+        ]
+      }
+    ],
+    "canonical.curation._finish_collapse_notes": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._merge_page_links": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._merge_part_rows": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._merged_part_pages": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._note_aliases": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._page_value_applies": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._primary_aliases": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._proven_prs": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._real_aliases": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation._winning_primary": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation.collapse": [
+      [
+        "NoneType",
+        null
+      ],
+      {
+        "historical_bindings": [
+          "NoneType",
+          null
+        ]
+      }
+    ],
+    "canonical.curation.curate": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.curation.unique": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history.HistoricalBindingConflict.__init__": [
+      [
+        "tuple",
+        [
+          [
+            "tuple",
+            []
+          ]
+        ]
+      ],
+      {}
+    ],
+    "canonical.history._owner": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history._pr_key": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history._record": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history._registry": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history._safe_key": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history._source_keys": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history.historical_groups": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history.protected_values": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history.validate_note_owners": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.history.validate_primaries": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._declared_primary": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._group_anchor": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._historical_primary": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._historical_repo_valid": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._issue_for_primary": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._keyword_refs": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._keyword_repo_matches": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._primary_conflict": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._primary_reference": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._protected_member": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._repo_from_task": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._same_repo_issue_url": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._slug_repo": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity._url_refs": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity.card_ids": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity.explicit_refs": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity.groups": [
+      [
+        "NoneType",
+        null
+      ],
+      {
+        "historical_bindings": [
+          "NoneType",
+          null
+        ]
+      }
+    ],
+    "canonical.identity.identity": [
+      [
+        "tuple",
+        [
+          [
+            "NoneType",
+            null
+          ]
+        ]
+      ],
+      {}
+    ],
+    "canonical.identity.repo_of": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.identity.root_task": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._artifact_identifier": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._bounded_json": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._date": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._declaration_signatures": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._declared_pr": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._matching_receipt": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._normalized_subject": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._pr_fields_match": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._pr_location": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._pr_path_repository": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._receipt_satisfies": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._task_metadata_block": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._task_metadata_location": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._trusted_declarations": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance._unique_pairs": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance.declaration": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance.github_primary": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance.identity_delta": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance.local_review": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance.parse_task_provenance": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance.propose_request_reconciliation": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance.qualified_pr": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.provenance.resolve_work_provenance": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "canonical.text.is_nothing": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_assembly.Assembly.__init__": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_assembly.Assembly.pr_issue": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_assembly.issue_ref": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_assembly.new_item": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_common.clip": [
+      [
+        "tuple",
+        [
+          [
+            "int",
+            240
+          ]
+        ]
+      ],
+      {}
+    ],
+    "wi_common.iso": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_dedupe.card_steps": [
+      [
+        "tuple",
+        [
+          [
+            "str",
+            ""
+          ]
+        ]
+      ],
+      {}
+    ],
+    "wi_dedupe.collapse": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_dedupe.effective_note": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_dedupe.merge_notes": [
+      [
+        "tuple",
+        [
+          [
+            "NoneType",
+            null
+          ]
+        ]
+      ],
+      {}
+    ],
+    "wi_dedupe.merge_steps": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_dedupe.unique": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_identity.explicit_refs": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_identity.groups": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_identity.identity": [
+      [
+        "tuple",
+        [
+          [
+            "NoneType",
+            null
+          ]
+        ]
+      ],
+      {}
+    ],
+    "wi_identity.repo_of": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_identity.root_task": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_probes.Probes._once": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_probes.Probes.atrium_version": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_probes.Probes.deploy_shas": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_probes.Probes.is_ancestor": [
+      [
+        "tuple",
+        [
+          [
+            "bool",
+            true
+          ]
+        ]
+      ],
+      {}
+    ],
+    "wi_probes.Probes.main_contains": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_probes.Probes.pr_meta": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_probes.Probes.tag_contains": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_sources._step": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_sources.clean_steps": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_status.blocked_reason": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_status.compute": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_status.deployed": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_status.done_status": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_status.fixed_after_block": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_status.lo_is_done": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_status.merged_stage": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_status.no_pr_status": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ],
+    "wi_status.open_pr_status": [
+      [
+        "NoneType",
+        null
+      ],
+      {}
+    ]
+  },
+  "dependencies": {
+    "canonical.common.refs": {
+      "REF_RE": {
+        "kind": "global",
+        "target": "REF_RE"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "max": {
+        "kind": "builtin",
+        "target": "max"
+      },
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      }
+    },
+    "canonical.common.repository_authority": {
+      "FULL": {
+        "kind": "global",
+        "target": "FULL"
+      },
+      "_CANONICAL_REPOSITORIES": {
+        "kind": "global",
+        "target": "_CANONICAL_REPOSITORIES"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      }
+    },
+    "canonical.common.short_repo": {
+      "REPOS": {
+        "kind": "global",
+        "target": "REPOS"
+      }
+    },
+    "canonical.curation._apply_edited_text": {
+      "TEXT_KEYS": {
+        "kind": "unavailable",
+        "target": "TEXT_KEYS"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "list": {
+        "kind": "builtin",
+        "target": "list"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.curation._apply_pages": {
+      "_merge_page_links": {
+        "kind": "function",
+        "target": "canonical.curation._merge_page_links"
+      },
+      "_page_value_applies": {
+        "kind": "function",
+        "target": "canonical.curation._page_value_applies"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.curation._apply_text_fields": {
+      "TEXT_KEYS": {
+        "kind": "unavailable",
+        "target": "TEXT_KEYS"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.curation._assign_primary": {
+      "_winning_primary": {
+        "kind": "function",
+        "target": "canonical.curation._winning_primary"
+      },
+      "github_primary": {
+        "kind": "function",
+        "target": "canonical.provenance.github_primary"
+      },
+      "next": {
+        "kind": "builtin",
+        "target": "next"
+      }
+    },
+    "canonical.curation._collapse_group": {
+      "FULL": {
+        "kind": "global",
+        "target": "FULL"
+      },
+      "_assign_primary": {
+        "kind": "function",
+        "target": "canonical.curation._assign_primary"
+      },
+      "_finish_collapse_notes": {
+        "kind": "function",
+        "target": "canonical.curation._finish_collapse_notes"
+      },
+      "_merge_part_rows": {
+        "kind": "function",
+        "target": "canonical.curation._merge_part_rows"
+      },
+      "_note_aliases": {
+        "kind": "function",
+        "target": "canonical.curation._note_aliases"
+      },
+      "_primary_aliases": {
+        "kind": "function",
+        "target": "canonical.curation._primary_aliases"
+      },
+      "_proven_prs": {
+        "kind": "function",
+        "target": "canonical.curation._proven_prs"
+      },
+      "_real_aliases": {
+        "kind": "function",
+        "target": "canonical.curation._real_aliases"
+      },
+      "copy": {
+        "kind": "stdlib",
+        "target": "copy"
+      },
+      "unique": {
+        "kind": "function",
+        "target": "canonical.curation.unique"
+      }
+    },
+    "canonical.curation._finish_collapse_notes": {
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      }
+    },
+    "canonical.curation._merge_page_links": {
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "list": {
+        "kind": "builtin",
+        "target": "list"
+      }
+    },
+    "canonical.curation._merge_part_rows": {
+      "_merged_part_pages": {
+        "kind": "function",
+        "target": "canonical.curation._merged_part_pages"
+      },
+      "max": {
+        "kind": "builtin",
+        "target": "max"
+      },
+      "unique": {
+        "kind": "function",
+        "target": "canonical.curation.unique"
+      }
+    },
+    "canonical.curation._merged_part_pages": {
+      "unique": {
+        "kind": "function",
+        "target": "canonical.curation.unique"
+      }
+    },
+    "canonical.curation._note_aliases": {
+      "all": {
+        "kind": "builtin",
+        "target": "all"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "unique": {
+        "kind": "function",
+        "target": "canonical.curation.unique"
+      }
+    },
+    "canonical.curation._page_value_applies": {
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      }
+    },
+    "canonical.curation._primary_aliases": {},
+    "canonical.curation._proven_prs": {
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "github_primary": {
+        "kind": "function",
+        "target": "canonical.provenance.github_primary"
+      }
+    },
+    "canonical.curation._real_aliases": {
+      "unique": {
+        "kind": "function",
+        "target": "canonical.curation.unique"
+      }
+    },
+    "canonical.curation._winning_primary": {
+      "STATUSES": {
+        "kind": "global",
+        "target": "STATUSES"
+      },
+      "max": {
+        "kind": "builtin",
+        "target": "max"
+      }
+    },
+    "canonical.curation.collapse": {
+      "_collapse_group": {
+        "kind": "function",
+        "target": "canonical.curation._collapse_group"
+      },
+      "copy": {
+        "kind": "stdlib",
+        "target": "copy"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "groups": {
+        "kind": "function",
+        "target": "canonical.identity.groups"
+      },
+      "protected_values": {
+        "kind": "function",
+        "target": "canonical.history.protected_values"
+      }
+    },
+    "canonical.curation.curate": {
+      "_apply_edited_text": {
+        "kind": "function",
+        "target": "canonical.curation._apply_edited_text"
+      },
+      "_apply_pages": {
+        "kind": "function",
+        "target": "canonical.curation._apply_pages"
+      },
+      "_apply_text_fields": {
+        "kind": "function",
+        "target": "canonical.curation._apply_text_fields"
+      },
+      "note_title": {
+        "kind": "function",
+        "target": "canonical.titles.note_title"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      }
+    },
+    "canonical.curation.unique": {},
+    "canonical.history.HistoricalBindingConflict.__init__": {
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "sorted": {
+        "kind": "builtin",
+        "target": "sorted"
+      },
+      "super": {
+        "kind": "builtin",
+        "target": "super"
+      },
+      "tuple": {
+        "kind": "builtin",
+        "target": "tuple"
+      }
+    },
+    "canonical.history._owner": {
+      "HistoricalBindingConflict": {
+        "kind": "class",
+        "target": "canonical.history.HistoricalBindingConflict"
+      },
+      "_source_keys": {
+        "kind": "function",
+        "target": "canonical.history._source_keys"
+      },
+      "iter": {
+        "kind": "builtin",
+        "target": "iter"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "next": {
+        "kind": "builtin",
+        "target": "next"
+      },
+      "sorted": {
+        "kind": "builtin",
+        "target": "sorted"
+      }
+    },
+    "canonical.history._pr_key": {
+      "ValueError": {
+        "kind": "builtin",
+        "target": "ValueError"
+      },
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "qualified_pr": {
+        "kind": "function",
+        "target": "canonical.provenance.qualified_pr"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      },
+      "urlsplit": {
+        "kind": "stdlib",
+        "target": "urlsplit"
+      }
+    },
+    "canonical.history._record": {
+      "HistoricalBindingConflict": {
+        "kind": "class",
+        "target": "canonical.history.HistoricalBindingConflict"
+      },
+      "Mapping": {
+        "kind": "stdlib",
+        "target": "Mapping"
+      },
+      "_pr_key": {
+        "kind": "function",
+        "target": "canonical.history._pr_key"
+      },
+      "_safe_key": {
+        "kind": "function",
+        "target": "canonical.history._safe_key"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.history._registry": {
+      "HistoricalBindingConflict": {
+        "kind": "class",
+        "target": "canonical.history.HistoricalBindingConflict"
+      },
+      "_record": {
+        "kind": "function",
+        "target": "canonical.history._record"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.history._safe_key": {
+      "SAFE_KEY": {
+        "kind": "global",
+        "target": "SAFE_KEY"
+      },
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.history._source_keys": {
+      "qualified_pr": {
+        "kind": "function",
+        "target": "canonical.provenance.qualified_pr"
+      }
+    },
+    "canonical.history.historical_groups": {
+      "HistoricalBindingConflict": {
+        "kind": "class",
+        "target": "canonical.history.HistoricalBindingConflict"
+      },
+      "_owner": {
+        "kind": "function",
+        "target": "canonical.history._owner"
+      },
+      "_registry": {
+        "kind": "function",
+        "target": "canonical.history._registry"
+      },
+      "_source_keys": {
+        "kind": "function",
+        "target": "canonical.history._source_keys"
+      },
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      }
+    },
+    "canonical.history.protected_values": {
+      "HistoricalBindingConflict": {
+        "kind": "class",
+        "target": "canonical.history.HistoricalBindingConflict"
+      },
+      "PROTECTED": {
+        "kind": "global",
+        "target": "PROTECTED"
+      },
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      }
+    },
+    "canonical.history.validate_note_owners": {
+      "HistoricalBindingConflict": {
+        "kind": "class",
+        "target": "canonical.history.HistoricalBindingConflict"
+      }
+    },
+    "canonical.history.validate_primaries": {
+      "HistoricalBindingConflict": {
+        "kind": "class",
+        "target": "canonical.history.HistoricalBindingConflict"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "protected_values": {
+        "kind": "function",
+        "target": "canonical.history.protected_values"
+      }
+    },
+    "canonical.identity._declared_primary": {
+      "__import__": {
+        "kind": "builtin",
+        "target": "__import__"
+      }
+    },
+    "canonical.identity._group_anchor": {
+      "_protected_member": {
+        "kind": "function",
+        "target": "canonical.identity._protected_member"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "min": {
+        "kind": "builtin",
+        "target": "min"
+      }
+    },
+    "canonical.identity._historical_primary": {
+      "_historical_repo_valid": {
+        "kind": "function",
+        "target": "canonical.identity._historical_repo_valid"
+      },
+      "_primary_reference": {
+        "kind": "function",
+        "target": "canonical.identity._primary_reference"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "repo_of": {
+        "kind": "function",
+        "target": "canonical.identity.repo_of"
+      }
+    },
+    "canonical.identity._historical_repo_valid": {
+      "__import__": {
+        "kind": "builtin",
+        "target": "__import__"
+      },
+      "repository_authority": {
+        "kind": "function",
+        "target": "canonical.common.repository_authority"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.identity._issue_for_primary": {
+      "_same_repo_issue_url": {
+        "kind": "function",
+        "target": "canonical.identity._same_repo_issue_url"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      },
+      "type": {
+        "kind": "builtin",
+        "target": "type"
+      }
+    },
+    "canonical.identity._keyword_refs": {
+      "KEYWORD": {
+        "kind": "global",
+        "target": "KEYWORD"
+      },
+      "_keyword_repo_matches": {
+        "kind": "function",
+        "target": "canonical.identity._keyword_repo_matches"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      }
+    },
+    "canonical.identity._keyword_repo_matches": {
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      }
+    },
+    "canonical.identity._primary_conflict": {
+      "__import__": {
+        "kind": "builtin",
+        "target": "__import__"
+      },
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      }
+    },
+    "canonical.identity._primary_reference": {
+      "__import__": {
+        "kind": "builtin",
+        "target": "__import__"
+      },
+      "_declared_primary": {
+        "kind": "function",
+        "target": "canonical.identity._declared_primary"
+      },
+      "_primary_conflict": {
+        "kind": "function",
+        "target": "canonical.identity._primary_conflict"
+      }
+    },
+    "canonical.identity._protected_member": {
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      }
+    },
+    "canonical.identity._repo_from_task": {
+      "URL": {
+        "kind": "global",
+        "target": "URL"
+      },
+      "_slug_repo": {
+        "kind": "function",
+        "target": "canonical.identity._slug_repo"
+      },
+      "iter": {
+        "kind": "builtin",
+        "target": "iter"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "next": {
+        "kind": "builtin",
+        "target": "next"
+      },
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      },
+      "refs": {
+        "kind": "function",
+        "target": "canonical.common.refs"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      }
+    },
+    "canonical.identity._same_repo_issue_url": {
+      "URL": {
+        "kind": "global",
+        "target": "URL"
+      },
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "repository_authority": {
+        "kind": "function",
+        "target": "canonical.common.repository_authority"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      }
+    },
+    "canonical.identity._slug_repo": {
+      "FULL": {
+        "kind": "global",
+        "target": "FULL"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      },
+      "sorted": {
+        "kind": "builtin",
+        "target": "sorted"
+      }
+    },
+    "canonical.identity._url_refs": {
+      "URL": {
+        "kind": "global",
+        "target": "URL"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "repository_authority": {
+        "kind": "function",
+        "target": "canonical.common.repository_authority"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      }
+    },
+    "canonical.identity.card_ids": {
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      }
+    },
+    "canonical.identity.explicit_refs": {
+      "_keyword_refs": {
+        "kind": "function",
+        "target": "canonical.identity._keyword_refs"
+      },
+      "_url_refs": {
+        "kind": "function",
+        "target": "canonical.identity._url_refs"
+      }
+    },
+    "canonical.identity.groups": {
+      "_group_anchor": {
+        "kind": "function",
+        "target": "canonical.identity._group_anchor"
+      },
+      "_historical_primary": {
+        "kind": "function",
+        "target": "canonical.identity._historical_primary"
+      },
+      "historical_groups": {
+        "kind": "function",
+        "target": "canonical.history.historical_groups"
+      },
+      "identity": {
+        "kind": "function",
+        "target": "canonical.identity.identity"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "validate_note_owners": {
+        "kind": "function",
+        "target": "canonical.history.validate_note_owners"
+      },
+      "validate_primaries": {
+        "kind": "function",
+        "target": "canonical.history.validate_primaries"
+      }
+    },
+    "canonical.identity.identity": {
+      "_issue_for_primary": {
+        "kind": "function",
+        "target": "canonical.identity._issue_for_primary"
+      },
+      "_primary_reference": {
+        "kind": "function",
+        "target": "canonical.identity._primary_reference"
+      },
+      "repo_of": {
+        "kind": "function",
+        "target": "canonical.identity.repo_of"
+      },
+      "repository_authority": {
+        "kind": "function",
+        "target": "canonical.common.repository_authority"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.identity.repo_of": {
+      "_repo_from_task": {
+        "kind": "function",
+        "target": "canonical.identity._repo_from_task"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      }
+    },
+    "canonical.identity.root_task": {
+      "SUFFIX": {
+        "kind": "global",
+        "target": "SUFFIX"
+      }
+    },
+    "canonical.provenance._artifact_identifier": {
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "ord": {
+        "kind": "builtin",
+        "target": "ord"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.provenance._bounded_json": {},
+    "canonical.provenance._date": {
+      "ValueError": {
+        "kind": "builtin",
+        "target": "ValueError"
+      },
+      "datetime": {
+        "kind": "stdlib",
+        "target": "datetime"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.provenance._declaration_signatures": {
+      "json": {
+        "kind": "stdlib",
+        "target": "json"
+      }
+    },
+    "canonical.provenance._declared_pr": {
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "qualified_pr": {
+        "kind": "function",
+        "target": "canonical.provenance.qualified_pr"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      }
+    },
+    "canonical.provenance._matching_receipt": {
+      "_date": {
+        "kind": "function",
+        "target": "canonical.provenance._date"
+      },
+      "_receipt_satisfies": {
+        "kind": "function",
+        "target": "canonical.provenance._receipt_satisfies"
+      },
+      "all": {
+        "kind": "builtin",
+        "target": "all"
+      }
+    },
+    "canonical.provenance._normalized_subject": {
+      "_artifact_identifier": {
+        "kind": "function",
+        "target": "canonical.provenance._artifact_identifier"
+      },
+      "_declared_pr": {
+        "kind": "function",
+        "target": "canonical.provenance._declared_pr"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.provenance._pr_fields_match": {},
+    "canonical.provenance._pr_location": {
+      "ValueError": {
+        "kind": "builtin",
+        "target": "ValueError"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      },
+      "urlsplit": {
+        "kind": "stdlib",
+        "target": "urlsplit"
+      }
+    },
+    "canonical.provenance._pr_path_repository": {
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      },
+      "repository_authority": {
+        "kind": "function",
+        "target": "canonical.common.repository_authority"
+      }
+    },
+    "canonical.provenance._receipt_satisfies": {
+      "_date": {
+        "kind": "function",
+        "target": "canonical.provenance._date"
+      },
+      "all": {
+        "kind": "builtin",
+        "target": "all"
+      },
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      }
+    },
+    "canonical.provenance._task_metadata_block": {
+      "_MARKER": {
+        "kind": "unavailable",
+        "target": "_MARKER"
+      },
+      "_bounded_json": {
+        "kind": "function",
+        "target": "canonical.provenance._bounded_json"
+      },
+      "_task_metadata_location": {
+        "kind": "function",
+        "target": "canonical.provenance._task_metadata_location"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "list": {
+        "kind": "builtin",
+        "target": "list"
+      }
+    },
+    "canonical.provenance._task_metadata_location": {
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      }
+    },
+    "canonical.provenance._trusted_declarations": {
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "declaration": {
+        "kind": "function",
+        "target": "canonical.provenance.declaration"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      }
+    },
+    "canonical.provenance._unique_pairs": {
+      "ValueError": {
+        "kind": "builtin",
+        "target": "ValueError"
+      }
+    },
+    "canonical.provenance.declaration": {
+      "_normalized_subject": {
+        "kind": "function",
+        "target": "canonical.provenance._normalized_subject"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      }
+    },
+    "canonical.provenance.github_primary": {
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      },
+      "qualified_pr": {
+        "kind": "function",
+        "target": "canonical.provenance.qualified_pr"
+      }
+    },
+    "canonical.provenance.identity_delta": {
+      "ValueError": {
+        "kind": "builtin",
+        "target": "ValueError"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "sorted": {
+        "kind": "builtin",
+        "target": "sorted"
+      }
+    },
+    "canonical.provenance.local_review": {
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      },
+      "declaration": {
+        "kind": "function",
+        "target": "canonical.provenance.declaration"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "canonical.provenance.parse_task_provenance": {
+      "RecursionError": {
+        "kind": "builtin",
+        "target": "RecursionError"
+      },
+      "ValueError": {
+        "kind": "builtin",
+        "target": "ValueError"
+      },
+      "_task_metadata_block": {
+        "kind": "function",
+        "target": "canonical.provenance._task_metadata_block"
+      },
+      "_unique_pairs": {
+        "kind": "function",
+        "target": "canonical.provenance._unique_pairs"
+      },
+      "declaration": {
+        "kind": "function",
+        "target": "canonical.provenance.declaration"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "json": {
+        "kind": "stdlib",
+        "target": "json"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      }
+    },
+    "canonical.provenance.propose_request_reconciliation": {
+      "_matching_receipt": {
+        "kind": "function",
+        "target": "canonical.provenance._matching_receipt"
+      }
+    },
+    "canonical.provenance.qualified_pr": {
+      "_pr_fields_match": {
+        "kind": "function",
+        "target": "canonical.provenance._pr_fields_match"
+      },
+      "_pr_location": {
+        "kind": "function",
+        "target": "canonical.provenance._pr_location"
+      },
+      "_pr_path_repository": {
+        "kind": "function",
+        "target": "canonical.provenance._pr_path_repository"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "type": {
+        "kind": "builtin",
+        "target": "type"
+      }
+    },
+    "canonical.provenance.resolve_work_provenance": {
+      "_declaration_signatures": {
+        "kind": "function",
+        "target": "canonical.provenance._declaration_signatures"
+      },
+      "_trusted_declarations": {
+        "kind": "function",
+        "target": "canonical.provenance._trusted_declarations"
+      },
+      "declaration": {
+        "kind": "function",
+        "target": "canonical.provenance.declaration"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      }
+    },
+    "canonical.text.is_nothing": {},
+    "wi_assembly.Assembly.__init__": {
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      }
+    },
+    "wi_assembly.Assembly.pr_issue": {
+      "_DETACHED": {
+        "kind": "global",
+        "target": "_DETACHED"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "explicit_refs": {
+        "kind": "function",
+        "target": "wi_identity.explicit_refs"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "iter": {
+        "kind": "builtin",
+        "target": "iter"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "next": {
+        "kind": "builtin",
+        "target": "next"
+      },
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      },
+      "type": {
+        "kind": "builtin",
+        "target": "type"
+      }
+    },
+    "wi_assembly.issue_ref": {},
+    "wi_assembly.new_item": {},
+    "wi_common.clip": {
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      }
+    },
+    "wi_common.iso": {
+      "datetime": {
+        "kind": "stdlib",
+        "target": "datetime"
+      },
+      "timezone": {
+        "kind": "stdlib",
+        "target": "timezone"
+      }
+    },
+    "wi_dedupe.card_steps": {
+      "merge_steps": {
+        "kind": "function",
+        "target": "wi_dedupe.merge_steps"
+      },
+      "sorted": {
+        "kind": "builtin",
+        "target": "sorted"
+      }
+    },
+    "wi_dedupe.collapse": {
+      "FULL": {
+        "kind": "global",
+        "target": "FULL"
+      },
+      "STATUSES": {
+        "kind": "global",
+        "target": "STATUSES"
+      },
+      "all": {
+        "kind": "builtin",
+        "target": "all"
+      },
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "compute": {
+        "kind": "function",
+        "target": "wi_status.compute"
+      },
+      "copy": {
+        "kind": "stdlib",
+        "target": "copy"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "effective_note": {
+        "kind": "function",
+        "target": "wi_dedupe.effective_note"
+      },
+      "groups": {
+        "kind": "function",
+        "target": "wi_identity.groups"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "issue_ref": {
+        "kind": "function",
+        "target": "wi_assembly.issue_ref"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "max": {
+        "kind": "builtin",
+        "target": "max"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "unique": {
+        "kind": "function",
+        "target": "wi_dedupe.unique"
+      }
+    },
+    "wi_dedupe.effective_note": {
+      "card_steps": {
+        "kind": "function",
+        "target": "wi_dedupe.card_steps"
+      },
+      "merge_notes": {
+        "kind": "function",
+        "target": "wi_dedupe.merge_notes"
+      },
+      "next": {
+        "kind": "builtin",
+        "target": "next"
+      },
+      "unique": {
+        "kind": "function",
+        "target": "wi_dedupe.unique"
+      }
+    },
+    "wi_dedupe.merge_notes": {
+      "STATUSES": {
+        "kind": "global",
+        "target": "STATUSES"
+      },
+      "all": {
+        "kind": "builtin",
+        "target": "all"
+      },
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      },
+      "copy": {
+        "kind": "stdlib",
+        "target": "copy"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "is_nothing": {
+        "kind": "function",
+        "target": "canonical.text.is_nothing"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "list": {
+        "kind": "builtin",
+        "target": "list"
+      },
+      "max": {
+        "kind": "builtin",
+        "target": "max"
+      },
+      "merge_steps": {
+        "kind": "function",
+        "target": "wi_dedupe.merge_steps"
+      },
+      "min": {
+        "kind": "builtin",
+        "target": "min"
+      },
+      "sorted": {
+        "kind": "builtin",
+        "target": "sorted"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      },
+      "unique": {
+        "kind": "function",
+        "target": "wi_dedupe.unique"
+      }
+    },
+    "wi_dedupe.merge_steps": {
+      "clean_steps": {
+        "kind": "function",
+        "target": "wi_sources.clean_steps"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "hashlib": {
+        "kind": "stdlib",
+        "target": "hashlib"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "next": {
+        "kind": "builtin",
+        "target": "next"
+      }
+    },
+    "wi_dedupe.unique": {},
+    "wi_fields.AnswerRec.__init__": {},
+    "wi_identity.explicit_refs": {
+      "KEYWORD": {
+        "kind": "global",
+        "target": "KEYWORD"
+      },
+      "URL": {
+        "kind": "global",
+        "target": "URL"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      }
+    },
+    "wi_identity.groups": {
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "identity": {
+        "kind": "function",
+        "target": "wi_identity.identity"
+      },
+      "iter": {
+        "kind": "builtin",
+        "target": "iter"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "min": {
+        "kind": "builtin",
+        "target": "min"
+      },
+      "next": {
+        "kind": "builtin",
+        "target": "next"
+      },
+      "root_task": {
+        "kind": "function",
+        "target": "wi_identity.root_task"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      }
+    },
+    "wi_identity.identity": {
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      },
+      "explicit_refs": {
+        "kind": "function",
+        "target": "wi_identity.explicit_refs"
+      },
+      "int": {
+        "kind": "builtin",
+        "target": "int"
+      },
+      "iter": {
+        "kind": "builtin",
+        "target": "iter"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "next": {
+        "kind": "builtin",
+        "target": "next"
+      },
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      },
+      "repo_of": {
+        "kind": "function",
+        "target": "wi_identity.repo_of"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      },
+      "type": {
+        "kind": "builtin",
+        "target": "type"
+      }
+    },
+    "wi_identity.repo_of": {
+      "FULL": {
+        "kind": "global",
+        "target": "FULL"
+      },
+      "URL": {
+        "kind": "global",
+        "target": "URL"
+      },
+      "iter": {
+        "kind": "builtin",
+        "target": "iter"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "next": {
+        "kind": "builtin",
+        "target": "next"
+      },
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      },
+      "refs": {
+        "kind": "function",
+        "target": "canonical.common.refs"
+      },
+      "set": {
+        "kind": "builtin",
+        "target": "set"
+      },
+      "short_repo": {
+        "kind": "function",
+        "target": "canonical.common.short_repo"
+      },
+      "sorted": {
+        "kind": "builtin",
+        "target": "sorted"
+      }
+    },
+    "wi_identity.root_task": {
+      "SUFFIX": {
+        "kind": "global",
+        "target": "SUFFIX"
+      }
+    },
+    "wi_probes.Probes._once": {},
+    "wi_probes.Probes.atrium_version": {},
+    "wi_probes.Probes.deploy_shas": {
+      "FORGEJO_REPO": {
+        "kind": "global",
+        "target": "FORGEJO_REPO"
+      }
+    },
+    "wi_probes.Probes.is_ancestor": {
+      "REPO_GIT": {
+        "kind": "global",
+        "target": "REPO_GIT"
+      }
+    },
+    "wi_probes.Probes.main_contains": {
+      "REPO_GIT": {
+        "kind": "global",
+        "target": "REPO_GIT"
+      }
+    },
+    "wi_probes.Probes.pr_meta": {},
+    "wi_probes.Probes.tag_contains": {
+      "REPO_GIT": {
+        "kind": "global",
+        "target": "REPO_GIT"
+      }
+    },
+    "wi_sources._step": {
+      "STEP_LIMITS": {
+        "kind": "global",
+        "target": "STEP_LIMITS"
+      },
+      "STEP_RE": {
+        "kind": "global",
+        "target": "STEP_RE"
+      },
+      "dict": {
+        "kind": "builtin",
+        "target": "dict"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "len": {
+        "kind": "builtin",
+        "target": "len"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "wi_sources.clean_steps": {
+      "_step": {
+        "kind": "function",
+        "target": "wi_sources._step"
+      },
+      "isinstance": {
+        "kind": "builtin",
+        "target": "isinstance"
+      },
+      "list": {
+        "kind": "builtin",
+        "target": "list"
+      },
+      "map": {
+        "kind": "builtin",
+        "target": "map"
+      }
+    },
+    "wi_status.blocked_reason": {
+      "clip": {
+        "kind": "function",
+        "target": "wi_common.clip"
+      },
+      "re": {
+        "kind": "stdlib",
+        "target": "re"
+      }
+    },
+    "wi_status.compute": {
+      "REPOS": {
+        "kind": "global",
+        "target": "REPOS"
+      },
+      "STATUSES": {
+        "kind": "global",
+        "target": "STATUSES"
+      },
+      "all": {
+        "kind": "builtin",
+        "target": "all"
+      },
+      "blocked_reason": {
+        "kind": "function",
+        "target": "wi_status.blocked_reason"
+      },
+      "done_status": {
+        "kind": "function",
+        "target": "wi_status.done_status"
+      },
+      "merged_stage": {
+        "kind": "function",
+        "target": "wi_status.merged_stage"
+      },
+      "no_pr_status": {
+        "kind": "function",
+        "target": "wi_status.no_pr_status"
+      },
+      "open_pr_status": {
+        "kind": "function",
+        "target": "wi_status.open_pr_status"
+      }
+    },
+    "wi_status.deployed": {
+      "DEPLOY_RULE": {
+        "kind": "global",
+        "target": "DEPLOY_RULE"
+      },
+      "TAG_PATTERN": {
+        "kind": "global",
+        "target": "TAG_PATTERN"
+      },
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      }
+    },
+    "wi_status.done_status": {
+      "IN_EFFECT_KINDS": {
+        "kind": "global",
+        "target": "IN_EFFECT_KINDS"
+      },
+      "REPOS": {
+        "kind": "global",
+        "target": "REPOS"
+      },
+      "STATUSES": {
+        "kind": "global",
+        "target": "STATUSES"
+      },
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "lo_is_done": {
+        "kind": "function",
+        "target": "wi_status.lo_is_done"
+      },
+      "merged_stage": {
+        "kind": "function",
+        "target": "wi_status.merged_stage"
+      },
+      "min": {
+        "kind": "builtin",
+        "target": "min"
+      },
+      "refs": {
+        "kind": "function",
+        "target": "canonical.common.refs"
+      },
+      "str": {
+        "kind": "builtin",
+        "target": "str"
+      }
+    },
+    "wi_status.fixed_after_block": {
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "iso": {
+        "kind": "function",
+        "target": "wi_common.iso"
+      }
+    },
+    "wi_status.lo_is_done": {},
+    "wi_status.merged_stage": {
+      "DEPLOY_RULE": {
+        "kind": "global",
+        "target": "DEPLOY_RULE"
+      },
+      "deployed": {
+        "kind": "function",
+        "target": "wi_status.deployed"
+      }
+    },
+    "wi_status.no_pr_status": {
+      "ALREADY_DONE": {
+        "kind": "global",
+        "target": "ALREADY_DONE"
+      },
+      "NOT_NEEDED": {
+        "kind": "global",
+        "target": "NOT_NEEDED"
+      },
+      "SUPERSEDED": {
+        "kind": "global",
+        "target": "SUPERSEDED"
+      },
+      "any": {
+        "kind": "builtin",
+        "target": "any"
+      },
+      "bool": {
+        "kind": "builtin",
+        "target": "bool"
+      }
+    },
+    "wi_status.open_pr_status": {
+      "fixed_after_block": {
+        "kind": "function",
+        "target": "wi_status.fixed_after_block"
+      }
+    },
+    "workitems.Ctx.__init__": {}
+  },
+  "functions": {
+    "canonical.common.refs": [
+      "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
+      "fbac613822610fafd71af73b2dee6f9674833eefadfdd79ffd85dec3d388b80f"
+    ],
+    "canonical.common.repository_authority": [
+      "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
+      "6a5869054a0cf845da79919f6c2b183e4a6c62ba52b233c704fca3c796c39999"
+    ],
+    "canonical.common.short_repo": [
+      "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
+      "bff2d611cf8692d83d68038b9b95a25a9fff72f6bf792a4a0fc684e430a823d1"
+    ],
+    "canonical.curation._apply_edited_text": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "cc5f7106fc20c510ee53388cfb70de97ad68612d624db8bf7ddd09de4f10da75"
+    ],
+    "canonical.curation._apply_pages": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "d38dfa2d2eab1db1819b5d970c0d34d4c74c5223531b4512348e8a6615b52820"
+    ],
+    "canonical.curation._apply_text_fields": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "7797593987b3ec61e2a99d98c0931f355c1f0919baa2c4902b4d04a131948649"
+    ],
+    "canonical.curation._assign_primary": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "8d2f5e6ddbd650a35bb9946f84ea5da1be40db9ceede3f0f9b903c93f144b293"
+    ],
+    "canonical.curation._collapse_group": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "96b8dd04bbfa1064b72d3a575f654d5ed8010b826585d19968e1bc3be31f3807"
+    ],
+    "canonical.curation._finish_collapse_notes": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "8f4d9a27ebfde75407232c6e5a158a5476fb87d6fb30a2b67104d01039522740"
+    ],
+    "canonical.curation._merge_page_links": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "697356c626816fbfe2cfe3477f36c9735ed2cf3611f025eea418d6cc7dbd5fd1"
+    ],
+    "canonical.curation._merge_part_rows": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "c60a28c7805ba38053a254d51015254dbe5628edb9310b83698a28046b33a392"
+    ],
+    "canonical.curation._merged_part_pages": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "718f06de77c10f63185f02abbc277e32906214710f063a901a4c2de0b92a002e"
+    ],
+    "canonical.curation._note_aliases": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "f995c7f90ee11c8754bc3cbb9f563a616c67047e29b849219242c7adc7ef3bb3"
+    ],
+    "canonical.curation._page_value_applies": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "079b4e2bfc37f2f49e0952f62983b13fbd86f5549f108c6fdec28eb3ce0e3954"
+    ],
+    "canonical.curation._primary_aliases": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "c1b1173217fe37f696813c10895d576dd4f4d652acde139c2ee5ae784f4dadfb"
+    ],
+    "canonical.curation._proven_prs": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "a7d8d4253367cf6ce9661286fce5bdf421f15e9c0f0eb34fe31164e966e2a677"
+    ],
+    "canonical.curation._real_aliases": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "bf48c30bfbd9f5d1dd0772467937606b1a96bdde50279194b7cf60c5c2c20527"
+    ],
+    "canonical.curation._winning_primary": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "c7aa6d417b84d769883b10312d877e522b47080fa260c2a77f25ee9527e70b31"
+    ],
+    "canonical.curation.collapse": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "f7b2af369f774a13374ca388219869ebc0192d575091f0bfe34d175984dffa3b"
+    ],
+    "canonical.curation.curate": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "f907695509615f3ad028bee88b51c69de0867c7be22322ac21109802412131ac"
+    ],
+    "canonical.curation.unique": [
+      "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+      "3f424b6ba4daa57901e96a2eb5e180cadc2bc3745471143365c71990a035eab1"
+    ],
+    "canonical.history.HistoricalBindingConflict.__init__": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "87a3215299fb64b3ea5c75c5a174d627e65f34a78c01de237b33241d401181be"
+    ],
+    "canonical.history._owner": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "cc3eab675375739f7f4d4a63f355ca107551046b352f44dd0c9eed541be00cdf"
+    ],
+    "canonical.history._pr_key": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "6487567e3e5ab287a9875c27d336ed68d8d688932ea452970ec65266d57c608f"
+    ],
+    "canonical.history._record": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "c666a44d6792c4622f00dd913afbea38ff4f480a4c6abe32a9a3e2930e4682fd"
+    ],
+    "canonical.history._registry": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "ead6b759bacb1cc08fa0b7ddb98ac82c079ce6307b1d43ffa93c8da1e18d88db"
+    ],
+    "canonical.history._safe_key": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "1515610c4bd261adba1cd72fb406764acadf775a4dfc9714c8273a32abfb92de"
+    ],
+    "canonical.history._source_keys": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "f3b45b8629b332820eeb613ab4e81818ad28698ea4bb4f879cde4d8d79501347"
+    ],
+    "canonical.history.historical_groups": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "2accde4da3beabaa64fb864bb4afdc1e6a275fcdbee70de72afb546757d10410"
+    ],
+    "canonical.history.protected_values": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "b5951d62d17a2fec28808d2783feedc5d843e17053f07fe08117c1a4beb69b1d"
+    ],
+    "canonical.history.validate_note_owners": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "d42ec641e9dd774965fc28a47691358b351cb79f455352abcbc7f36c0de2676e"
+    ],
+    "canonical.history.validate_primaries": [
+      "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
+      "f0f4a771d14bfd2d01ff9a45431c702ef35c2075314a23bda30f0433377d3919"
+    ],
+    "canonical.identity._declared_primary": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "b05736736c57a385a338bb5a73af06da5af36eaa176ba67ee536f691f3478ec2"
+    ],
+    "canonical.identity._group_anchor": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "30727885c1de7454d8e2a5adfcc951aca46869c72788834efed4da031bc21a60"
+    ],
+    "canonical.identity._historical_primary": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "0f21be499f4271ab3a7354d7bf9bd5f9cc4810c275d8755142d4070a3cbd68dd"
+    ],
+    "canonical.identity._historical_repo_valid": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "50a824842d9bc0984fea2c97cf93e8d68f21c0f8113217fc43f75209ab8056a2"
+    ],
+    "canonical.identity._issue_for_primary": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "8852ef040a26456bb8c607bc3b8ab273aafdc7b1a2c49b253107eabc3de7be6b"
+    ],
+    "canonical.identity._keyword_refs": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "478c9155367f039773fb4acb30a5b6363bb6ef6ac3a43d76f48945405f510ff6"
+    ],
+    "canonical.identity._keyword_repo_matches": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "944d732b6945ec7db7fead541f60f6febfd7a589b6f1e58f53ca424029f40983"
+    ],
+    "canonical.identity._primary_conflict": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "5d8d052811b3ccb2938007badc78490f92fdf8ab8168f81fb211e07430f3120b"
+    ],
+    "canonical.identity._primary_reference": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "a8eb214accc751b22818472bbdcf1bda366c799fb68d5b877c977ed5f609d4e2"
+    ],
+    "canonical.identity._protected_member": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "cdaa3da3b38c4164ac8f487872b966ae9c86add53a040f461a2906cd2a3546bc"
+    ],
+    "canonical.identity._repo_from_task": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "be475cef13b88e0a19f360d8ff8aad3c103538478121755fb6f89fd46c3d5f1d"
+    ],
+    "canonical.identity._same_repo_issue_url": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "815c1f55e27b49e1cea62a0d7a35be029c1a4faafb2d79942ec1c15a0ba155bd"
+    ],
+    "canonical.identity._slug_repo": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "dbceedd3bc1b0646d73a7273410405727abe2bb888115c4bf66586393865724c"
+    ],
+    "canonical.identity._url_refs": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "a8c74b02fb9e97c1d78f6a9aa5edd2abc6aee8feb620624dae6458123b2b9318"
+    ],
+    "canonical.identity.card_ids": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "6d5763f64577ce00e0d93854f2c0a78fde8a1af1cb61f42506f3b62636cd6bc3"
+    ],
+    "canonical.identity.explicit_refs": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "951e78548b0fdc9e0892096409b5cb5fc901e5198d199cd0f76e26bfee5beef4"
+    ],
+    "canonical.identity.groups": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "9be468e1a3a10687d4cc71aeb313937e32c9a40d2033e350e4b8b0031b546ef0"
+    ],
+    "canonical.identity.identity": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "6abbd9f6d38e37cedbc374bac66c336f9cf709fcd00ded2e57251b9829c765d4"
+    ],
+    "canonical.identity.repo_of": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "6ae94d249a720f89ba30b2ff198b785ef59fb4279e308ddec340951ecd3bdb27"
+    ],
+    "canonical.identity.root_task": [
+      "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
+      "bba38bae777340f7418c788a4c73a7e63741c0125aee091be587401c14d9789e"
+    ],
+    "canonical.provenance._artifact_identifier": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "66693546965dedf0ef2d7377250391cff5f649ea16ce67aa8210ae4beb5394fb"
+    ],
+    "canonical.provenance._bounded_json": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "49ebfec4a48d4c8a1b2654cba012f8307839ec1fbbfae90f19a3e6fc37fd3e83"
+    ],
+    "canonical.provenance._date": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "c6f61ece452d08e9de0b95aa3b56d09a53861f2828fe97bb895970b44c5b80f4"
+    ],
+    "canonical.provenance._declaration_signatures": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "f1f390cffc43d80f702abaa237586b9eb581f9da87607d8ef794348a8d3a4f0d"
+    ],
+    "canonical.provenance._declared_pr": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "37e09d2ebfa5ee83dda37fac08a3aa22c5d6f7400affbed12ddc7f69e4045d7a"
+    ],
+    "canonical.provenance._matching_receipt": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "dfba3e73f2d03ae0f4b872c31b92d7bfa194efdd030ac2c48f3ac59c38a93cef"
+    ],
+    "canonical.provenance._normalized_subject": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "33ed5e1352a244ee176448058d7ce64352e45cc77a53db2c4d43df7a17d8b8b2"
+    ],
+    "canonical.provenance._pr_fields_match": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "6b4de1d548c627f86f412da8d92e135389067645b682b8b023b6047137907af2"
+    ],
+    "canonical.provenance._pr_location": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "2e845fd90c5a0d8e078edfa1fa388786a96676b028d5193a8c41d489841500db"
+    ],
+    "canonical.provenance._pr_path_repository": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "982c26550727f4b583aadcca2fafb6f27dfd035f63a7455df3505c8a1045c556"
+    ],
+    "canonical.provenance._receipt_satisfies": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "2436370ac629b6181b0b53e6f5428519bc47a69b87f954df8911d04db9f77e3a"
+    ],
+    "canonical.provenance._task_metadata_block": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "7da34d72a2940cc422611e3b47ef7cffe7589b4840685657ffc7dd636c86f94f"
+    ],
+    "canonical.provenance._task_metadata_location": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "1c9994bfe631715bebb9f1ef4498cb9bf14419982bb8d04197509c1c3de76a8a"
+    ],
+    "canonical.provenance._trusted_declarations": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "8c30cd04ba5aaa2a157c51629ad175648325f88e743db4e1b4daf74c07560bbc"
+    ],
+    "canonical.provenance._unique_pairs": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "0b4c22d4ff09d19dba1ff784c686e292947607d362169acd2a8060f2c5028cbb"
+    ],
+    "canonical.provenance.declaration": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "b2ee5598d19c740e7f44dd6ed3c7c44a3a0bc1494555e17ec7589671a9bc457c"
+    ],
+    "canonical.provenance.github_primary": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "bced81126a8566a2cdb6cb103afa1546857bdac609f2f3fc714f84eca2e20325"
+    ],
+    "canonical.provenance.identity_delta": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "2e895e9aedb4dfff12ce601bc791c63d6841001b9a65b1f2ceb2eef715a6ffba"
+    ],
+    "canonical.provenance.local_review": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "cdb8bd5c7c690cfc3fefb665760a9a20170e328283f47e190728b93a63aa3803"
+    ],
+    "canonical.provenance.parse_task_provenance": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "01531629d75bc77b8511a3ce5992dc47121c17e4e87c8b0c3af20481d1a04aa3"
+    ],
+    "canonical.provenance.propose_request_reconciliation": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "baa380a801e83466785b8780508b5f2b228879232c1e89e4d7d40b6a36977275"
+    ],
+    "canonical.provenance.qualified_pr": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "f8a56bb440fa570d188b4556b75ce97121161dcf0e163b8e1c5664119c81748d"
+    ],
+    "canonical.provenance.resolve_work_provenance": [
+      "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
+      "a0b3dc87a4b1fdfac918c5b412c01b54dc4f6d521ed41c5651d0eea8e66a20af"
+    ],
+    "canonical.text.is_nothing": [
+      "105e9a0b385030a9c841138fd799c553a49c127406b796ae26e39dbb883ee661",
+      "4742a9c90bedc64bbb0f296a52e992d530be64efa74dddc83c395d87eb85fec7"
+    ],
+    "wi_assembly.Assembly.__init__": [
+      "fbba30c034ef56cb177fc83ffecb0e651afd0783287ec5e792137726f8cec7e4",
+      "164675daf4ead1d662867431a5c63d1c5de82375f825dd3a3811e45e5a975c2f"
+    ],
+    "wi_assembly.Assembly.pr_issue": [
+      "fbba30c034ef56cb177fc83ffecb0e651afd0783287ec5e792137726f8cec7e4",
+      "906361ac9d966f25d07e8ab2f14fc5c4cf00157f5ea9cf8bc72a7f3a22c0b839"
+    ],
+    "wi_assembly.issue_ref": [
+      "fbba30c034ef56cb177fc83ffecb0e651afd0783287ec5e792137726f8cec7e4",
+      "bc49b3980c6a43fa006fdcdc7b7b8630333264c56ff6e52f0ecf98f46b3bce01"
+    ],
+    "wi_assembly.new_item": [
+      "fbba30c034ef56cb177fc83ffecb0e651afd0783287ec5e792137726f8cec7e4",
+      "014913b75a390b233d53113d382d1d13356becd6fdaee492e3fe7e73f656a55d"
+    ],
+    "wi_common.clip": [
+      "9fddd1658632f8ed6a0267bf910e3e50c144a3a88114706e2030618d674547b6",
+      "904a9ef49bb4a43c19d079eba9db453ffc9b64515dbb22cf76e876b772212c52"
+    ],
+    "wi_common.iso": [
+      "9fddd1658632f8ed6a0267bf910e3e50c144a3a88114706e2030618d674547b6",
+      "23a48611bdb29d879ec75548ada22994983ef7722b7882466d098f1b52a5c1f3"
+    ],
+    "wi_dedupe.card_steps": [
+      "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+      "a8f91c7a0cdaee33749a1ce5da16b2f7d26ab3df8fb10daffb5365fdd82c488b"
+    ],
+    "wi_dedupe.collapse": [
+      "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+      "260f1dfe0bbfbb2a216f817a7211265e84addabd21d2e9388e3b3df6cc70a63b"
+    ],
+    "wi_dedupe.effective_note": [
+      "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+      "149d1be1a50ec4075b512939015c2c125a2f05ce0f403f58ea12d9f3f07ffd89"
+    ],
+    "wi_dedupe.merge_notes": [
+      "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+      "7cf88ff4ef3097077f138c1b42121f223f4a6f2f72f849247d21cf24b6c56c06"
+    ],
+    "wi_dedupe.merge_steps": [
+      "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+      "6105fabc6f1478e5a8bab6e7f2c94e18aca8844dd05715e1a6333db8e571264a"
+    ],
+    "wi_dedupe.unique": [
+      "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+      "3f424b6ba4daa57901e96a2eb5e180cadc2bc3745471143365c71990a035eab1"
+    ],
+    "wi_fields.AnswerRec.__init__": [
+      "a8767633bd978f21f1ea833b769a0b858b13533adbe5259414adb08519bac1d4",
+      "6fa69b1dd14aff21cfcbd31a00e9ecb575e4a19d6bc77345dad6aee9f09135fe"
+    ],
+    "wi_identity.explicit_refs": [
+      "6fcae367a975082525ae32f19e9395290d1032a12bd0627a60f62f7a7a80841a",
+      "aeaf18b2fd5ad25bf5985864894b5c7f9b3f03db000f33596bd1debf5479d5a8"
+    ],
+    "wi_identity.groups": [
+      "6fcae367a975082525ae32f19e9395290d1032a12bd0627a60f62f7a7a80841a",
+      "e00e28ed102731be10b362ff19d909639eddcab9ab213019118e5fde50cc7511"
+    ],
+    "wi_identity.identity": [
+      "6fcae367a975082525ae32f19e9395290d1032a12bd0627a60f62f7a7a80841a",
+      "8aba5df9ac7713b654709561ba66f4af86bbfb8600a1cbc3d0cb63762f829fed"
+    ],
+    "wi_identity.repo_of": [
+      "6fcae367a975082525ae32f19e9395290d1032a12bd0627a60f62f7a7a80841a",
+      "248f13d19e23b14463b2eb8c2345fab171dd1cb09877fc183a9dd566a8fb4d90"
+    ],
+    "wi_identity.root_task": [
+      "6fcae367a975082525ae32f19e9395290d1032a12bd0627a60f62f7a7a80841a",
+      "bba38bae777340f7418c788a4c73a7e63741c0125aee091be587401c14d9789e"
+    ],
+    "wi_probes.Probes._once": [
+      "59cfa6ea5725c257c25a6832a59b62c016469d787c316a990c6eb17887469b5d",
+      "846f06a499556210c44766960f4e8676582ab0dc0f9eaa6b2f63a1074ec0907d"
+    ],
+    "wi_probes.Probes.atrium_version": [
+      "59cfa6ea5725c257c25a6832a59b62c016469d787c316a990c6eb17887469b5d",
+      "b9817679f5541ee6b0c30a0317db46ed87a9bd3b08cd293d7d3974d331bc51d2"
+    ],
+    "wi_probes.Probes.deploy_shas": [
+      "59cfa6ea5725c257c25a6832a59b62c016469d787c316a990c6eb17887469b5d",
+      "e00a06c2af05baa9bb166a1e6767c0a0e228d4cf83b33334bd233195b0ccfa69"
+    ],
+    "wi_probes.Probes.is_ancestor": [
+      "59cfa6ea5725c257c25a6832a59b62c016469d787c316a990c6eb17887469b5d",
+      "29dd49f52880090241dcf846fbb78e1c9ffbf7f79cd4e59a890d3e220fef13d2"
+    ],
+    "wi_probes.Probes.main_contains": [
+      "59cfa6ea5725c257c25a6832a59b62c016469d787c316a990c6eb17887469b5d",
+      "3d1bd0a826d4edeacf49e093773dbe2fe9f0e473d097f2290acaedc0ad31e86d"
+    ],
+    "wi_probes.Probes.pr_meta": [
+      "59cfa6ea5725c257c25a6832a59b62c016469d787c316a990c6eb17887469b5d",
+      "83519e12aac9e4d6306c7b4235a9ff0b618b73ae5201fb06ef9fe07181bb6baf"
+    ],
+    "wi_probes.Probes.tag_contains": [
+      "59cfa6ea5725c257c25a6832a59b62c016469d787c316a990c6eb17887469b5d",
+      "674eba65b6f2c4656d135716a6678a686a4ee05037fabb585b46e569d48a57f7"
+    ],
+    "wi_sources._step": [
+      "db4f54c2f816ee2726edf1ffb1c0241cd164ccf9da99311297b32b78e90c0320",
+      "1dd6869871fec4976a87b788bb8f67355e6466f7fdb93b3b687e47bb6a023c32"
+    ],
+    "wi_sources.clean_steps": [
+      "db4f54c2f816ee2726edf1ffb1c0241cd164ccf9da99311297b32b78e90c0320",
+      "9d5eab3781f965b3402f40932f32b58f7b41da44c57b7a83cdfd347223ef8677"
+    ],
+    "wi_status.blocked_reason": [
+      "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "2022312ae44b3642d36bb19205ab2c772c367caa0b378a11b1fcc00810d68527"
+    ],
+    "wi_status.compute": [
+      "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "631bee77cb5559107ccb6269ff0459297ca1f043b370281bdc45b3c2200b6a83"
+    ],
+    "wi_status.deployed": [
+      "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "6f6b71730fdd7f1e82d3c2e035b4fe26411dd71b6f5dfa7601b8f69bd90cee2e"
+    ],
+    "wi_status.done_status": [
+      "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "5f4ca34b9203dd4713b943fd5968fcc533a5222503d1fd5c589a34e1a9658e0d"
+    ],
+    "wi_status.fixed_after_block": [
+      "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "71b4edac4c0003a7e263d06c18c1b138d8ee392a679819f90006668fe31759b1"
+    ],
+    "wi_status.lo_is_done": [
+      "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "58d4a8005132d6e8197f3128a59cf70511606055ba083538fc1376014dc9423c"
+    ],
+    "wi_status.merged_stage": [
+      "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "f8c1c15a6e9a3ce309d82685199163fcabda329c67713a8bde526e274337524f"
+    ],
+    "wi_status.no_pr_status": [
+      "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "1b94e5fc24b0ccc5895f04b761b253c62c0c2127b47b28efc87bd0c19602d04d"
+    ],
+    "wi_status.open_pr_status": [
+      "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "20a221ecd823843a5a7c576a15eeba0c47e85b6531a9ab50776d39eee3a63009"
+    ],
+    "workitems.Ctx.__init__": [
+      "304b641de96c34503c789289fe1151f8f6588bdeabc18d4639ef24f0f01e1675",
+      "b09c1d2ae46953805439a80f6dc299e6fb788c056ab4d76155064d2693d349e6"
+    ]
+  },
+  "globals": {
+    "ALREADY_DONE": [
+      "tuple",
+      [
+        "already-fixed",
+        "already fixed"
+      ]
+    ],
+    "CLOSED": [
+      "tuple",
+      [
+        "Integration",
+        "Main",
+        "Deployed",
+        "Dropped"
+      ]
+    ],
+    "DEPLOY_RULE": [
+      "dict",
+      [
+        [
+          "atrium",
+          "atrium container"
+        ],
+        [
+          "nexus",
+          "fj deploy"
+        ],
+        [
+          "adlimenui",
+          "tag"
+        ],
+        [
+          "ratio",
+          "tag"
+        ],
+        [
+          "himalaia",
+          "tag"
+        ],
+        [
+          "dotfiles",
+          "stops at Main"
+        ]
+      ]
+    ],
+    "FULL": [
+      "dict",
+      [
+        [
+          "himalaia",
+          "app-himalaia"
+        ],
+        [
+          "ratio",
+          "app-ratio"
+        ],
+        [
+          "adlimenui",
+          "adlimen-ui"
+        ],
+        [
+          "dotfiles",
+          "claude-dotfiles"
+        ],
+        [
+          "nexus",
+          "nexus"
+        ],
+        [
+          "atrium",
+          "atrium"
+        ]
+      ]
+    ],
+    "IN_EFFECT_KINDS": [
+      "tuple",
+      [
+        "review",
+        "docs",
+        "ops"
+      ]
+    ],
+    "KEYWORD": [
+      "regex",
+      "(?i)\\b(PRs?|pull request|issues?|closes|fixes|resolves|addresses|refs?)\\s+(?:([\\w.-]+(?:/[\\w.-]+)?)\\s*)?#(\\d+)",
+      34
+    ],
+    "NOT_NEEDED": [
+      "tuple",
+      [
+        "obsolete",
+        "not-reproduc",
+        "not reproduc"
+      ]
+    ],
+    "PROTECTED": [
+      "tuple",
+      [
+        "ask",
+        "steps",
+        "approval",
+        "pin",
+        "hide",
+        "status",
+        "priority",
+        "answers",
+        "pr",
+        "issue",
+        "branch",
+        "review"
+      ]
+    ],
+    "REF_RE": [
+      "regex",
+      "(?:\\b(claude-dotfiles|app-himalaia|adlimen-ui|app-ratio|adlimenui|himalaia|dotfiles|atrium|ratio|nexus)\\s?)?#(\\d+)",
+      32
+    ],
+    "REPOS": [
+      "dict",
+      [
+        [
+          "app-himalaia",
+          "himalaia"
+        ],
+        [
+          "himalaia",
+          "himalaia"
+        ],
+        [
+          "app-ratio",
+          "ratio"
+        ],
+        [
+          "ratio",
+          "ratio"
+        ],
+        [
+          "adlimen-ui",
+          "adlimenui"
+        ],
+        [
+          "adlimenui",
+          "adlimenui"
+        ],
+        [
+          "claude-dotfiles",
+          "dotfiles"
+        ],
+        [
+          "dotfiles",
+          "dotfiles"
+        ],
+        [
+          "nexus",
+          "nexus"
+        ],
+        [
+          "atrium",
+          "atrium"
+        ]
+      ]
+    ],
+    "SAFE_KEY": [
+      "regex",
+      "[A-Za-z0-9][A-Za-z0-9._-]*",
+      32
+    ],
+    "STATUSES": [
+      "list",
+      [
+        "Backlog",
+        "Doing",
+        "PR review",
+        "PR fix",
+        "Merge",
+        "Integration",
+        "Main",
+        "Deployed",
+        "Dropped"
+      ]
+    ],
+    "STEP_LIMITS": [
+      "dict",
+      [
+        [
+          "text",
+          500
+        ],
+        [
+          "cmd",
+          1000
+        ],
+        [
+          "link",
+          500
+        ]
+      ]
+    ],
+    "STEP_RE": [
+      "regex",
+      "^[A-Za-z0-9_-]{1,40}$",
+      32
+    ],
+    "SUFFIX": [
+      "regex",
+      "-(?:fix\\d*|next\\d*|cx|impl|followup|review|unified)$",
+      32
+    ],
+    "SUPERSEDED": [
+      "tuple",
+      [
+        "superseded"
+      ]
+    ],
+    "TAG_PATTERN": [
+      "dict",
+      [
+        [
+          "adlimenui",
+          "ui/v*"
+        ],
+        [
+          "ratio",
+          "v*"
+        ],
+        [
+          "himalaia",
+          "v*"
+        ]
+      ]
+    ],
+    "URL": [
+      "regex",
+      "https://github\\.com/(?:[\\w.-]+/)([\\w.-]+)/(issues|pull)/(\\d+)",
+      32
+    ],
+    "_CANONICAL_REPOSITORIES": [
+      "frozenset",
+      [
+        "adlimen-auth",
+        "adlimen-cicd",
+        "adlimen-harness",
+        "adlimen-infra",
+        "adlimen-ui",
+        "app-himalaia",
+        "app-ratio",
+        "atrium",
+        "claude-dotfiles",
+        "limen-assistant",
+        "nexus",
+        "orchestra"
+      ]
+    ]
+  },
+  "local_imports": {
+    "canonical.identity._declared_primary": [
+      {
+        "kind": "function",
+        "level": 1,
+        "module": "canonical.provenance",
+        "name": "qualified_pr",
+        "target": "canonical.provenance.qualified_pr"
+      }
+    ],
+    "canonical.identity._historical_repo_valid": [
+      {
+        "kind": "function",
+        "level": 1,
+        "module": "canonical.provenance",
+        "name": "qualified_pr",
+        "target": "canonical.provenance.qualified_pr"
+      }
+    ],
+    "canonical.identity._primary_conflict": [
+      {
+        "kind": "function",
+        "level": 1,
+        "module": "canonical.provenance",
+        "name": "qualified_pr",
+        "target": "canonical.provenance.qualified_pr"
+      }
+    ],
+    "canonical.identity._primary_reference": [
+      {
+        "kind": "function",
+        "level": 1,
+        "module": "canonical.provenance",
+        "name": "qualified_pr",
+        "target": "canonical.provenance.qualified_pr"
+      },
+      {
+        "kind": "function",
+        "level": 1,
+        "module": "canonical.provenance",
+        "name": "resolve_work_provenance",
+        "target": "canonical.provenance.resolve_work_provenance"
+      }
+    ]
+  },
+  "python": "3.12",
+  "schema": "m3s-approved-source-pins/1"
+}

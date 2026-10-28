@@ -292,3 +292,31 @@ def test_bound_detail_restores_execution_evidence_but_not_stale_asks(
     assert loaded["items"][0]["children"][0]["exit"] == "0"
     assert loaded["items"][0]["your_call"] is False and loaded["items"][0]["ask"] == []
     assert loaded["items"][1] == board["items"][1]
+
+
+def test_raw_dotted_audit_keeps_findings_but_projects_affected_repository():
+    from orchestra.dashboard.quality import audit
+
+    item = {
+        "id": "synthetic",
+        "repo": "nexus.",
+        "title": "Rivedere contratto",
+        "status": "PR review",
+        "your_call": False,
+        "pr": {
+            "number": 207,
+            "url": "https://github.com/matteocervelli/nexus/pull/207",
+        },
+    }
+    raw_findings = findings(item)
+    assert "pipeline_without_pr" in {row["code"] for row in raw_findings}
+    direct = audit({"items": [item]})
+    assert direct["items"][0]["issues"] == raw_findings
+    assert direct["items"][0]["repo"] == "nexus"
+    assert item["repo"] == "nexus."
+    assert audit({"items": [item]}) == direct
+    projected = audit({"items": [{**item, "repo": "nexus"}]})
+    assert "pipeline_without_pr" not in {
+        row["code"] for row in findings({**item, "repo": "nexus"})
+    }
+    assert projected != direct

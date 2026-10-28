@@ -39,3 +39,5 @@ candidate; core export does not replace runtime grouping.
 the donor tree and never applies them. See the
 [producer contract](../specs/2026-10-27-dashboard-card-producer.md) and
 [relative donor provenance](../provenance/dashboard-card-producer-20261027.json).
+
+Public repository projection reuses `dashboard/repository.py` from ROOT, with no new registry. The existing exporter can produce one explicitly requested producer+repository compatibility bundle. Its fixed package inventory is21 (collector plus repository plus dormant M3S included). See `docs/specs/2026-10-27-dashboard-public-repository-projection.md`.
