@@ -150,6 +150,11 @@ def _prior(
 ) -> list[Row]:
     value = _parse(raw, limit) if raw is not None else []
     _require(type(value) is list)
+    _require(all(type(row) is dict for row in value))
+    value = [row.copy() for row in value]
+    for row in value:
+        if row.get("state") == "open" and row.get("closedAt") == "0001-01-01T00:00:00Z":
+            row["closedAt"] = None
     names = core._scope(repositories)
     rows = core._retained(value, names)
     _rows(rows, names, now)
