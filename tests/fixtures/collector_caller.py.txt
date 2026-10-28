@@ -3,6 +3,19 @@
 NOW = 1_800_000_000.0
 
 
+def legacy_prior():
+    """gh-search field shape only, with declared synthetic identity and dates."""
+    return {
+        "number": 7,
+        "repository": {"name": "synthetic", "nameWithOwner": "matteocervelli/synthetic"},
+        "url": "https://github.com/matteocervelli/synthetic/pull/7",
+        "state": "open",
+        "createdAt": "2026-10-20T00:00:00Z",
+        "updatedAt": "2026-10-23T00:00:00Z",
+        "closedAt": "0001-01-01T00:00:00Z",
+    }
+
+
 def payload(number=1, *, repository="synthetic", base="auto/integration", **changes):
     row = {
         "number": number,
