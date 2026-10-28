@@ -68,6 +68,17 @@ no callback that publishes partially and then raises is repaired by this helper.
 Progress.last_created must be None or a finite nonfuture numeric timestamp whose
 type is not bool before it is compared with the prefix witness; False cannot
 stand for epoch0 and no timestamp is normalized to make the comparison pass.
+The legacy LIST ingress has one explicit ABI exception verified by ROOT: exact
+closedAt="0001-01-01T00:00:00Z" on exact state="open" becomes None in a private
+working copy. The original LIST bytes remain available for fallback and unchanged
+through partial/error rounds; only complete/fresh/nonconflicting collection may
+replace the mirror. This creates no observation time, approval, head or other
+missing field. createdAt/updatedAt/mergedAt, other strings and closed/merged states
+retain their existing guards. This exception is not applied to checkpoint state;
+strict codec dates and prefix validation are unchanged. Every LIST member must be
+a JSON object before calling the core; null/bool/int/string/list members yield
+fixed load_error, not AttributeError or empty-complete. V2 review remains scoped
+to B1/NB1; this new legacy ingress requires its own follow-up acceptance.
 Freshness900, cadence120 unchanged, cap64MiB apply to complete documents including
 duplicated state, not just row payload. Limits never increase automatically.
 

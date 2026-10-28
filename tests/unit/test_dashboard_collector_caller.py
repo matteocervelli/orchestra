@@ -303,6 +303,105 @@ def test_last_created_false_cannot_equal_the_epoch_timestamp(direction):
             encode_checkpoint(value, [REPO], now=NOW)
 
 
+@pytest.mark.parametrize(
+    "field,state,value",
+    [
+        ("createdAt", "open", "0001-01-01T00:00:00Z"),
+        ("updatedAt", "open", "0001-01-01T00:00:00Z"),
+        ("mergedAt", "open", "0001-01-01T00:00:00Z"),
+        ("closedAt", "closed", "0001-01-01T00:00:00Z"),
+        ("closedAt", "merged", "0001-01-01T00:00:00Z"),
+        ("closedAt", "OPEN", "0001-01-01T00:00:00Z"),
+        ("closedAt", "open", "0001-01-01T00:00:00.000Z"),
+        ("closedAt", "open", "not-a-date"),
+        ("closedAt", "open", "1969-12-31T23:59:59Z"),
+        ("closedAt", "open", "2100-01-01T00:00:00Z"),
+    ],
+)
+def test_legacy_exception_does_not_relax_other_dates_or_states(field, state, value):
+    from orchestra.dashboard.collector_caller import Budget, prepare_collection
+
+    legacy = FIXTURE["legacy_prior"]() | {
+        "closedAt": None,
+        "state": state,
+        field: value,
+    }
+    store, budget = MemoryStore(), Budget(25)
+    raw = store.data["prs.json"] = json.dumps([legacy]).encode()
+    result = prepare_collection(
+        [REPO],
+        budget,
+        lambda r: pytest.fail("invalid prior must not fetch"),
+        store.read,
+        store.commit,
+        now=NOW,
+        clock=lambda: NOW,
+    )
+    assert (result.receipt["status"], result.receipt["reason"]) == (
+        "error",
+        "load_error",
+    )
+    assert budget.attempts == 0 and store.writes == 0 and store.data["prs.json"] == raw
+
+
+@pytest.mark.parametrize("direction", ["encode", "decode"])
+def test_checkpoint_codec_remains_strict_about_go_zero_time(direction):
+    from orchestra.dashboard.collector_caller import (
+        Snapshot,
+        decode_checkpoint,
+        encode_checkpoint,
+    )
+
+    legacy = FIXTURE["legacy_prior"]()
+    state = core.CollectionState(known={legacy["url"]: legacy | {"closedAt": None}})
+    value = Snapshot(state, {}, NOW)
+    if direction == "encode":
+        state.known[legacy["url"]]["closedAt"] = legacy["closedAt"]
+        with pytest.raises(ValueError):
+            encode_checkpoint(value, [REPO], now=NOW)
+    else:
+        data = json.loads(encode_checkpoint(value, [REPO], now=NOW))
+        data["state"]["known"][legacy["url"]]["closedAt"] = legacy["closedAt"]
+        with pytest.raises(ValueError):
+            decode_checkpoint(json.dumps(data).encode(), [REPO], now=NOW)
+
+
+def test_invalid_checkpoint_is_not_normalized_as_legacy_prior():
+    from orchestra.dashboard.collector_caller import (
+        Budget,
+        Snapshot,
+        encode_checkpoint,
+        prepare_collection,
+    )
+
+    legacy = FIXTURE["legacy_prior"]()
+    value = Snapshot(
+        core.CollectionState(known={legacy["url"]: legacy | {"closedAt": None}}),
+        {},
+        NOW,
+    )
+    data = json.loads(encode_checkpoint(value, [REPO], now=NOW))
+    data["state"]["known"][legacy["url"]]["closedAt"] = legacy["closedAt"]
+    store, budget = MemoryStore(), Budget(25)
+    store.data["prs.json"] = json.dumps([legacy]).encode()
+    store.data["prs-rest-v1.json"] = json.dumps(data).encode()
+    before = dict(store.data)
+    result = prepare_collection(
+        [REPO],
+        budget,
+        lambda r: pytest.fail("corrupt checkpoint must not fetch"),
+        store.read,
+        store.commit,
+        now=NOW,
+        clock=lambda: NOW,
+    )
+    assert (result.receipt["status"], result.receipt["reason"]) == (
+        "error",
+        "load_error",
+    )
+    assert budget.attempts == 0 and store.writes == 0 and store.data == before
+
+
 def test_last_good_rows_cannot_belong_to_another_approved_feed():
     from orchestra.dashboard.collector_caller import (
         Snapshot,

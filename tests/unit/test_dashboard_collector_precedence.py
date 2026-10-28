@@ -481,3 +481,104 @@ def test_storage_exception_boundaries_preserve_control_and_private_text(
         ["prs.json"] if site == "prior_read" else ["prs.json", "prs-rest-v1.json"]
     )
     assert store.data == before
+
+
+@pytest.mark.parametrize(
+    "available,status,attempts,failure",
+    [
+        (0, "partial", 0, ""),
+        (6, "partial", 1, ""),
+        (25, "complete", 3, ""),
+        (25, "error", 3, "mirror_staged"),
+    ],
+)
+def test_legacy_zero_closed_time_is_private_unknown_until_complete(
+    available, status, attempts, failure
+):
+    from orchestra.dashboard.collector_caller import Budget, prepare_collection
+
+    original = FIXTURE["legacy_prior"]()
+    original["opaque_note"] = "0001-01-01T00:00:00Z"
+    raw = json.dumps([original], indent=2).encode()
+    store, budget = MemoryStore(), Budget(available)
+    store.data["prs.json"], store.fail = raw, failure
+    result = prepare_collection(
+        [REPO],
+        budget,
+        lambda r: core.Page([], NOW, False),
+        store.read,
+        store.commit,
+        now=NOW,
+        clock=lambda: NOW,
+    )
+    assert result.receipt["status"] == status
+    assert budget.attempts == attempts and budget.remaining == available - attempts
+    assert result.rows == [original | {"closedAt": None}]
+    assert original["closedAt"] == "0001-01-01T00:00:00Z"
+    assert result.receipt["lineage"][original["url"]]["observed_at"] is None
+    if status == "complete":
+        assert json.loads(store.data["prs.json"]) == result.rows
+    else:
+        assert store.data["prs.json"] == raw and result.mirror == raw
+
+
+def test_legacy_zero_time_warm_checkpoint_resume_and_cache_hit():
+    from orchestra.dashboard.collector_caller import (
+        Budget,
+        decode_checkpoint,
+        prepare_collection,
+    )
+
+    original = FIXTURE["legacy_prior"]()
+    store, current = MemoryStore(), [NOW]
+    raw = store.data["prs.json"] = json.dumps([original], indent=2).encode()
+
+    def run(available):
+        budget = Budget(available)
+        result = prepare_collection(
+            [REPO],
+            budget,
+            lambda r: core.Page([], current[0], False),
+            store.read,
+            store.commit,
+            now=current[0],
+            clock=lambda: current[0],
+        )
+        return result, budget
+
+    first, initial_budget = run(6)
+    assert first.receipt["status"] == "partial" and initial_budget.attempts == 1
+    assert store.data["prs.json"] == raw
+    saved = decode_checkpoint(store.data["prs-rest-v1.json"], [REPO], now=NOW)
+    assert saved.state.known[original["url"]]["closedAt"] is None
+    current[0] += 120
+    second, resumed = run(25)
+    assert second.receipt["status"] == "complete" and resumed.attempts == 2
+    assert second.receipt["lineage"][original["url"]]["observed_at"] is None
+    current[0] += 120
+    third, warm = run(0)
+    assert third.receipt["status"] == "complete" and warm.attempts == 0
+    assert third.rows == [original | {"closedAt": None}]
+
+
+@pytest.mark.parametrize("invalid", [None, True, 7, "not-an-object", []])
+def test_legacy_prior_members_must_be_objects_before_core(invalid):
+    from orchestra.dashboard.collector_caller import Budget, prepare_collection
+
+    store, budget = MemoryStore(), Budget(25)
+    raw = store.data["prs.json"] = json.dumps([invalid]).encode()
+    result = prepare_collection(
+        [REPO],
+        budget,
+        lambda r: pytest.fail("bad prior must not fetch"),
+        store.read,
+        store.commit,
+        now=NOW,
+        clock=lambda: NOW,
+    )
+    assert (result.receipt["status"], result.receipt["reason"]) == (
+        "error",
+        "load_error",
+    )
+    assert budget.attempts == 0 and budget.remaining == 25 and store.writes == 0
+    assert store.data["prs.json"] == raw
