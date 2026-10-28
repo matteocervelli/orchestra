@@ -108,9 +108,9 @@
     "src/orchestra/dashboard/provenance.py": "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
     "src/orchestra/dashboard/quality.py": "491ef4c9ce642902d6d66a879ced601bf34a1b521564347660b2c5fea1e3aec5",
     "src/orchestra/dashboard/repository.py": "c14012185c1a434e26acf8cfcb7d1248987378648c8399e9c9daa0ae88a9b97e",
-    "src/orchestra/dashboard/shadow.py": "8942b74eeaf0f13dd9edfe56bbd84cc1872155900d555e9502387e14b0292d6d",
+    "src/orchestra/dashboard/shadow.py": "82022c384c23cd7622ca95662213142b1d0dd8964001234ff8a9d43b3ea6d2ee",
     "src/orchestra/dashboard/shadow_graph.py": "e08a62dc491833f3de36738dc90bd2f4e37424df5c1f46141e8c823b3e24fc52",
-    "src/orchestra/dashboard/shadow_prior.py": "bfaa0381e7e5a8438e98170622cc65201c65f078bf111c140ffc5a511a76039c",
+    "src/orchestra/dashboard/shadow_prior.py": "30a7d0f5527349be150f6b046483abe4772c0d0668905af283c8533aafd83aea",
     "src/orchestra/dashboard/shadow_probe.py": "dc2eb5c102e39cbd3e696128342423d77d0456c4143be8b9c1b582a88a36bd67",
     "src/orchestra/dashboard/shadow_profile.py": "8ab21fdd2f437307ca5b487c817e644d9ed97cdf3a48250cf17ea6461355179d",
     "src/orchestra/dashboard/shadow_schema.py": "d5d8d57b3e7050ad4479970d09a27230aa93b1dac01422c292da4fdf4ab26828",
@@ -372,5 +372,27 @@
     "runtime_ready": false,
     "applied": false,
     "rollout_gate": "Independent composition review, same before vector, API/UI/legacy old-URL/callchips consumer proof and loaded-process/activation consent; no output-only compatibility claim."
+  },
+  "m4_handoff": {
+    "base": "9755979f4cd4778adadc61cee37df32dcd4d3ab5",
+    "contract_sha256": "022cc781eebf4e288deba2ff61b3e5ff3658f3bf24503c23103d3862272b81c7",
+    "review_sha256": "1857dcd7199eac2fb086505dff02fc6beeafa0615dd06f4cf203e4cb0d0799b6",
+    "source_only": true,
+    "runtime_ready": false,
+    "runtime_caller_wired": false,
+    "runtime_reader_implemented": false,
+    "request": "Programmatic exact ShadowRequest only; None defaultOFF; bool invalid; --check never consumes or captures.",
+    "profile": "Hardcoded approved_profile after consume at actual asm/ctx/callback boundary when profileNone; preapproved API retained.",
+    "prior_projection": "Pure field-by-field fixed public records to PriorBindingInput; no byte/completion attestation, reader, witness mint or currentexpected.",
+    "public_field_origin": "Existing ITEM schema plus declared compact PUBLIC_ITEM_KEYS Source; known rich fields ignored without value access, unknown/forbidden blocked.",
+    "commit": "First original CommitResult retained; same-process durable capability; JSON/dataclasses.replace rejected, shallowcopy with capability not promised rejection.",
+    "exporter_sha256": "bb36a0bec329ceb91b346aa22da91cbec9fe66e13641868929eec75ba4004225",
+    "preserved_package_inventory": 21,
+    "preserved_legacy_resources": 7,
+    "limits": [
+      "No runtime/build/capture/provider/raw data read",
+      "No consumer/archive/deploy/real corpus proof",
+      "No collectorA or activation"
+    ]
   }
 }

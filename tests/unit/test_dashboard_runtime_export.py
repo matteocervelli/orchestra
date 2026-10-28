@@ -364,7 +364,9 @@ def publish(data, out=None):
     snapshot_digest = "a" * 64
     write(public)
 """
-    after = module.shadow_adapter(source)
+    from test_dashboard_repository_projection import RAW_MAIN
+
+    after = module.shadow_adapter(source + "\n" + RAW_MAIN)
     tree = ast.parse(after)
     build = next(
         node
@@ -705,3 +707,179 @@ def test_identity_candidate_and_unified_core_are_separate(tmp_path, monkeypatch)
             include_identity_candidate=True,
         )
     assert not output.exists()
+
+
+def handoff_main():
+    import ast
+
+    from test_dashboard_repository_projection import RAW_MAIN
+
+    source = """
+def build():
+    ctx.notes = collapse(asm, ctx.notes, tk)
+    return data
+
+def publish(data, out=None):
+    public = data
+    snapshot_digest = "a" * 64
+    write(public)
+"""
+    module = exporter()
+    changed = module.shadow_adapter(source + "\n" + RAW_MAIN)
+    main = module._function(changed, "main")
+    return ast.Module([main], type_ignores=[])
+
+
+@pytest.mark.parametrize(
+    "mode", ["off", "false", "true", "check", "enabled", "publish_failure"]
+)
+def test_programmatic_main_handoff_preserves_normal_cycle_and_capability(
+    tmp_path, mode
+):
+    from types import SimpleNamespace
+
+    from dashboard_shadow_fixture import boundary
+    from test_dashboard_shadow import prior_input
+
+    from orchestra.dashboard.quality import audit, board_digest
+    from orchestra.dashboard.shadow import ShadowObserver, ShadowRequest
+    from orchestra.dashboard.shadow_prior import (
+        PriorWitness,
+        project_prior_publications,
+    )
+    from orchestra.dashboard.shadow_store import CommitResult, CommitState, read_receipt
+
+    fixture = boundary()
+    evidence, verified_witness, now = prior_input()
+    prior = project_prior_publications(
+        {
+            "generated": evidence.generated,
+            "items": [
+                {
+                    "id": "synthetic",
+                    "repo": "atrium",
+                    "slugs": list(fixture["tasks"]),
+                    "pr": None,
+                }
+            ],
+        },
+        {"generated": evidence.generated, "items": []},
+        artifacts=evidence.artifacts,
+        board_digest=evidence.board_digest,
+        coverage="live_and_terminal",
+    )
+    # The synthetic ROOT witness is deliberately separate from the pure projector.
+    witness = PriorWitness(prior, verified_witness.sha256, verified_witness.verified_at)
+    fixture["ctx"].now = now.timestamp()
+    directory = tmp_path / "private"
+    directory.mkdir(mode=0o700)
+    request = ShadowRequest("6" * 32, directory, 7200)
+    events, observers, created = [], [], []
+
+    def new_observer():
+        created.append(1)
+        return ShadowObserver()
+
+    def build(**kwargs):
+        events.append("build")
+        if kwargs:
+            assert mode in {"enabled", "publish_failure"}
+            assert kwargs["shadow_request"] is request
+            assert (
+                kwargs["shadow_prior"] is prior and kwargs["shadow_witness"] is witness
+            )
+            assert kwargs["shadow_profile"] is None
+            shadow = kwargs["shadow"]
+            observers.append(shadow)
+            result = shadow.observe_boundary(
+                fixture["baseline"],
+                fixture["candidate"],
+                fixture["asm"],
+                fixture["notes"],
+                fixture["tasks"],
+                shared_roots={"ctx": fixture["ctx"], "locals": fixture["locals"]},
+                callbacks=fixture["callbacks"],
+                prior=prior,
+                witness=witness,
+                profile=None,
+                request=request,
+            )
+            assert result["synthetic"]["steps_checked"]["check"] is True
+            assert shadow.pending.equivalent, shadow.pending.differences
+        else:
+            fixture["baseline"](fixture["asm"], fixture["notes"], fixture["tasks"])
+        return {
+            "generated": "2026-10-27T13:00:00.000001Z",
+            "items": [{"id": "synthetic", "ask": [], "auto": []}],
+        }
+
+    failure = RuntimeError("synthetic ordinary publish failure")
+
+    def publish(data, **kwargs):
+        events.append("publish")
+        if mode == "publish_failure":
+            raise failure
+        if kwargs:
+            assert kwargs["shadow"] is observers[0]
+            shadow = kwargs["shadow"]
+            shadow.seal_after_publish(
+                shadow.pending, data["generated"], board_digest(data)
+            )
+
+    namespace = {
+        "ShadowObserver": new_observer,
+        "ShadowRequest": ShadowRequest,
+        "CommitResult": CommitResult,
+        "CommitState": CommitState,
+        "build": build,
+        "publish": publish,
+        "quality_audit": audit,
+        "sys": SimpleNamespace(
+            argv=["workitems"] + (["--check"] if mode == "check" else [])
+        ),
+        "validate": lambda data: [],
+        "duplicate_gaps": lambda data: [],
+        "uncurated_open": lambda data: [],
+        "step_gaps": lambda data: [],
+        "NO_REC": "none",
+    }
+    exec(compile(handoff_main(), "synthetic-source-main.py", "exec"), namespace)
+    args = (
+        {}
+        if mode == "off"
+        else {
+            "shadow_request": False
+            if mode == "false"
+            else True
+            if mode == "true"
+            else request,
+            "shadow_prior": prior,
+            "shadow_witness": witness,
+        }
+    )
+    if mode == "publish_failure":
+        with pytest.raises(RuntimeError) as caught:
+            namespace["main"](**args)
+        assert caught.value is failure and observers[0].commit_result is None
+    elif mode == "check":
+        with pytest.raises(SystemExit) as caught:
+            namespace["main"](**args)
+        assert caught.value.code == 0 and not request._consumed and observers == []
+    else:
+        result = namespace["main"](**args)
+        if mode == "enabled":
+            assert (
+                result is observers[0].commit_result
+                and result.state is CommitState.COMMITTED
+            )
+            assert read_receipt(directory, result.receipt)["verdict"] == "PASS"
+        elif mode == "off":
+            assert result is None and not request._consumed and observers == []
+        else:
+            assert (
+                result.state is CommitState.NOT_COMMITTED
+                and observers == []
+                and not request._consumed
+            )
+    assert events == (["build"] if mode == "check" else ["build", "publish"])
+    assert created == ([1] if mode in {"enabled", "publish_failure"} else [])
