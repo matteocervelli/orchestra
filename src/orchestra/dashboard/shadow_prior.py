@@ -5,7 +5,9 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Any
 
+from . import shadow_schema as S
 from .common import repository_authority
 from .provenance import qualified_pr
 from .shadow_graph import ShadowBlocked
@@ -181,3 +183,128 @@ def derive_prior_bindings(
         {"kind": kind, "key": key, "owner": owner}
         for (kind, key), owner in registry.items()
     ]
+
+
+# Public compact fields from the declared publisher SOURCE; archive fields also
+# reuse the existing fixed item schema. Only ownership metadata values are read.
+_PUBLIC_FIELDS = frozenset(
+    {
+        "priority_src",
+        "order",
+        "your_call",
+        "call_kind",
+        "links",
+        "issue_no",
+        "pr_no",
+        "taken",
+        "proposals",
+        "history",
+        "blocked",
+        "dropped",
+        "agent",
+        "gates",
+        "raw_title",
+        "cost",
+        "auto",
+        "flags",
+        "repos",
+    }
+)
+_PUBLICATION_FIELDS = frozenset(
+    {"generated", "items", "statuses", "decisions", "host", "children", "ledger"}
+)
+
+
+def _projection_record(value: object, fields: frozenset[str]) -> dict[str, Any]:
+    if type(value) is not dict:
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    for key in value:
+        if type(key) is not str:
+            raise ShadowBlocked("prior_invalid", "$prior.scope")
+        if key in S.FORBIDDEN:
+            raise ShadowBlocked("forbidden", "$prior.scope")
+        if key not in fields:
+            raise ShadowBlocked("prior_invalid", "$prior.scope")
+    return value
+
+
+def _publication_rows(value: object) -> tuple[str, list[Any]]:
+    record = _projection_record(value, _PUBLICATION_FIELDS)
+    if not {"generated", "items"} <= record.keys():
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    stamp, rows = record["generated"], record["items"]
+    generation(stamp)
+    if type(rows) is not list or len(rows) > 5000:
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    return stamp, rows
+
+
+def _project_pr(value: object) -> tuple[int | None, str | None]:
+    if value is None:
+        return None, None
+    fields = frozenset(S.PR[1]) | frozenset(S.PR[2])
+    row = _projection_record(value, fields)
+    number, url = row.get("number"), row.get("url")
+    if type(number) is not int or type(url) is not str:
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    return number, url
+
+
+def _project_owner(value: object) -> PriorOwner:
+    fields = frozenset(S.ITEM[1]) | frozenset(S.ITEM[2]) | _PUBLIC_FIELDS
+    row = _projection_record(value, fields)
+    if not {"id", "repo", "slugs"} <= row.keys():
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    iid, repo, slugs = row["id"], row["repo"], row["slugs"]
+    if type(repo) is not str or not repository_authority(repo):
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    if type(slugs) is not list or len(slugs) > 20000:
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    number, url = _project_pr(row.get("pr"))
+    owner = PriorOwner(iid, repo, tuple(slugs), number, url)
+    _owner_keys(owner)
+    return owner
+
+
+def _project_owners(rows: list[Any]) -> tuple[PriorOwner, ...]:
+    if len(rows) > 5000:
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    owners, identifiers = [], set()
+    registry: dict[tuple[str, str], str] = {}
+    counts = {"task": 0, "pr": 0}
+    for row in rows:
+        owner = _project_owner(row)
+        if owner.id in identifiers:
+            raise ShadowBlocked("prior_invalid", "$prior.scope")
+        identifiers.add(owner.id)
+        _register_owner(owner, registry, counts)
+        owners.append(owner)
+    if counts["task"] > 20000 or counts["pr"] > 5000:
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    return tuple(owners)
+
+
+def project_prior_publications(
+    board: object,
+    archive: object,
+    *,
+    artifacts: tuple[Artifact, ...],
+    board_digest: str,
+    coverage: str,
+) -> PriorBindingInput:
+    """Project ROOT-verified public metadata; never read files or mint a witness."""
+    stamp, live = _publication_rows(board)
+    archive_stamp, terminal = _publication_rows(archive)
+    if type(coverage) is not str or coverage != "live_and_terminal":
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    if stamp != archive_stamp or not _hex(board_digest):
+        raise ShadowBlocked("prior_invalid", "$prior.generation")
+    if type(artifacts) is not tuple or any(
+        type(item) is not Artifact or type(item.name) is not str for item in artifacts
+    ):
+        raise ShadowBlocked("prior_invalid", "$prior.scope")
+    prior = PriorBindingInput(
+        stamp, board_digest, artifacts, coverage, _project_owners(live + terminal)
+    )
+    _artifacts(prior)
+    return prior

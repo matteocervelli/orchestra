@@ -18,7 +18,7 @@ from .shadow_prior import (
     generation,
 )
 from .shadow_probe import EVENT, Recorder
-from .shadow_profile import ApprovedProfile
+from .shadow_profile import ApprovedProfile, approved_profile
 from .shadow_store import COUNTS, COVERAGE, CommitResult, CommitState, commit_receipt
 
 
@@ -78,15 +78,37 @@ class PendingShadow:
         self.equivalent = False
 
 
-def _root(
-    asm: Any, notes: Any, tasks: Any, shared: Any, profile: ApprovedProfile
-) -> dict[str, Any]:
+def _shared_frame(shared: Any) -> dict[str, Any]:
     if (
         type(shared) is not dict
         or any(type(key) is not str for key in shared)
         or set(shared) != {"ctx", "locals"}
     ):
         raise ShadowBlocked("root_schema", "$roots")
+    return shared
+
+
+def _boundary_profile(
+    baseline: Any,
+    candidate: Any,
+    asm: Any,
+    shared: Any,
+    callbacks: Any,
+    profile: Any,
+) -> ApprovedProfile:
+    if profile is None:
+        frame = _shared_frame(shared)
+        profile = approved_profile(baseline, candidate, asm, frame["ctx"], callbacks)
+    if type(profile) is not ApprovedProfile:
+        raise ShadowBlocked("callable_drift", "$code[*]")
+    profile.bind(baseline, candidate, callbacks)
+    return profile
+
+
+def _root(
+    asm: Any, notes: Any, tasks: Any, shared: Any, profile: ApprovedProfile
+) -> dict[str, Any]:
+    _shared_frame(shared)
     return {
         "asm": asm,
         "ctx": shared["ctx"],
@@ -278,6 +300,12 @@ def _recorded_baseline(
 class ShadowObserver:
     def __init__(self) -> None:
         self.pending: PendingShadow | None = None
+        self._commit_result: CommitResult | None = None
+
+    @property
+    def commit_result(self) -> CommitResult | None:
+        """The original result/capability of this observer's one seal attempt."""
+        return self._commit_result
 
     def observe_boundary(
         self,
@@ -303,9 +331,9 @@ class ShadowObserver:
             if type(request) is not ShadowRequest:
                 raise ShadowBlocked("bounds", "$commit")
             request.consume()
-            if type(profile) is not ApprovedProfile:
-                raise ShadowBlocked("callable_drift", "$code[*]")
-            profile.bind(baseline, candidate, callbacks)
+            profile = _boundary_profile(
+                baseline, candidate, asm, shared_roots, callbacks, profile
+            )
             prepared = _prepare(
                 asm, notes, tasks, shared_roots, prior, witness, profile, pending
             )
@@ -381,13 +409,20 @@ class ShadowObserver:
     def seal_after_publish(
         self, handle: PendingShadow, final_generated: str, board_digest: str
     ) -> CommitResult:
-        if handle is not self.pending or handle.sealed or not handle.baseline_ok:
+        if (
+            handle is not self.pending
+            or handle.sealed
+            or not handle.baseline_ok
+            or self._commit_result is not None
+        ):
             return CommitResult(CommitState.NOT_COMMITTED)
         handle.sealed = True
-        if handle.prior is None or handle.witness is None:
-            return CommitResult(CommitState.NOT_COMMITTED)
-        try:
-            payload = _publication_payload(handle, final_generated, board_digest)
-            return commit_receipt(handle.request.directory, payload)
-        except (ShadowBlocked, ValueError, OSError):
-            return CommitResult(CommitState.NOT_COMMITTED)
+        result = CommitResult(CommitState.NOT_COMMITTED)
+        if handle.prior is not None and handle.witness is not None:
+            try:
+                payload = _publication_payload(handle, final_generated, board_digest)
+                result = commit_receipt(handle.request.directory, payload)
+            except (ShadowBlocked, ValueError, OSError):
+                pass
+        self._commit_result = result
+        return result

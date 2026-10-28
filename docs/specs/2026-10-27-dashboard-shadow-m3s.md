@@ -6,6 +6,19 @@ SOURCE only/defaultOFF; no real capture/build/provider/data reads or runtime app
 
 ## File Manifest
 
+Current M4 SOURCE delta only (all other historical paths remain frozen):
+
+- src/orchestra/dashboard/shadow.py
+- src/orchestra/dashboard/shadow_prior.py
+- scripts/export_dashboard_producer.py
+- tests/unit/test_dashboard_shadow_handoff.py
+- tests/unit/test_dashboard_runtime_export.py
+- docs/specs/2026-10-27-dashboard-shadow-m3s.md
+- docs/provenance/dashboard-card-producer-20261027.json
+- docs/guides/dashboard-producer.md
+
+## Historical M3S paths (frozen before M4)
+
 - src/orchestra/dashboard/shadow.py
 - src/orchestra/dashboard/shadow_schema.py
 - src/orchestra/dashboard/shadow_graph.py
@@ -712,3 +725,72 @@ closed, not a fabricated target or alwaysBLOCK. The true resolve_work_provenance
 and complete canonical/legacy positive remain required. Business files and E1
 are unchanged; before/after approval and baseline→candidate timing must BLOCK
 with baseline1/candidate0/spy0.
+
+## M4 handoff amendment — approved SOURCE8 (2026-10-28)
+
+Parent GO dashboard-producer-m4-handoff-source-go-20261028.md accepts proposal
+022cc781eebf4e288deba2ff61b3e5ff3658f3bf24503c23103d3862272b81c7 and review
+1857dcd7199eac2fb086505dff02fc6beeafa0615dd06f4cf203e4cb0d0799b6.
+Base9755979; new WT dashboard-shadow-handoff-m4-20261028. SOURCE only, no runtime
+reader/capture/build/provider/apply/install/commit/push/cleanup. Frozen original
+contract and previous freezes remain historical evidence.
+
+### Current file manifest (M4 delta only)
+
+- src/orchestra/dashboard/shadow.py
+- src/orchestra/dashboard/shadow_prior.py
+- scripts/export_dashboard_producer.py
+- tests/unit/test_dashboard_shadow_handoff.py
+- tests/unit/test_dashboard_runtime_export.py
+- docs/specs/2026-10-27-dashboard-shadow-m3s.md
+- docs/provenance/dashboard-card-producer-20261027.json
+- docs/guides/dashboard-producer.md
+
+REQ-01/M4: shadow_adapter additionally transforms the existing main into a
+programmatic optional handoff of shadow_request/prior/witness, all defaultNone.
+No new CLI flag/file/env trigger. None is OFF; boolTrue/False are invalid and
+never create observer/profile/prior access or consume a nonce. Invalid requests
+retain normal baseline/publication behavior and return NOT_COMMITTED privately.
+--check keeps its normal raw/check path, creates no observer and consumes no
+request. A valid request creates exactly one observer shared by build/publish;
+no second build or publish. Default main return/behavior stays unchanged.
+
+REQ-02/M4: project_prior_publications(board,archive,*,artifacts,board_digest,
+coverage) is pure and returns only PriorBindingInput. ROOT supplies verified
+previous public objects, byte evidence and canonical board digest; this function
+never attests bytes/completion or creates a trusted witness. Exact dict/list
+records, fixed public field names (ordinary rich item fields reuse ITEM schema),
+forbidden/unknown keys rejected before value access; only generated/items and
+id/repo/slugs/pr.number/url are accessed. Rich known fields ignored without
+reading values; projection scope is owner metadata, not the complete postgraph.
+Required item id/repo/slugs, optional pr absent/None means no PRkey; slugs must
+be explicit complete list, never reconstructed. Repository authority required;
+qualified PR exact URL/number; duplicate owner rows or sourcekeys under distinct
+owners block atomically. Two exact artifact names/hashes/lengths<=10MiB,
+same UTC microsecond generation, coverage live_and_terminal, existing bounds
+5000owner/20000taskkey/5000PRkey. No deep copy, dump, file reader or currentexpected.
+Witness identity/time/source verification remains the trusted ROOT responsibility.
+
+REQ-03/M4: profile=None is admitted only for an exact valid consumed Request.
+Validate exact shared ctx/locals frame first, then call hardcoded approved_profile
+with actual baseline/candidate/asm/ctx/callbacks at that boundary, before clone
+and baseline. No caller factory, fixture profile or registry inferred from input.
+Preapproved profile API remains supported; failure privately BLOCKs with normal
+baseline exactly once. DefaultOFF never opens the pin resource.
+
+REQ-06/M4: observer retains its first original CommitResult through a typed
+read-only property. The first valid seal attempt stores its result including
+NOT_COMMITTED/UNKNOWN; repeated/foreign handles never retry or replace that
+result. Publisher still seals only after normal successful publish with actual
+final generation/digest; programmatic main returns this result only in requested
+mode. Keep store/profile/pins/schema/graph/probe and business byte-invariant.
+NB1: JSON or dataclasses.replace without _durable capability must be rejected;
+shallowcopy retaining the capability is not promised rejection. Same-process
+read_receipt remains authoritative; no serialized PASS promotion or new service.
+
+TDD phases: actual boundary profile/consume timing and original commit capability;
+pure prior shape/privacy/conflicts; transformed real-source main forwarding,
+OFF/bool/check and failure counts; quality/security/full unit and final wheel
+21+7; own hash freeze and STOP for independent parent review. Tests use existing
+Source real canonical/legacy helpers with invented data only. No real M4 PASS,
+activation, consumer/archive/deploy or collectorA effect is certified by this delta.

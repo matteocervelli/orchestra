@@ -226,6 +226,54 @@ def _workitems(source: str) -> str:
     )
 
 
+def _shadow_main(source: str) -> str:
+    main = _function(source, "main")
+    names = ("shadow_request", "shadow_prior", "shadow_witness")
+    existing = {arg.arg for arg in (*main.args.args, *main.args.kwonlyargs)}
+    if existing.intersection(names):
+        raise ValueError("shadow main already present")
+    main.args.kwonlyargs.extend(ast.arg(arg=name) for name in names)
+    main.args.kw_defaults.extend(ast.Constant(None) for _ in names)
+    _main_handoff_calls(main)
+    main.body[:0] = ast.parse(
+        "shadow = None\n"
+        "if '--check' not in sys.argv and type(shadow_request) is ShadowRequest:\n"
+        "    shadow = ShadowObserver()"
+    ).body
+    main.body.extend(
+        ast.parse(
+            "if shadow_request is not None:\n"
+            "    return (shadow.commit_result if shadow is not None and "
+            "shadow.commit_result is not None "
+            "else CommitResult(CommitState.NOT_COMMITTED))"
+        ).body
+    )
+    main.returns = ast.parse("CommitResult | None", mode="eval").body
+    return ast.unparse(ast.fix_missing_locations(main))
+
+
+def _main_handoff_calls(main: ast.FunctionDef) -> None:
+    expected_build = ast.dump(ast.parse("data = build()").body[0])
+    expected_publish = ast.dump(ast.parse("publish(data)").body[0])
+    builds = [node for node in main.body if ast.dump(node) == expected_build]
+    publishes = [node for node in main.body if ast.dump(node) == expected_publish]
+    if len(builds) != 1 or len(publishes) != 1:
+        raise ValueError("missing normal main handoff")
+    build, publish = builds[0], publishes[0]
+    if not isinstance(build, ast.Assign) or not isinstance(publish, ast.Expr):
+        raise ValueError("invalid main handoff")
+    build.value = ast.parse(
+        "build(shadow=shadow,shadow_request=shadow_request,shadow_prior=shadow_prior,"
+        "shadow_witness=shadow_witness,shadow_profile=None) "
+        "if shadow is not None else build()",
+        mode="eval",
+    ).body
+    publish.value = ast.parse(
+        "publish(data,shadow=shadow) if shadow is not None else publish(data)",
+        mode="eval",
+    ).body
+
+
 def shadow_adapter(source: str) -> str:
     """Review-only dormant hook on an explicitly supplied already-core caller."""
     build, publish = _function(source, "build"), _function(source, "publish")
@@ -302,10 +350,13 @@ def shadow_adapter(source: str) -> str:
         {
             "build": ast.unparse(ast.fix_missing_locations(build)),
             "publish": ast.unparse(ast.fix_missing_locations(publish)),
+            "main": _shadow_main(source),
         },
     )
     return _imports_after_future(
         changed,
+        "from orchestra_dashboard.shadow import ShadowObserver, ShadowRequest\n"
+        "from orchestra_dashboard.shadow_store import CommitResult, CommitState\n"
         "from orchestra_dashboard.curation import collapse as canonical_collapse\n",
     )
 
