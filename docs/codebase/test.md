@@ -35,3 +35,5 @@ child cards, protected fields and qualified PR objects for both forges. It uses
 invented fixtures only. A separate external frozen Nexus slice exercises real
 Assembly inputs and exact-ID consumer lookup without executing full build/log
 readers; it is not committed as runtime data or claimed as full activation proof.
+
+`test_dashboard_repository_projection.py` exercises the pinned SOURCE publisher/main bodies emitted by the real exporter with synthetic data and injected writer boundaries: YourCall12, C1 aliases/negative values, live/archive/detail coherence, digest, nested references and raw audit1. Extraction origin and Python3.12 AST pins are in producer provenance. Runtime export tests require an independent explicit21 inventory and verify one merged compatibility bundle, common/helper/before-vector guards, failure before output and unchanged donor bytes. These do not certify loaded consumer old URLs or real producer builds.

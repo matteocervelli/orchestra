@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from .provenance import local_review, qualified_pr
+from .repository import repository_key
 from .titles import generic_title
 
 PENDING = frozenset({"PR review", "PR fix", "Merge", "Integration", "Main"})
@@ -340,7 +341,7 @@ def _affected_item(
 ) -> dict[str, Any]:
     return {
         "id": item["id"],
-        "repo": item.get("repo"),
+        "repo": repository_key(item.get("repo")),
         "title": item.get("title"),
         "status": item.get("status"),
         "your_call": bool(item.get("your_call")),

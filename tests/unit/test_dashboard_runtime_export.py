@@ -77,7 +77,21 @@ def synthetic_donors(root: Path) -> dict[str, str]:
     expected = {}
     for name, text in files.items():
         if name == "workitems":
-            text += "    return public, out\n"
+            text = text.replace(
+                '    public = {"generated": data["generated"], "items": data["items"]}',
+                '    items = [item for item in data.get("items", []) '
+                "if isinstance(item, dict)]\n"
+                "    live = items\n"
+                '    public = {"generated": data["generated"], "items": live}',
+            )
+            text = text.replace(
+                "def publish(data, out=None):",
+                "def quality_audit(data): return {}\nTERMINAL_STATUSES = ()\n"
+                "def publish(data, out=None):",
+            )
+            text += (
+                '    quality_audit({**data, "items": live})\n    return public, out\n'
+            )
         relative = f"bin/{name}.py"
         path = root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -251,7 +265,32 @@ def test_applied_delta_uses_after_hash_and_preserves_retained_function_ast(
         }
     ]
     assert report["files"][0]["before_sha256"] != expected["bin/wi_text.py"]
-    assert len(report["unchanged_package_paths"]) == 13
+    expected_package = (
+        "__init__.py",
+        "common.py",
+        "collector.py",
+        "repository.py",
+        "curation.py",
+        "history.py",
+        "identity.py",
+        "notes.py",
+        "provenance.py",
+        "quality.py",
+        "sources.py",
+        "text.py",
+        "titles.py",
+        "shadow.py",
+        "shadow_graph.py",
+        "shadow_prior.py",
+        "shadow_probe.py",
+        "shadow_profile.py",
+        "shadow_schema.py",
+        "shadow_store.py",
+        "shadow_profile_pins.json",
+    )
+    assert report["unchanged_package_paths"] == sorted(
+        "bin/orchestra_dashboard/" + name for name in expected_package
+    )
     assert report["package_changes"] == []
     assert report["apply_artifact"] == "delta.diff" and report["applied"] is False
     checked = subprocess.run(
@@ -306,3 +345,363 @@ def test_applied_delta_rejects_mismatches_before_writing(
         module.build_applied_delta(applied, output)
     assert not (output / "delta.diff").exists()
     assert not (output / "delta-manifest.json").exists()
+
+
+def test_shadow_adapter_is_dormant_and_seals_after_successful_final_publish() -> None:
+    import ast
+
+    module = exporter()
+    source = """def build(now=None):
+    spawns = tk = ordinary_tasks = runs = ledger = led = None
+    by_slug = decisions = triage = all_prs = revs = probes = None
+    asm = None
+    ctx = Context()
+    ctx.notes = collapse(asm, ctx.notes, tk)
+    return {"normal": True}
+
+def publish(data, out=None):
+    public = data
+    snapshot_digest = "a" * 64
+    write(public)
+"""
+    after = module.shadow_adapter(source)
+    tree = ast.parse(after)
+    build = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "build"
+    )
+    assert all(
+        isinstance(value, ast.Constant) and value.value is None
+        for value in build.args.kw_defaults
+    )
+    assert (
+        len(
+            [
+                node
+                for node in ast.walk(build)
+                if isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "observe_boundary"
+            ]
+        )
+        == 1
+    )
+    # The real caller does not import issue_ref; use the baseline's named globals.
+    from types import SimpleNamespace
+
+    callbacks = {name: object() for name in ("compute", "effective_note", "issue_ref")}
+    normal_namespace = dict(callbacks)
+    exec("def collapse(asm, notes, tasks): return notes", normal_namespace)
+    captured = {}
+
+    class Boundary:
+        def observe_boundary(self, *args, **kwargs):
+            captured.update(kwargs["callbacks"])
+            return args[3]
+
+    namespace = {
+        "collapse": normal_namespace["collapse"],
+        "canonical_collapse": object(),
+        "Context": lambda: SimpleNamespace(notes={}),
+    }
+    exec(compile(ast.Module([build], type_ignores=[]), "synthetic", "exec"), namespace)
+    assert namespace["build"](shadow=Boundary(), shadow_request=object()) == {
+        "normal": True
+    }
+    assert all(captured[key] is value for key, value in callbacks.items())
+    # Execute only this invented publisher; never import/build the donor producer.
+    publish = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "publish"
+    )
+    events = []
+    namespace = {"write": lambda public: events.append("write")}
+    exec(
+        compile(ast.Module([publish], type_ignores=[]), "synthetic", "exec"), namespace
+    )
+
+    class Observer:
+        pending = object()
+
+        def seal_after_publish(self, handle, generation, digest):
+            events.append(("seal", generation, digest))
+
+    data = {"generated": "synthetic-final-generation"}
+    namespace["publish"](data)
+    assert events == ["write"]
+    events.clear()
+    namespace["publish"](data, shadow=Observer())
+    assert events == ["write", ("seal", data["generated"], "a" * 64)]
+
+    def fail(*args):
+        raise RuntimeError("synthetic publisher failure")
+
+    namespace["write"] = fail
+    events.clear()
+    with pytest.raises(RuntimeError):
+        namespace["publish"](data, shadow=Observer())
+    assert events == []
+
+
+def test_export_pin_table_is_exact_and_default_caller_remains_dormant(
+    tmp_path: Path,
+) -> None:
+    donor = tmp_path / "donor"
+    expected = synthetic_donors(donor)
+    output = tmp_path / "bundle"
+    exporter().build_bundle(donor, output, expected)
+    relative = "bin/orchestra_dashboard/shadow_profile_pins.json"
+    assert (output / relative).read_bytes() == (
+        ROOT / "src/orchestra/dashboard/shadow_profile_pins.json"
+    ).read_bytes()
+    manifest = json.loads((output / "manifest.json").read_text())
+    assert any(row["path"] == relative for row in manifest["files"])
+    assert "observe_boundary" not in (output / "bin/workitems.py").read_text()
+    assert manifest["runtime_ready"] is False
+
+
+def test_package_inventory_is_closed_and_extra_json_is_not_read(
+    tmp_path: Path, monkeypatch
+) -> None:
+    module = exporter()
+    package = tmp_path / "package"
+    shutil.copytree(
+        ROOT / "src/orchestra/dashboard",
+        package,
+        ignore=shutil.ignore_patterns("__pycache__"),
+    )
+    monkeypatch.setattr(module, "PACKAGE", package)
+    (package / "unrelated.json").write_text('{"auth":"PRIVATE_SENTINEL"}')
+    donor = tmp_path / "donor"
+    expected = synthetic_donors(donor)
+    output = tmp_path / "bundle"
+    module.build_bundle(donor, output, expected)
+    assert not (output / "bin/orchestra_dashboard/unrelated.json").exists()
+    (package / "unapproved.py").write_text("raise RuntimeError('must not execute')\n")
+    with pytest.raises(ValueError, match="inventory drift"):
+        module.build_bundle(donor, tmp_path / "rejected", expected)
+    assert not (tmp_path / "rejected").exists()
+
+
+def composition_inputs(tmp_path, monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    import export_repository_compat as compat
+
+    donor = tmp_path / "donor"
+    expected = synthetic_donors(donor)
+    fixture = ROOT / "tests/fixtures/repository_compat"
+    pinned = []
+    for name in ("preview_recipes", "action_dedupe"):
+        relative = f"bin/{name}.py"
+        raw = (fixture / f"{name}.py").read_bytes()
+        (donor / relative).write_bytes(raw)
+        expected[relative] = hashlib.sha256(raw).hexdigest()
+        pinned.append({"path": relative, "before_sha256": expected[relative]})
+    pin = tmp_path / "fixture-compat-pins.json"
+    pin.write_text(json.dumps({"runtime_targets": pinned}))
+    monkeypatch.setattr(compat, "PIN_MANIFEST", pin)
+    common = "bin/orchestra_dashboard/common.py"
+    (donor / common).parent.mkdir()
+    (donor / common).write_bytes(
+        (ROOT / "src/orchestra/dashboard/common.py").read_bytes()
+    )
+    expected[common] = hashlib.sha256((donor / common).read_bytes()).hexdigest()
+    return exporter(), compat, donor, expected
+
+
+def test_composed_inventory_is_exact_21():
+    assert set(exporter().PACKAGE_FILES) == {
+        "__init__.py",
+        "common.py",
+        "collector.py",
+        "curation.py",
+        "history.py",
+        "identity.py",
+        "notes.py",
+        "provenance.py",
+        "quality.py",
+        "repository.py",
+        "sources.py",
+        "text.py",
+        "titles.py",
+        "shadow.py",
+        "shadow_graph.py",
+        "shadow_prior.py",
+        "shadow_probe.py",
+        "shadow_profile.py",
+        "shadow_schema.py",
+        "shadow_store.py",
+        "shadow_profile_pins.json",
+    }
+    assert len(exporter().PACKAGE_FILES) == 21
+
+
+def test_composed_bundle_has_one_helper_same_before_vector_and_inert_donor(
+    tmp_path, monkeypatch
+):
+    module, compat, donor, expected = composition_inputs(tmp_path, monkeypatch)
+    existing = "bin/orchestra_dashboard/text.py"
+    (donor / existing).write_text("def is_nothing(value): return False\n")
+    expected[existing] = hashlib.sha256((donor / existing).read_bytes()).hexdigest()
+    before = {path: (donor / path).read_bytes() for path in expected}
+    proposals = compat.propose(
+        *(before[f"bin/{name}.py"].decode() for name in compat.TARGETS)
+    )
+    isolated = tmp_path / "compat-isolated"
+    compat_report = compat.build_bundle(donor, isolated)
+    output = tmp_path / "combined"
+    report = module.build_bundle(
+        donor, output, expected, include_repository_compat=True
+    )
+    assert report["repository_compat"] and report["applied"] is False
+    rows = {r["path"]: r for r in report["files"]}
+    assert len(rows) == len(report["files"])
+    helper = "bin/orchestra_dashboard/repository.py"
+    assert rows[helper]["before_sha256"] is None
+    assert rows[existing]["before_sha256"] == expected[existing]
+    for row in compat_report["files"]:
+        assert rows[row["path"]] == row
+        assert (isolated / "after" / row["path"]).read_bytes() == (
+            output / row["path"]
+        ).read_bytes()
+    for path, text in proposals.items():
+        assert (output / path).read_text() == text
+        assert rows[path]["before_sha256"] == expected.get(path)
+    for path, raw in before.items():
+        assert (donor / path).read_bytes() == raw
+    assert (
+        rows["bin/orchestra_dashboard/common.py"]["before_sha256"]
+        == expected["bin/orchestra_dashboard/common.py"]
+    )
+    assert (output / helper).read_bytes() == (
+        ROOT / "src/orchestra/dashboard/repository.py"
+    ).read_bytes()
+    result = subprocess.run(
+        ["git", "apply", "--check", str(output / "patch.diff")],
+        cwd=donor,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "existing_helper",
+        "common_drift",
+        "compat_drift",
+        "duplicate_binding",
+        "helper_conflict",
+        "unbound_package",
+    ],
+)
+def test_composed_bundle_rejects_before_any_output(tmp_path, monkeypatch, mutation):
+    module, compat, donor, expected = composition_inputs(tmp_path, monkeypatch)
+    if mutation == "existing_helper":
+        (donor / "bin/orchestra_dashboard/repository.py").write_text(
+            "# already present"
+        )
+    elif mutation == "common_drift":
+        (donor / "bin/orchestra_dashboard/common.py").write_text("# authority drift")
+    elif mutation in {"compat_drift", "duplicate_binding"}:
+        relative = "bin/preview_recipes.py"
+        with (donor / relative).open("a") as stream:
+            stream.write(
+                "\ndef normalize_item(item): return item\n"
+                if mutation == "duplicate_binding"
+                else "\nREPOS = {}\n"
+            )
+        expected[relative] = hashlib.sha256((donor / relative).read_bytes()).hexdigest()
+    elif mutation == "helper_conflict":
+        original = compat.propose
+
+        def conflict(*args):
+            return original(*args) | {
+                "bin/orchestra_dashboard/repository.py": "# conflicting after"
+            }
+
+        monkeypatch.setattr(compat, "propose", conflict)
+    else:
+        (donor / "bin/orchestra_dashboard/text.py").write_text(
+            "# unbound existing Source"
+        )
+    before = {
+        p.relative_to(donor): p.read_bytes() for p in donor.rglob("*") if p.is_file()
+    }
+    output = tmp_path / "combined"
+    with pytest.raises(ValueError):
+        module.build_bundle(donor, output, expected, include_repository_compat=True)
+    assert not output.exists()
+    assert before == {
+        p.relative_to(donor): p.read_bytes() for p in donor.rglob("*") if p.is_file()
+    }
+
+
+def test_composed_cli_uses_the_same_explicit_before_vector(
+    tmp_path, monkeypatch, capsys
+):
+    module, _, donor, expected = composition_inputs(tmp_path, monkeypatch)
+    metadata = tmp_path / "source-root/docs/provenance"
+    metadata.mkdir(parents=True)
+    (metadata / "dashboard-card-producer-20261027.json").write_text(
+        json.dumps(
+            {
+                "donors": [
+                    {"donor": path, "sha256": sha}
+                    for path, sha in expected.items()
+                    if path
+                    not in {
+                        "bin/preview_recipes.py",
+                        "bin/action_dedupe.py",
+                        "bin/orchestra_dashboard/common.py",
+                    }
+                ],
+                "repository_composition": {
+                    "expected_existing_source": {
+                        path: expected[path]
+                        for path in (
+                            "bin/preview_recipes.py",
+                            "bin/action_dedupe.py",
+                            "bin/orchestra_dashboard/common.py",
+                        )
+                    }
+                },
+            }
+        )
+    )
+    monkeypatch.setattr(module, "ROOT", tmp_path / "source-root")
+    output = tmp_path / "cli-bundle"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "export_dashboard_producer",
+            "--donor-source",
+            str(donor),
+            "--output",
+            str(output),
+            "--include-repository-compat",
+        ],
+    )
+    assert module.main() == 0
+    assert json.loads(capsys.readouterr().out)["applied"] is False
+    assert (
+        json.loads((output / "manifest.json").read_text())["repository_compat"] is True
+    )
+
+
+def test_identity_candidate_and_unified_core_are_separate(tmp_path, monkeypatch):
+    module, _, donor, expected = composition_inputs(tmp_path, monkeypatch)
+    output = tmp_path / "mixed"
+    with pytest.raises(ValueError, match="separate"):
+        module.build_bundle(
+            donor,
+            output,
+            expected,
+            include_repository_compat=True,
+            include_identity_candidate=True,
+        )
+    assert not output.exists()

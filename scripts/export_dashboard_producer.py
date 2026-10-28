@@ -14,6 +14,30 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = ROOT / "src/orchestra/dashboard"
 
+PACKAGE_FILES = (
+    "__init__.py",
+    "common.py",
+    "collector.py",
+    "repository.py",
+    "curation.py",
+    "history.py",
+    "identity.py",
+    "notes.py",
+    "provenance.py",
+    "quality.py",
+    "sources.py",
+    "text.py",
+    "titles.py",
+    "shadow.py",
+    "shadow_graph.py",
+    "shadow_prior.py",
+    "shadow_probe.py",
+    "shadow_profile.py",
+    "shadow_schema.py",
+    "shadow_store.py",
+    "shadow_profile_pins.json",
+)
+
 
 def bindings(node: ast.stmt) -> list[str]:
     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
@@ -73,6 +97,44 @@ def _function(source: str, name: str) -> ast.FunctionDef:
     return nodes[0]
 
 
+def _project_publication(publish: ast.FunctionDef) -> None:
+    expected = ast.parse(
+        "items = [item for item in data.get('items', []) if isinstance(item, dict)]"
+    ).body[0]
+    matches = [
+        i for i, node in enumerate(publish.body) if ast.dump(node) == ast.dump(expected)
+    ]
+    if len(matches) != 1:
+        raise ValueError("missing terminal repository boundary")
+    index = matches[0]
+    publish.body[index : index + 1] = ast.parse(
+        "raw_items = [item for item in data.get('items', []) "
+        "if isinstance(item, dict)]\n"
+        "raw_live = [item for item in raw_items "
+        "if item.get('status') not in TERMINAL_STATUSES]\n"
+        "items = [dict(item, repo=repository_key(item['repo'])) if 'repo' in item "
+        "else dict(item) for item in raw_items]"
+    ).body
+    _raw_publication_audit(publish)
+
+
+def _raw_publication_audit(publish: ast.FunctionDef) -> None:
+    calls = [
+        node
+        for node in ast.walk(publish)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "quality_audit"
+    ]
+    if len(calls) != 1:
+        raise ValueError("missing raw audit boundary")
+    call = calls[0]
+    expected_arg = ast.parse("{**data, 'items': live}", mode="eval").body
+    if len(call.args) != 1 or ast.dump(call.args[0]) != ast.dump(expected_arg):
+        raise ValueError("unexpected raw audit input")
+    call.args[0] = ast.parse("{**data, 'items': raw_live}", mode="eval").body
+
+
 def _workitems(source: str) -> str:
     finish = _function(source, "finish")
     inserted = False
@@ -93,6 +155,7 @@ def _workitems(source: str) -> str:
     if not inserted:
         raise ValueError("missing provenance insertion boundary")
     publish = _function(source, "publish")
+    _project_publication(publish)
     inserted = False
     detail_calls = 0
     for index, node in enumerate(publish.body):
@@ -155,10 +218,95 @@ def _workitems(source: str) -> str:
     return _imports_after_future(
         changed,
         (
+            "from orchestra_dashboard.repository import repository_key\n"
             "from orchestra_dashboard.provenance import resolve_w"
             "ork_provenance\nfrom orchestra_dashboard.quality impo"
             "rt bind_detail, board_digest, publication_generated\n"
         ),
+    )
+
+
+def shadow_adapter(source: str) -> str:
+    """Review-only dormant hook on an explicitly supplied already-core caller."""
+    build, publish = _function(source, "build"), _function(source, "publish")
+    added = (
+        "shadow",
+        "shadow_request",
+        "shadow_prior",
+        "shadow_witness",
+        "shadow_profile",
+    )
+    existing = {arg.arg for arg in (*build.args.args, *build.args.kwonlyargs)}
+    if existing.intersection(added):
+        raise ValueError("shadow hook already present")
+    build.args.kwonlyargs.extend(ast.arg(arg=name) for name in added)
+    build.args.kw_defaults.extend(ast.Constant(None) for _ in added)
+    matches = [
+        (index, node)
+        for index, node in enumerate(build.body)
+        if isinstance(node, ast.Assign)
+        and isinstance(node.value, ast.Call)
+        and isinstance(node.value.func, ast.Name)
+        and node.value.func.id == "collapse"
+        and len(node.targets) == 1
+        and ast.unparse(node.targets[0]) == "ctx.notes"
+    ]
+    if len(matches) != 1:
+        raise ValueError("missing shadow boundary")
+    index, normal = matches[0]
+    names = (
+        "spawns",
+        "tk",
+        "ordinary_tasks",
+        "runs",
+        "ledger",
+        "led",
+        "by_slug",
+        "decisions",
+        "triage",
+        "all_prs",
+        "revs",
+        "probes",
+    )
+    local_source = ", ".join(repr(name) + ": " + name for name in names)
+    injected = ast.parse(
+        "if shadow is not None and shadow_request is not None:\n"
+        "    ctx.notes = shadow.observe_boundary(collapse, canonical_collapse, "
+        "asm, ctx.notes, tk, "
+        "shared_roots={'ctx':ctx,'locals':{" + local_source + "}}, "
+        "callbacks={'compute':collapse.__globals__['compute'],"
+        "'effective_note':collapse.__globals__['effective_note'],"
+        "'issue_ref':collapse.__globals__['issue_ref']}, "
+        "prior=shadow_prior,witness=shadow_witness,profile=shadow_profile,request=shadow_request)\n"
+        "else:\n    pass\n"
+    ).body[0]
+    if not isinstance(injected, ast.If):
+        raise ValueError("invalid shadow hook")
+    injected.orelse = [normal]
+    build.body[index] = injected
+    if any(
+        arg.arg == "shadow" for arg in (*publish.args.args, *publish.args.kwonlyargs)
+    ):
+        raise ValueError("shadow publisher already present")
+    publish.args.kwonlyargs.append(ast.arg(arg="shadow"))
+    publish.args.kw_defaults.append(ast.Constant(None))
+    seal = ast.parse(
+        "if shadow is not None and shadow.pending is not None:\n"
+        "    shadow.seal_after_publish(shadow.pending,public['generated'],"
+        "snapshot_digest)\n"
+    ).body
+    position = len(publish.body) - int(isinstance(publish.body[-1], ast.Return))
+    publish.body[position:position] = seal
+    changed = replace_symbols(
+        source,
+        {
+            "build": ast.unparse(ast.fix_missing_locations(build)),
+            "publish": ast.unparse(ast.fix_missing_locations(publish)),
+        },
+    )
+    return _imports_after_future(
+        changed,
+        "from orchestra_dashboard.curation import collapse as canonical_collapse\n",
     )
 
 
@@ -329,42 +477,143 @@ def adapters(
     }
 
 
+def _read_originals(donor: Path, expected: dict[str, str]) -> dict[str, str]:
+    originals = {}
+    package_paths = {"bin/orchestra_dashboard/" + name for name in PACKAGE_FILES}
+    for relative, digest in expected.items():
+        path = Path(relative)
+        simple = len(path.parts) == 2 and path.suffix == ".py"
+        if (
+            not relative.startswith("bin/")
+            or ".." in path.parts
+            or not (simple or relative in package_paths)
+        ):
+            raise ValueError("invalid donor path")
+        raw = (donor / relative).read_bytes()
+        if hashlib.sha256(raw).hexdigest() != digest:
+            raise ValueError(f"donor hash mismatch: {relative}")
+        originals[relative] = raw.decode("utf-8")
+    return originals
+
+
+def _repository_package_before(donor: Path, originals: dict[str, str]) -> None:
+    helper = "bin/orchestra_dashboard/repository.py"
+    if (donor / helper).exists():
+        raise ValueError("existing_output_or_helper")
+    for name in PACKAGE_FILES:
+        relative = "bin/orchestra_dashboard/" + name
+        if (donor / relative).exists() and relative not in originals:
+            raise ValueError("unbound_existing_package_source")
+    common = "bin/orchestra_dashboard/common.py"
+    if originals.get(common) != (PACKAGE / "common.py").read_text():
+        raise ValueError("authority_dependency_drift")
+
+
+def _repository_proposals(donor: Path, originals: dict[str, str]) -> dict[str, str]:
+    import export_repository_compat as compat
+
+    _repository_package_before(donor, originals)
+    paths = [f"bin/{name}.py" for name in compat.TARGETS]
+    if not all(path in originals for path in paths):
+        raise ValueError("missing_compat_donors")
+    before = {path: originals[path].encode() for path in paths}
+    compat.validate_donors(before)
+    return compat.propose(*(originals[path] for path in paths))
+
+
+def _merge_proposals(generated: dict[str, str], proposed: dict[str, str]) -> None:
+    if set(proposed) != {
+        "bin/preview_recipes.py",
+        "bin/action_dedupe.py",
+        "bin/orchestra_dashboard/repository.py",
+    }:
+        raise ValueError("compat_target_inventory_drift")
+    for path, text in proposed.items():
+        if path in generated and generated[path] != text:
+            raise ValueError("conflicting_source_proposals")
+        generated[path] = text
+
+
+def _package_sources() -> dict[str, str]:
+    expected_modules = {name for name in PACKAGE_FILES if name.endswith(".py")}
+    if {path.name for path in PACKAGE.glob("*.py")} != expected_modules:
+        raise ValueError("canonical package inventory drift")
+    return {
+        "bin/orchestra_dashboard/" + name: (PACKAGE / name).read_text()
+        for name in PACKAGE_FILES
+    }
+
+
+def _bundle_sources(
+    donor: Path,
+    originals: dict[str, str],
+    *,
+    include_identity_candidate: bool,
+    include_repository_compat: bool,
+) -> dict[str, str]:
+    compat_paths = {"bin/preview_recipes.py", "bin/action_dedupe.py"}
+    proposed = (
+        _repository_proposals(donor, originals) if include_repository_compat else None
+    )
+    producer = {
+        path: text
+        for path, text in originals.items()
+        if len(Path(path).parts) == 2 and path not in compat_paths
+    }
+    generated = adapters(
+        producer, include_identity_candidate=include_identity_candidate
+    )
+    generated.update(_package_sources())
+    if proposed is not None:
+        _merge_proposals(generated, proposed)
+    return generated
+
+
+def _bundle_admission(
+    donor: Path,
+    output: Path,
+    *,
+    include_identity_candidate: bool,
+    include_repository_compat: bool,
+) -> None:
+    if include_repository_compat and include_identity_candidate:
+        raise ValueError("identity candidate requires a separate bundle")
+    if output.exists() or output.resolve().is_relative_to(donor.resolve()):
+        raise ValueError("output must be new and outside donor root")
+
+
 def build_bundle(
     donor: Path,
     output: Path,
     expected: dict[str, str],
     *,
     include_identity_candidate: bool = False,
+    include_repository_compat: bool = False,
 ) -> dict[str, Any]:
-    if output.exists() or output.resolve().is_relative_to(donor.resolve()):
-        raise ValueError("output must be new and outside donor root")
-    originals = {}
-    for relative, digest in expected.items():
-        if (
-            not relative.startswith("bin/")
-            or len(Path(relative).parts) != 2
-            or not relative.endswith(".py")
-        ):
-            raise ValueError("invalid donor path")
-        data = (donor / relative).read_bytes()
-        if hashlib.sha256(data).hexdigest() != digest:
-            raise ValueError(f"donor hash mismatch: {relative}")
-        originals[relative] = data.decode("utf-8")
-    generated = adapters(
-        originals, include_identity_candidate=include_identity_candidate
+    _bundle_admission(
+        donor,
+        output,
+        include_identity_candidate=include_identity_candidate,
+        include_repository_compat=include_repository_compat,
     )
-    for path in PACKAGE.glob("*.py"):
-        generated["bin/orchestra_dashboard/" + path.name] = path.read_text()
+    originals = _read_originals(donor, expected)
+    generated = _bundle_sources(
+        donor,
+        originals,
+        include_identity_candidate=include_identity_candidate,
+        include_repository_compat=include_repository_compat,
+    )
     patch = []
     rows = []
     for relative, text in sorted(generated.items()):
-        compile(text, relative, "exec")
+        if relative.endswith(".py"):
+            compile(text, relative, "exec")
         before = originals.get(relative, "")
         patch.extend(
             difflib.unified_diff(
                 before.splitlines(keepends=True),
                 text.splitlines(keepends=True),
-                fromfile="a/" + relative,
+                fromfile="a/" + relative if relative in originals else "/dev/null",
                 tofile="b/" + relative,
             )
         )
@@ -387,6 +636,7 @@ def build_bundle(
         "files": rows,
         "applied": False,
         "identity_candidate": include_identity_candidate,
+        "repository_compat": include_repository_compat,
         "runtime_ready": False,
         "deferred_targets": []
         if include_identity_candidate
@@ -407,7 +657,10 @@ def _bundle_snapshot(root: Path) -> dict[str, bytes]:
         if (
             not relative.startswith("bin/")
             or ".." in Path(relative).parts
-            or not relative.endswith(".py")
+            or not (
+                relative.endswith(".py")
+                or relative == "bin/orchestra_dashboard/shadow_profile_pins.json"
+            )
         ):
             raise ValueError("invalid bundle path")
         data = (root / relative).read_bytes()
@@ -479,17 +732,23 @@ def main() -> int:
     parser.add_argument("--donor-source", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--include-identity-candidate", action="store_true")
+    parser.add_argument("--include-repository-compat", action="store_true")
     parser.add_argument("--against-applied-bundle", type=Path)
     args = parser.parse_args()
     provenance = json.loads(
         (ROOT / "docs/provenance/dashboard-card-producer-20261027.json").read_text()
     )
     expected = {row["donor"]: row["sha256"] for row in provenance["donors"]}
+    if args.include_repository_compat:
+        expected.update(
+            provenance["repository_composition"]["expected_existing_source"]
+        )
     report = build_bundle(
         args.donor_source,
         args.output,
         expected,
         include_identity_candidate=args.include_identity_candidate,
+        include_repository_compat=args.include_repository_compat,
     )
     if args.against_applied_bundle:
         build_applied_delta(args.against_applied_bundle, args.output)
