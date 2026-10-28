@@ -51,3 +51,7 @@ caller adoption, launcher hooks and identity migration have distinct gates.
 The [legacy repository alias companion](docs/guides/dashboard-legacy-repository-aliases.md)
 provides an inert, hash-bound consumer patch and an explicit local JavaScript
 regression gate; it does not alter the installed dashboard or Python CI.
+
+The [project ownership SOURCE contract](docs/specs/2026-10-28-dashboard-project-ownership.md)
+documents the inactive explicit-scope classifier, UNKNOWN representation and
+complete-vector export gate.

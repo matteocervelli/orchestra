@@ -31,6 +31,12 @@ def synthetic_donors(root: Path) -> dict[str, str]:
         ),
         "wi_status": "STATUSES = []\nCLOSED = ()\n",
         "wi_text": "def fill_text(it, curated, asking): return None\n",
+        "wi_repos": (
+            "ALIASES = {}\nNAME = URL = REF = None\n"
+            "def canonical(value): return value\ndef clean(values): return values\n"
+            "def reference_repos(text): return []\ndef task_repos(text): return []\n"
+            "def derive(it, card, note, tasks, spawns, ledger): return []\n"
+        ),
         "wi_identity": "def groups(items, notes, tasks, pr_issues): return {}, {}\n",
         "wi_quality": (
             'def audit(data): return {"atrium": "https://example.'
@@ -54,9 +60,19 @@ def synthetic_donors(root: Path) -> dict[str, str]:
             "s, tasks): return {}\n"
         ),
         "workitems": (
-            "from pathlib import Path\nTEXT_KEYS = ()\ndef curate(i"
+            "from pathlib import Path\nimport wi_repos\nfrom wi_common import REPOS\n"
+            "TEXT_KEYS = ()\ndef match_pages(*args, **kwargs): return None\n"
+            "def curate(i"
             't, note, card): return set(), ""\ndef finish(it, iid,'
-            " ctx):\n    note = {}\n    card = {}\n    curated, prev"
+            " ctx):\n    note = {}\n    card = {}\n    rows = []\n"
+            "    it['repos'] = wi_repos.derive("
+            "it, card, note, ctx.tasks, ctx.spawns, rows)\n"
+            "    if not (it.get('pr') or it.get('issue')):\n"
+            "        it['repo'] = it['repos'][0]\n"
+            "    repo = REPOS.get(it['repo'], it['repo'])\n"
+            "    match_pages(it, iid, repo, ctx.pages, "
+            "number_repos=ctx.number_repos, html=ctx.html)\n"
+            "    it['repo'] = it['repo'] or 'orchestra'\n    curated, prev"
             "iew = curate(it, note, card)\n    return curated, preview\n"
             "def _detail_item(item, "
             "ledger): return item\ndef read_json(path, default): r"
@@ -277,6 +293,7 @@ def test_applied_delta_uses_after_hash_and_preserves_retained_function_ast(
         "identity.py",
         "notes.py",
         "provenance.py",
+        "ownership.py",
         "quality.py",
         "sources.py",
         "text.py",
@@ -515,7 +532,7 @@ def composition_inputs(tmp_path, monkeypatch):
     return exporter(), compat, donor, expected
 
 
-def test_composed_inventory_is_exact_23():
+def test_composed_inventory_is_exact_24():
     assert set(exporter().PACKAGE_FILES) == {
         "__init__.py",
         "common.py",
@@ -526,6 +543,7 @@ def test_composed_inventory_is_exact_23():
         "history.py",
         "identity.py",
         "notes.py",
+        "ownership.py",
         "provenance.py",
         "quality.py",
         "repository.py",
@@ -541,7 +559,7 @@ def test_composed_inventory_is_exact_23():
         "shadow_store.py",
         "shadow_profile_pins.json",
     }
-    assert len(exporter().PACKAGE_FILES) == 23
+    assert len(exporter().PACKAGE_FILES) == 24
 
 
 def test_composed_bundle_has_one_helper_same_before_vector_and_inert_donor(

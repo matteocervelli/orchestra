@@ -1,0 +1,54 @@
+def repos_in(text: str) -> set[str]:
+    return {C.short_repo(alias) for alias in C.REPOS if re.search('(?<![a-z0-9])' + re.escape(alias) + '(?![a-z0-9])', text.lower())}
+
+class PageSource(HTMLParser):
+    """Only explicit metadata and document headings express page ownership."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.metadata: set[str] = set()
+        self.headings: list[str] = []
+        self.heading = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in ('title', 'h1'):
+            self.heading = True
+        if tag == 'meta':
+            fields = dict(attrs)
+            if (fields.get('name') or '').lower() == 'orchestra-repos':
+                self.metadata.update(repos_in(fields.get('content') or ''))
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in ('title', 'h1'):
+            self.heading = False
+            self.headings.append(' ')
+
+    def handle_data(self, data: str) -> None:
+        if self.heading:
+            self.headings.append(data)
+
+def match_pages(it: dict, iid: str, repo: str, pages: list[str], *, number_repos: dict[str, set[str]], html: dict) -> None:
+    keys = set(it['slugs']) | {iid}
+    nums = {str(x['number']) for x in (it['issue'], it['pr']) if x}
+    repo = C.short_repo(repo or '')
+    for name in pages:
+        stem = name.removesuffix('.html')
+        tokens = set(re.split('[-_.]', stem))
+        slug_match = any((k in stem for k in keys if len(k) > 6))
+        numbers = nums & tokens
+        if not (slug_match or numbers):
+            continue
+        source = PageSource()
+        source.feed(page_text(name, html))
+        scope = source.metadata or repos_in(stem) or repos_in(''.join(source.headings))
+        if scope:
+            if repo not in scope:
+                continue
+        elif 'issue' in tokens:
+            if not any((number_repos.get(n) == {repo} for n in numbers)):
+                continue
+        elif not slug_match:
+            continue
+        bucket = it['pages'][classify_page(name)]
+        if name not in bucket:
+            bucket.append(name)
