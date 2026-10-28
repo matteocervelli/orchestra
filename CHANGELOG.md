@@ -6,6 +6,8 @@ All notable changes to Orchestra are documented here.
 
 ### Added
 
+- Inert legacy dashboard repository-alias companion with pinned Native helper
+  generation, exact donor hashes and a standalone JavaScript behavior gate.
 - Seed the reusable Orchestra workflow repository with dual-forge flow,
   Forgejo-only CI, reviewable launcher and Slack/ledger sources, documentation,
   tests, and synthetic boundary fixtures.
