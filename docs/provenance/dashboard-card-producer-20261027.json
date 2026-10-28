@@ -412,7 +412,7 @@
       "bin/workitems.py": "304b641de96c34503c789289fe1151f8f6588bdeabc18d4639ef24f0f01e1675"
     },
     "canonical": "src/orchestra/dashboard/ownership.py",
-    "canonical_sha256": "8534b157d1749e140facd5ecd3ecc5a0338d5a627e403f2d5f36e752b22e038c",
+    "canonical_sha256": "36accb6a252c714610fce7d774e85418b19a85ee9c0c70106e8a7e0e0d3c9139",
     "selected_fixtures": "tests/fixtures/dashboard_ownership/manifest.json",
     "contract": "docs/specs/2026-10-28-dashboard-project-ownership.md",
     "api": "build_bundle(..., expected=<complete reviewed before vector>, include_project_ownership=True)",
