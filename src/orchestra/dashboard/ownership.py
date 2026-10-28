@@ -85,6 +85,18 @@ def _mask_quote(match: re.Match[str]) -> str:
     return "\x00"
 
 
+def _line_clauses(line: str) -> Iterator[str]:
+    """Segment one unfenced line, excluding its quoted and reference tails."""
+    line = re.sub(r"^(?:[-*+] |\d+[.)] )", "", line)
+    line = _QUOTED.sub(_mask_quote, line)
+    for clause in re.split(r"(?<=[.!?])\s+", line):
+        clause = clause.strip().removesuffix(".").strip()
+        if _STOP.match(clause):
+            break
+        if clause:
+            yield clause
+
+
 def _clauses(text: str) -> Iterator[str]:
     """Only line/sentence starts; quoted and excluded tails cannot start scope."""
     fence = ""
@@ -103,14 +115,7 @@ def _clauses(text: str) -> Iterator[str]:
             continue
         if fence or line.startswith(">"):
             continue
-        line = re.sub(r"^(?:[-*+] |\d+[.)] )", "", line)
-        line = _QUOTED.sub(_mask_quote, line)
-        for clause in re.split(r"(?<=[.!?])\s+", line):
-            clause = clause.strip().removesuffix(".").strip()
-            if _STOP.match(clause):
-                break
-            if clause:
-                yield clause
+        yield from _line_clauses(line)
 
 
 def _repo_value(value: str, *, path_only: bool = False) -> str:
@@ -158,16 +163,12 @@ def _primary_repo(raw: object) -> list[str]:
     return [repo for repo in candidates if qualified_pr(raw, repo)]
 
 
-def derive(
+def _declared_repos(
     it: dict[str, Any],
     card: dict[str, Any],
     note: dict[str, Any],
-    tasks: dict[str, Any],
-    spawns: dict[str, Any],
-    ledger: list[dict[str, Any]],
 ) -> list[str]:
-    """Keep explicit display declarations; UNKNOWN is an empty ordered list."""
-    del spawns, ledger  # Legacy call signature, not ownership evidence.
+    """Preserve latest-child, card, note and legacy declaration precedence."""
     declared = next(
         (
             repos
@@ -179,7 +180,20 @@ def derive(
         [],
     )
     declared = declared or clean(card.get("repos")) or clean(note.get("repos"))
-    declared = declared or clean([card.get("repo") or note.get("repo")])
+    return declared or clean([card.get("repo") or note.get("repo")])
+
+
+def derive(
+    it: dict[str, Any],
+    card: dict[str, Any],
+    note: dict[str, Any],
+    tasks: dict[str, Any],
+    spawns: dict[str, Any],
+    ledger: list[dict[str, Any]],
+) -> list[str]:
+    """Keep explicit display declarations; UNKNOWN is an empty ordered list."""
+    del spawns, ledger  # Legacy call signature, not ownership evidence.
+    declared = _declared_repos(it, card, note)
     if declared:
         return declared
     if primary := _primary_repo(it.get("pr")):
