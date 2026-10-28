@@ -394,5 +394,14 @@
       "No consumer/archive/deploy/real corpus proof",
       "No collectorA or activation"
     ]
+  },
+  "collector_phase_a_composition": {
+    "base": "3fead2de3dfb27380d12eb5847f5f0d30aa5cb40",
+    "donor_freeze_sha256": "4654d36cc1e1194dbbf413950801e23e2c820f175c4c01e9ff85f8d3d475064e",
+    "donor_review_sha256": "441b92f8c68d5445e9a1ba79c8347a9b0d18059dbc2ed1dee625d77726804b45",
+    "package_files": 23,
+    "runtime_caller_wired": false,
+    "phase_b_accepted": false,
+    "composition_review": "pending"
   }
 }
