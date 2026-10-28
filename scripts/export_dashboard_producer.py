@@ -25,6 +25,7 @@ PACKAGE_FILES = (
     "history.py",
     "identity.py",
     "notes.py",
+    "ownership.py",
     "provenance.py",
     "quality.py",
     "sources.py",
@@ -137,8 +138,43 @@ def _raw_publication_audit(publish: ast.FunctionDef) -> None:
     call.args[0] = ast.parse("{**data, 'items': raw_live}", mode="eval").body
 
 
-def _workitems(source: str) -> str:
+def _ownership_finish(finish: ast.FunctionDef) -> None:
+    expected = ast.parse(
+        "it['repos'] = wi_repos.derive(it, card, note, ctx.tasks, ctx.spawns, rows)\n"
+        "if not (it.get('pr') or it.get('issue')):\n"
+        "    it['repo'] = it['repos'][0]\n"
+        "repo = REPOS.get(it['repo'], it['repo'])"
+    ).body
+    dumps = [ast.dump(node) for node in finish.body]
+    indices = [
+        index
+        for index in range(len(dumps) - 2)
+        if dumps[index : index + 3] == [ast.dump(node) for node in expected]
+    ]
+    fallback = ast.dump(ast.parse("it['repo'] = it['repo'] or 'orchestra'").body[0])
+    late = [index for index, node in enumerate(dumps) if node == fallback]
+    indexed = ast.dump(ast.parse("it['repos'][0]", mode="eval").body)
+    reads = sum(ast.dump(node) == indexed for node in ast.walk(finish))
+    if (
+        len(indices) != 1
+        or len(late) != 1
+        or reads != 1
+        or any(dumps.count(ast.dump(node)) != 1 for node in expected)
+        or late[0] <= indices[0] + 2
+    ):
+        raise ValueError("missing or ambiguous ownership boundary")
+    guard = expected[1]
+    if not isinstance(guard, ast.If):
+        raise ValueError("invalid ownership boundary")
+    guard.body = ast.parse("it['repo'] = it['repos'][0] if it['repos'] else ''").body
+    finish.body[indices[0] + 1] = guard
+    del finish.body[late[0]]
+
+
+def _workitems(source: str, *, include_project_ownership: bool = False) -> str:
     finish = _function(source, "finish")
+    if include_project_ownership:
+        _ownership_finish(finish)
     inserted = False
     for index, node in enumerate(finish.body):
         if (
@@ -424,7 +460,10 @@ def _clean_adapter_imports(source: str, unused_candidates: set[str]) -> str:
 
 
 def adapters(
-    donors: dict[str, str], *, include_identity_candidate: bool = False
+    donors: dict[str, str],
+    *,
+    include_identity_candidate: bool = False,
+    include_project_ownership: bool = False,
 ) -> dict[str, str]:
     result = {
         path: text
@@ -432,8 +471,10 @@ def adapters(
         if include_identity_candidate
         or path not in {"bin/wi_identity.py", "bin/wi_dedupe.py"}
     }
-    modules = [("wi_text", "text")] + (
-        [("wi_identity", "identity")] if include_identity_candidate else []
+    modules = (
+        [("wi_text", "text")]
+        + ([("wi_repos", "ownership")] if include_project_ownership else [])
+        + ([("wi_identity", "identity")] if include_identity_candidate else [])
     )
     for filename, module in modules:
         names = module_exports(donors[f"bin/{filename}.py"])
@@ -515,7 +556,9 @@ def adapters(
                 ),
             },
         )
-    result["bin/workitems.py"] = _workitems(donors["bin/workitems.py"])
+    result["bin/workitems.py"] = _workitems(
+        donors["bin/workitems.py"], include_project_ownership=include_project_ownership
+    )
     result["bin/dashboard-producer-title.py"] = (
         "from orchestra_dashboard.notes import main\n\nif __nam"
         'e__ == "__main__":\n    raise SystemExit(main())\n'
@@ -597,12 +640,32 @@ def _package_sources() -> dict[str, str]:
     }
 
 
+def _ownership_vector(donor: Path, originals: dict[str, str]) -> None:
+    required = {
+        "bin/wi_repos.py",
+        "bin/workitems.py",
+        "bin/wi_common.py",
+        "bin/wi_text.py",
+        "bin/wi_status.py",
+        "bin/wi_sources.py",
+        "bin/wi_notes.py",
+        "bin/wi_quality.py",
+    }
+    if not required <= originals.keys():
+        raise ValueError("incomplete ownership source vector")
+    for name in PACKAGE_FILES:
+        relative = "bin/orchestra_dashboard/" + name
+        if (donor / relative).exists() and relative not in originals:
+            raise ValueError("unbound ownership package source")
+
+
 def _bundle_sources(
     donor: Path,
     originals: dict[str, str],
     *,
     include_identity_candidate: bool,
     include_repository_compat: bool,
+    include_project_ownership: bool,
 ) -> dict[str, str]:
     compat_paths = {"bin/preview_recipes.py", "bin/action_dedupe.py"}
     proposed = (
@@ -614,7 +677,9 @@ def _bundle_sources(
         if len(Path(path).parts) == 2 and path not in compat_paths
     }
     generated = adapters(
-        producer, include_identity_candidate=include_identity_candidate
+        producer,
+        include_identity_candidate=include_identity_candidate,
+        include_project_ownership=include_project_ownership,
     )
     generated.update(_package_sources())
     if proposed is not None:
@@ -642,7 +707,12 @@ def build_bundle(
     *,
     include_identity_candidate: bool = False,
     include_repository_compat: bool = False,
+    include_project_ownership: bool = False,
 ) -> dict[str, Any]:
+    if type(include_project_ownership) is not bool:
+        raise ValueError("project ownership selection must be bool")
+    if include_project_ownership and include_identity_candidate:
+        raise ValueError("ownership candidate excludes identity changes")
     _bundle_admission(
         donor,
         output,
@@ -650,11 +720,14 @@ def build_bundle(
         include_repository_compat=include_repository_compat,
     )
     originals = _read_originals(donor, expected)
+    if include_project_ownership:
+        _ownership_vector(donor, originals)
     generated = _bundle_sources(
         donor,
         originals,
         include_identity_candidate=include_identity_candidate,
         include_repository_compat=include_repository_compat,
+        include_project_ownership=include_project_ownership,
     )
     patch = []
     rows = []
@@ -690,6 +763,7 @@ def build_bundle(
         "applied": False,
         "identity_candidate": include_identity_candidate,
         "repository_compat": include_repository_compat,
+        "project_ownership": include_project_ownership,
         "runtime_ready": False,
         "deferred_targets": []
         if include_identity_candidate
@@ -704,6 +778,10 @@ def _bundle_snapshot(root: Path) -> dict[str, bytes]:
     manifest = json.loads((root / "manifest.json").read_text())
     if manifest.get("identity_candidate"):
         raise ValueError("adapter delta requires core bundles")
+    if manifest.get("project_ownership"):
+        raise ValueError(
+            "ownership requires a complete source vector, not an applied delta"
+        )
     snapshot = {}
     for row in manifest["files"]:
         relative = row["path"]
@@ -786,8 +864,16 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--include-identity-candidate", action="store_true")
     parser.add_argument("--include-repository-compat", action="store_true")
+    parser.add_argument("--include-project-ownership", action="store_true")
+    parser.add_argument("--expected-source", type=Path)
     parser.add_argument("--against-applied-bundle", type=Path)
     args = parser.parse_args()
+    if args.include_project_ownership != (args.expected_source is not None):
+        parser.error(
+            "project ownership requires an explicit complete --expected-source vector"
+        )
+    if args.include_project_ownership and args.against_applied_bundle is not None:
+        parser.error("project ownership cannot use the historical applied-delta path")
     provenance = json.loads(
         (ROOT / "docs/provenance/dashboard-card-producer-20261027.json").read_text()
     )
@@ -796,12 +882,23 @@ def main() -> int:
         expected.update(
             provenance["repository_composition"]["expected_existing_source"]
         )
+    if args.expected_source is not None:
+        expected = json.loads(args.expected_source.read_text())
+        if not isinstance(expected, dict) or not all(
+            isinstance(key, str)
+            and isinstance(value, str)
+            and len(value) == 64
+            and all(char in "0123456789abcdef" for char in value)
+            for key, value in expected.items()
+        ):
+            raise ValueError("invalid ownership source vector")
     report = build_bundle(
         args.donor_source,
         args.output,
         expected,
         include_identity_candidate=args.include_identity_candidate,
         include_repository_compat=args.include_repository_compat,
+        include_project_ownership=args.include_project_ownership,
     )
     if args.against_applied_bundle:
         build_applied_delta(args.against_applied_bundle, args.output)

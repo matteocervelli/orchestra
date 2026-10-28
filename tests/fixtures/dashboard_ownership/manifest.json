@@ -1,0 +1,137 @@
+{
+  "schema": "orchestra-dashboard-ownership-source/1",
+  "base": "6d9969e46b8056e1e1b792d883a7c25a365ddbab",
+  "stage": "GREEN-SOURCE-inactive-pending-independent-review",
+  "donors": {
+    "bin/wi_repos.py": {
+      "sha256": "ab740131657dc92359981f77315ff12ee378ba648d95bdb03d1bf6bb3a68673b",
+      "selected_symbols": [
+        "ALIASES",
+        "NAME",
+        "URL",
+        "REF",
+        "canonical",
+        "clean",
+        "reference_repos",
+        "task_repos",
+        "derive"
+      ]
+    },
+    "bin/workitems.py": {
+      "sha256": "304b641de96c34503c789289fe1151f8f6588bdeabc18d4639ef24f0f01e1675",
+      "selected_boundary": "finish: derive assignment, scalar conditional, repo lookup, late scalar fallback",
+      "downstream_selected_symbols": [
+        "asks",
+        "finish",
+        "identify"
+      ],
+      "source_ast_sha256": {
+        "identify": "e42fd7323be5b15b67f27e9de8509df015e50af9c65a76273ca51dbd90cd8f07",
+        "finish": "f7f32c2e5148839e1350749c0b36005e4f307178c458fa4f384b7eacbd9b1626",
+        "asks": "9f9a0310ed585485a60e7db66622b99b0e72fc95b96191ec4f9097ca97d3798c"
+      }
+    },
+    "bin/wi_pages.py": {
+      "sha256": "647f4e70e4f59b260838ee701c473e4ef6117b9990867e94dd1393b11594ef2f",
+      "downstream_selected_symbols": [
+        "PageSource",
+        "match_pages",
+        "repos_in"
+      ],
+      "source_ast_sha256": {
+        "repos_in": "41a1ee3c16624b26f4bdc858c73357d3bb0f6498bb4a45fc0258824a8cb832f9",
+        "PageSource": "570bc1dc4bc35d0089d8b845c97703103e140bca0537ae863b41daf28fa89282",
+        "match_pages": "0223bf523be0075625bd3cbac263957432c60180dacbf9dbd14efaa14442e719"
+      }
+    },
+    "bin/wi_fields.py": {
+      "sha256": "a8767633bd978f21f1ea833b769a0b858b13533adbe5259414adb08519bac1d4",
+      "downstream_selected_symbols": [
+        "ACTION_RE",
+        "CALL_KINDS",
+        "MOCKUP_RE",
+        "PAGE_SUFFIXES",
+        "RERUN_RE",
+        "_heads",
+        "ask_answered",
+        "ask_kind",
+        "enrich_asks",
+        "first_page",
+        "is_himalaia",
+        "links_of",
+        "local_page",
+        "norm_q",
+        "owned",
+        "page_text",
+        "steps_of",
+        "ui_of"
+      ],
+      "source_ast_sha256": {
+        "is_himalaia": "629f36094defc98a30586e60941a08c95a7d763b0cc63d405b26f8bc415894c5",
+        "local_page": "311cd84671b5e58c5b25417123e2a299c5db423479167fca51ef4f1ba6cad10e",
+        "first_page": "546879b2994856530825004e4f0bdabebb35c62a7e95ee06b904507b08cf0c0f",
+        "page_text": "3b3af3edbf91408979a8d2e4c1d6c63f45269c2d6d233d85cc1775e8ba4ae8bf",
+        "links_of": "92d1a076c7c60a196bcfeda392aca38608475520a21136b25bda253b016264d1",
+        "ui_of": "ca601fee760c0ce7936daabbe15ae073ae3e57c42859ec9034d4f6cc5b3239d8",
+        "ask_kind": "c930e5759a95079d167676223bcdeab13ab6b17b05c048d82b58e0ab5352e96b",
+        "norm_q": "3a7fa0db05836159c06c5499766028ea3b9ce123e64985d72c96e0da6fa57fa4",
+        "_heads": "502ec5b3bdf6bd1678407e3ba13c80bd8dd28818c61fe06bb1f6432edf851c47",
+        "owned": "872ff9b47a53e4ff696a2b731f6b2ed9195dd2ce09f6b5fa723d48726050dcb3",
+        "ask_answered": "f8ec6b14493b3a9f1e67fb1d0a0477afd170d34928dc63ff7959930dc7b92185",
+        "steps_of": "ad366bf3945ebeabe912ab96893e3532dddbf9d58bc5c23d5f88f806d1a386e6",
+        "enrich_asks": "db1301c2fccae78f8edee380762610c71265ddf0bbda0c09f50216f92b52df00"
+      }
+    },
+    "bin/wi_sources.py": {
+      "sha256": "db4f54c2f816ee2726edf1ffb1c0241cd164ccf9da99311297b32b78e90c0320",
+      "downstream_selected_symbols": [
+        "STEP_LIMITS",
+        "_step",
+        "classify_page",
+        "clean_steps"
+      ],
+      "source_ast_sha256": {
+        "_step": "39badd9f43fde0caf14f48b93dffa2bb06525da132eb3e8b5ed4066566ebc4a9",
+        "clean_steps": "5e94300103604772ba64785d1adb70cf7d9daeccdda4d1185bce6265b6341e0d",
+        "classify_page": "fef4fa9d61dab683e1a0cf5d1d584d443e890dc0e12cc0394a805208694928f1"
+      }
+    },
+    "bin/wi_dedupe.py": {
+      "sha256": "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+      "downstream_selected_symbols": [
+        "merged_asks"
+      ],
+      "source_ast_sha256": {
+        "merged_asks": "4dd77b309df5a7cd5fa74128fd737e4e7bc8c62d670002c2f3bff589cc5840fc"
+      }
+    }
+  },
+  "fixtures": {
+    "finish_fallback.py.txt": "9341b1f54694e4696e61be01d36b3c2c62b048ea5b121c815f968eace83b770b",
+    "finish_prefix.py.txt": "a64775e3b101a315912c500d48722e413f70da5849d32c0f51fac5bb35d50c26",
+    "wi_repos.py.txt": "6e525f17b063aeaab6a9950da658e5a5fc5c5e780f821f38e0ab4c057e380f18",
+    "workitems_selected.py.txt": "5d0e2df6d5e63b8230c57670aec008d9672ba2c368a6c04d9013cad28675cd3d",
+    "wi_pages_selected.py.txt": "08898895bc977c46dfc66f4ffcc1c001a381e1f419777d15fe0df46617559f2c",
+    "wi_fields_selected.py.txt": "3377f4b0b8d83d782e79c21ab6275c42895d7fde5e0cafa50528da6ac1174a49",
+    "wi_sources_selected.py.txt": "d27b6c55d1cc7329160d6fe94b0fc6a4fa1f58071cf6393e2d18c47b0ec5ea90",
+    "wi_dedupe_selected.py.txt": "b9e9e103e79b90a2e863e657b1ee845059aef7cd8dfa80dd8fe62215c0fe858b"
+  },
+  "planned_paths": [
+    "src/orchestra/dashboard/ownership.py",
+    "scripts/export_dashboard_producer.py",
+    "tests/unit/test_dashboard_ownership.py",
+    "tests/unit/test_dashboard_ownership_caller.py",
+    "tests/unit/test_dashboard_runtime_export.py",
+    "docs/specs/2026-10-28-dashboard-project-ownership.md",
+    "docs/provenance/dashboard-card-producer-20261027.json",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "activation": "default OFF; synthetic bundle tests only; no operational donor import/build/publish/export/apply",
+  "contract_revision": 3,
+  "source_scope_evidence": "parent-supplied sanitized excerpts from the existing audit; synthetic variants only",
+  "task_scope_grammar": "positive bounded clauses at line/sentence boundaries; excludes quoted/fenced/reference/negative tails; no blanket path/name inference",
+  "test_source_sha256": "b19ef7c2800405dbc7f310f4920f705df4801f755f8120b478fd18912e370748",
+  "normalization": "full finish fixture removes only previously generated work_provenance assignment before core emitter insertion; other selected function AST unchanged",
+  "downstream_test_source_sha256": "95b622bebebe34ee703cc31819383aafb2a451aee47b55a5cca9610c1fb337f8"
+}

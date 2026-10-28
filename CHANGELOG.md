@@ -4,6 +4,12 @@ All notable changes to Orchestra are documented here.
 
 ## [Unreleased]
 
+### Fixed
+
+- Inactive SOURCE ownership candidate preserves explicit source assignments and
+  separates display projects from cited dependencies, mathematical terms and
+  exclusions. Unidentified projects no longer default to Orchestra in that candidate.
+
 ### Added
 
 - Inert legacy dashboard repository-alias companion with pinned Native helper

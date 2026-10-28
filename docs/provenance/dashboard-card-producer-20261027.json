@@ -403,5 +403,24 @@
     "runtime_caller_wired": false,
     "phase_b_accepted": false,
     "composition_review": "pending"
+  },
+  "project_ownership": {
+    "basis": "6d9969e46b8056e1e1b792d883a7c25a365ddbab",
+    "historical_provenance_before_sha256": "1699b7a5824224d6ab68257a0756532076f3e3f45ad60dc42950a291d9057fc5",
+    "source_donor_pins": {
+      "bin/wi_repos.py": "ab740131657dc92359981f77315ff12ee378ba648d95bdb03d1bf6bb3a68673b",
+      "bin/workitems.py": "304b641de96c34503c789289fe1151f8f6588bdeabc18d4639ef24f0f01e1675"
+    },
+    "canonical": "src/orchestra/dashboard/ownership.py",
+    "canonical_sha256": "8534b157d1749e140facd5ecd3ecc5a0338d5a627e403f2d5f36e752b22e038c",
+    "selected_fixtures": "tests/fixtures/dashboard_ownership/manifest.json",
+    "contract": "docs/specs/2026-10-28-dashboard-project-ownership.md",
+    "api": "build_bundle(..., expected=<complete reviewed before vector>, include_project_ownership=True)",
+    "cli": "--include-project-ownership requires --expected-source <complete-vector.json>",
+    "default_enabled": false,
+    "applied": false,
+    "runtime_ready": false,
+    "bounds": "Own source pins do not override the historical donor vector. Every supplied target is hash-checked; all existing emitted package targets must be explicitly bound. Identity candidate and applied-delta mode are rejected. Composition proof is synthetic SOURCE only.",
+    "protected": "No IDs, aliases, bookmarks, primary scalar PR/issue associations, asks, pin, workflow state, curated notes or caller page-matching policy are changed."
   }
 }
