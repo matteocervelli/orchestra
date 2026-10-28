@@ -18,6 +18,8 @@ PACKAGE_FILES = (
     "__init__.py",
     "common.py",
     "collector.py",
+    "collector_caller.py",
+    "collector_checkpoint.py",
     "repository.py",
     "curation.py",
     "history.py",

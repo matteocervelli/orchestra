@@ -269,6 +269,8 @@ def test_applied_delta_uses_after_hash_and_preserves_retained_function_ast(
         "__init__.py",
         "common.py",
         "collector.py",
+        "collector_caller.py",
+        "collector_checkpoint.py",
         "repository.py",
         "curation.py",
         "history.py",
@@ -513,11 +515,13 @@ def composition_inputs(tmp_path, monkeypatch):
     return exporter(), compat, donor, expected
 
 
-def test_composed_inventory_is_exact_21():
+def test_composed_inventory_is_exact_23():
     assert set(exporter().PACKAGE_FILES) == {
         "__init__.py",
         "common.py",
         "collector.py",
+        "collector_caller.py",
+        "collector_checkpoint.py",
         "curation.py",
         "history.py",
         "identity.py",
@@ -537,7 +541,7 @@ def test_composed_inventory_is_exact_21():
         "shadow_store.py",
         "shadow_profile_pins.json",
     }
-    assert len(exporter().PACKAGE_FILES) == 21
+    assert len(exporter().PACKAGE_FILES) == 23
 
 
 def test_composed_bundle_has_one_helper_same_before_vector_and_inert_donor(

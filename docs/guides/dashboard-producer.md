@@ -221,3 +221,17 @@ become PASS from file presence; no retry, overwrite or cleanup. Generation and
 digest come from the successful final publish. Shared metadata must first pass
 ROOT's local schema/privacy scan. No roots, report/tasktext, secrets or native
 paths are emitted. See the [M4 amendment](../specs/2026-10-27-dashboard-shadow-m3s.md).
+
+## Collector helpers in the composed source package
+
+The closed producer package includes `collector_caller.py` and
+`collector_checkpoint.py`, bringing its explicit inventory to 23 files. Their
+Phase A implementation prepares bounded coverage and checkpoint results through
+injected callbacks. Ordinary storage callback failures return fixed error codes;
+cancellation remains propagated, and booleans cannot masquerade as timestamps.
+
+This packages the helpers without wiring the operational caller. Phase B still
+requires the real caller budget, atomic storage contract, coverage and consumer
+proofs. The global budget of 25 requests, collector allowance of at most 20 and
+reserve of 5 are unchanged. Shadow capture remains default OFF; SOURCE
+persistence does not authorize runtime installation or activation.
