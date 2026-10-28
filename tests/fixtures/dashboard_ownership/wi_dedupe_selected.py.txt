@@ -1,0 +1,21 @@
+def merged_asks(it: dict, note: dict, card: dict) -> dict:
+    """Keep all explicit questions with their original owner and identifiers."""
+    if not it.get('_deduped'):
+        return note if 'ask' in note or not isinstance(card.get('ask'), list) else {**note, 'ask': card['ask']}
+    rows = list(note.get('ask') or [])
+    for child in sorted(it['children'], key=lambda c: c['start']):
+        if child['slug'] in it.get('_ask_overrides', []):
+            continue
+        for ask in child.get('card', {}).get('ask') or []:
+            if isinstance(ask, dict):
+                rows.append({**ask, '_item': child['slug']})
+    for d in it.get('decisions', []):
+        rows.append({'id': d['id'], 'question': d['title'], 'rec': d.get('rec', ''), 'link': d.get('link', ''), '_item': 'decision-' + str(d['id'])})
+    deduped = []
+    seen = set()
+    for row in rows:
+        key = (row.get('_item'), row.get('id') or row.get('question'))
+        if key not in seen:
+            deduped.append(row)
+            seen.add(key)
+    return {**note, 'ask': deduped} if rows else note
