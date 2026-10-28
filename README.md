@@ -47,3 +47,7 @@ The [dashboard producer guide](docs/guides/dashboard-producer.md) explains title
 admission, curated text, provenance checks and hash-bound consumer updates.
 The core consumer fixes have been applied separately by their runtime owner;
 caller adoption, launcher hooks and identity migration have distinct gates.
+
+The [legacy repository alias companion](docs/guides/dashboard-legacy-repository-aliases.md)
+provides an inert, hash-bound consumer patch and an explicit local JavaScript
+regression gate; it does not alter the installed dashboard or Python CI.
