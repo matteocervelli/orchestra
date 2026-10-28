@@ -187,3 +187,37 @@ bounded frozen Nexus replay proves324/207 ownership and note reachability only.
 Full same-generation pre-collapse child-card/ask/step/flag and live/archive action
 compatibility still require a separately reviewed sanitized capsule. Capture is
 not implemented and no live hook is installed.
+
+## Explicit shadow handoff (SOURCE only)
+
+The default exporter does not wire the observer. `shadow_adapter` prepares an
+explicit dormant transformation of a reviewed already-core caller, including
+its existing main. Applying or invoking that caller requires ROOT's separate
+hash, ownership and one-run approval; this Source API is not activation.
+
+`main(shadow_request=None, shadow_prior=None, shadow_witness=None)` keeps the
+normal CLI OFF. True/False are invalid requests, not flags. `--check` never
+creates an observer or consumes a request. There is no requestfile/env watcher
+or boolean CLI switch. In a requested run, the same observer reaches build and
+publish, actual loaded profile admission happens after consume at the real
+asm/ctx boundary, baseline/publish each run once, and main returns the original
+seal CommitResult privately. Capture does not replace normal producer output.
+
+ROOT supplies two complete verified preceding public publications and their
+byte lengths/SHA plus canonical board digest. `project_prior_publications`
+projects only ownership metadata to PriorBindingInput; it does not read files,
+verify byte claims or create a witness. ROOT constructs PriorWitness referencing
+that exact object after its independent verification. Missing slugs, unknown or
+conflicting owners, foreign PRs, stale/incomplete prior and forbidden fields
+block; current expected output, pr_no/links/children are not surrogate authority.
+Known rich fields are ignored without reading their values; this metadata
+projection does not claim that a rich postgraph or consumer has been replayed.
+
+Keep the first actual CommitResult in the same process. Only COMMITTED with its
+original capability may enter `read_receipt(request.directory,result.receipt)`;
+JSON or dataclasses.replace without that capability is rejected. A shallow copy
+that retains it is not promised rejection. NOT_COMMITTED/COMMIT_UNKNOWN never
+become PASS from file presence; no retry, overwrite or cleanup. Generation and
+digest come from the successful final publish. Shared metadata must first pass
+ROOT's local schema/privacy scan. No roots, report/tasktext, secrets or native
+paths are emitted. See the [M4 amendment](../specs/2026-10-27-dashboard-shadow-m3s.md).
