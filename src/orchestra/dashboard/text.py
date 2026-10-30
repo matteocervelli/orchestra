@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from .common import CLOSED, REPOS, STATUSES
+from .sources import task_display_title
 from .titles import meaningful_title
 
 NOTHING_DONE = "Niente: già fatto."
@@ -82,9 +83,17 @@ def is_nothing(needs: str) -> bool:
     return needs.startswith("Niente")
 
 
-def fill_text(it: dict[Any, Any], curated: set[str], asking: bool) -> None:
+def fill_text(
+    it: dict[Any, Any],
+    curated: set[str],
+    asking: bool,
+    ask_note: dict[Any, Any] | None = None,
+    legacy_asking: bool = False,
+    tasks: list[dict[Any, Any]] | None = None,
+) -> bool:
     """Fill missing card text and record actual fallback fields."""
-    title = _selected_title(it, curated)
+    asking = _human_asking(it, asking, ask_note, legacy_asking)
+    title = _selected_title(it, curated, tasks)
     auto = [] if title else ["title_it"]
     it["title"] = title or fallback_title(it, it["raw_title"])
     if not it["problem"].strip():
@@ -100,6 +109,50 @@ def fill_text(it: dict[Any, Any], curated: set[str], asking: bool) -> None:
         if key not in curated and key not in auto:
             auto.append(key)
     it["auto"] = sorted(auto)
+    return asking
+
+
+def _human_asking(
+    it: dict[Any, Any],
+    asking: bool,
+    ask_note: dict[Any, Any] | None,
+    legacy_asking: bool,
+) -> bool:
+    if not asking or legacy_asking:
+        return asking
+    if _technical_failure(it):
+        override = (ask_note or {}).get("ask")
+        if isinstance(override, (dict, list)):
+            return bool(ask_of(it, override))
+        # Retire only this generated needs fallback. Explicit rows must stay
+        # lossless: the caller pairs them positionally with answer ownership.
+        if it["needs"].strip() == SERVE_NEEDS:
+            it["needs"] = ""
+        return bool(ask_of(it))
+    return asking
+
+
+def _technical_failure(it: dict[Any, Any]) -> bool:
+    children = it.get("children") or []
+    if (
+        it.get("status") != "Backlog"
+        or not children
+        or any(child.get("running") for child in children)
+    ):
+        return False
+    if _independent_human_signal(it):
+        return False
+    last = max(children, key=lambda child: str(child.get("start") or ""))
+    return last.get("exit") not in (None, 0, "0")
+
+
+def _independent_human_signal(it: dict[Any, Any]) -> bool:
+    return bool(
+        it.get("pr")
+        or it.get("decisions")
+        or (it.get("triage") or {}).get("verdict") == "done?"
+        or "needs-human" in it.get("labels", [])
+    )
 
 
 def ask_link(it: dict[Any, Any]) -> str:
@@ -121,25 +174,29 @@ def ask_of(
     it: dict[Any, Any], override: dict[Any, Any] | list[Any] | None = None
 ) -> list[dict[Any, Any]]:
     "One-line questions with the recommended answer: notes `ask` > decisions > needs."
+    return [split_advice(row, it["needs"]) for row in _ask_rows(it, override)]
+
+
+def _ask_rows(
+    it: dict[Any, Any], override: dict[Any, Any] | list[Any] | None
+) -> list[dict[Any, Any]]:
     if isinstance(override, dict):
         override = [override]
     if isinstance(override, list):
-        rows = [a for a in override if isinstance(a, dict)]
-    elif it.get("decisions"):
-        rows = [
+        return [ask for ask in override if isinstance(ask, dict)]
+    if it.get("decisions"):
+        return [
             {
-                "id": d.get("id"),
-                "question": d.get("title"),
-                "rec": d.get("rec"),
-                "link": d.get("link"),
+                "id": decision.get("id"),
+                "question": decision.get("title"),
+                "rec": decision.get("rec"),
+                "link": decision.get("link"),
             }
-            for d in it["decisions"]
+            for decision in it["decisions"]
         ]
-    elif it["needs"] and (not is_nothing(it["needs"])):
-        rows = [{"link": ask_link(it)}]
-    else:
-        rows = []
-    return [split_advice(a, it["needs"]) for a in rows]
+    if it["needs"] and not is_nothing(it["needs"]):
+        return [{"link": ask_link(it)}]
+    return []
 
 
 def split_advice(a: dict[Any, Any], needs: str) -> dict[Any, Any]:
@@ -208,13 +265,28 @@ def _fallback_kind(it: dict[Any, Any], raw: str) -> str:
     return PREFIX_IT[prefix.group(1).lower()] if prefix else ""
 
 
-def _selected_title(it: dict[Any, Any], curated: set[str]) -> str:
+def _selected_title(
+    it: dict[Any, Any], curated: set[str], tasks: list[dict[Any, Any]] | None
+) -> str:
     supplied = it.pop("title_it", "")
+    protected = _curated_title(it, curated, supplied)
+    if protected:
+        return protected
+    direct = meaningful_title(supplied)
+    if direct:
+        return direct
+    if it.get("pr") or it.get("issue"):
+        return ""
+    candidates = {title for task in tasks or [] if (title := task_display_title(task))}
+    return candidates.pop() if len(candidates) == 1 else ""
+
+
+def _curated_title(it: dict[Any, Any], curated: set[str], supplied: Any) -> str:
     if "title_it" in curated and isinstance(supplied, str) and supplied.strip():
         return supplied
     if "title" in curated and str(it.get("title") or "").strip():
         return str(it["title"])
-    return meaningful_title(supplied)
+    return ""
 
 
 def _solution_fallback(it: dict[Any, Any]) -> str:

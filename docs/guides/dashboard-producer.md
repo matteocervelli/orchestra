@@ -98,6 +98,27 @@ Normal heading parentheses are preserved. Only the exact legacy wrapper
 `# Task: filename-slug (goal)` extracts its goal, keeping inner parentheses.
 A different slug does not establish that wrapper.
 
+For an uncurated task card, the presentation layer can reuse a bounded Italian
+author heading or an explicit `Obiettivo`, `Scopo` or `Consegna corrente` section,
+including inline labels. It leaves the original task goal/header/text intact for
+identity and ownership. Conflicting subjects, English-only headings, operational
+instructions and unsafe path/command text retain the quality finding; this is
+not universal title prevention or a translation service. Explicit curated titles
+remain authoritative.
+
+This title recovery is limited to task sources. Uncurated PR/issue titles keep
+their existing fallback and quality finding. The changed canonical `text.py`
+requires a fresh core export; the historical applied-delta export accepts only
+`sources.py` changes and correctly rejects this contribution.
+
+A failed technical child alone does not create a human question. Concrete note
+or child questions, decisions, manual needs and legacy human-status overrides
+remain visible; an explicit empty note ask override remains authoritative. This
+does not change lifecycle status or declare the failed work complete.
+Explicit ask rows retain their order and answer ownership, including kind/link
+rows without question text. Only the needs-derived technical-failure placeholder
+is retired, before question normalization; explicit rows are never filtered.
+
 `duplicate_ask_id` reports a nonempty ID repeated among open asks. It retains all
 asks, does not answer them, and excludes already-answered entries from that check.
 

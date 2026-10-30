@@ -173,6 +173,7 @@ def _ownership_finish(finish: ast.FunctionDef) -> None:
 
 def _workitems(source: str, *, include_project_ownership: bool = False) -> str:
     finish = _function(source, "finish")
+    _quality_text_finish(finish)
     if include_project_ownership:
         _ownership_finish(finish)
     inserted = False
@@ -262,6 +263,41 @@ def _workitems(source: str, *, include_project_ownership: bool = False) -> str:
             "rt bind_detail, board_digest, publication_generated\n"
         ),
     )
+
+
+def _quality_text_finish(finish: ast.FunctionDef) -> None:
+    """Pass existing merged intent to canonical text; no asking policy here."""
+    fills = [
+        node
+        for node in finish.body
+        if isinstance(node, ast.Expr)
+        and isinstance(node.value, ast.Call)
+        and isinstance(node.value.func, ast.Name)
+        and node.value.func.id == "fill_text"
+    ]
+    notes = [
+        node
+        for node in finish.body
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "ask_note"
+            for target in node.targets
+        )
+    ]
+    if not fills and not notes:
+        return  # Supported minimal synthetic donor has no text/ask boundary.
+    if len(fills) != 1 or len(notes) != 1:
+        raise ValueError("ambiguous text/asking boundary")
+    finish.body.remove(notes[0])
+    index = finish.body.index(fills[0])
+    finish.body[index : index + 1] = [
+        notes[0],
+        *ast.parse(
+            "res['asking'] = fill_text(it, curated, res['asking'], ask_note, "
+            "note.get('status') in ASKING_OLD, "
+            "[ctx.tasks[s] for s in it.get('slugs', []) if s in ctx.tasks])"
+        ).body,
+    ]
 
 
 def _shadow_main(source: str) -> str:
