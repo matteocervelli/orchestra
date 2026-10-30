@@ -1,0 +1,25 @@
+{
+  "schema": "orchestra-legacy-release-visibility/v1",
+  "base_source_commit": "908f01cacf4b82b1d9621e674a7aba91507ed806",
+  "prerequisite_runtime_patches": {
+    "repository-aliases.patch": "b50f1c9cd9b51981817e21b08bbab6231a08f3f20309c63328bdbda6535dde9a",
+    "callchips-aliases.patch": "d2f40e399a57c73c1d9919955f2968eafb2c727cfd6b756d044efdb28d62fa27"
+  },
+  "files": [
+    {
+      "path": "assets/cb-state.js",
+      "before_sha256": "2d63f85b02ccae26ecd4b488d458266680e3dae345d92f60abc62ebf5ccf25ca",
+      "after_sha256": "05d6ed600311a8d55509f7c056ba5ffeb0cb7a14ac321335767c5587741aa4f9"
+    }
+  ],
+  "patch": "release-visibility.patch",
+  "patch_sha256": "9d83a73db817fe82941b5b699497970ff647372fa7661534fc3b705b5b437f5d",
+  "change": "Remove only ID/slugs regex inference from releaseItem.",
+  "preserved": [
+    "release_operation === true",
+    "kind in release/tag/promotion/deploy/release_prepare",
+    "releaseVisible explicit search reveal and ordinary matches query semantics",
+    "raw cards/IDs/status/asks/steps/PR/memberships and other alias/action/grouping code"
+  ],
+  "activation": "Inert source patch only; independent review, exact donor checks and owner application authorization remain required."
+}
