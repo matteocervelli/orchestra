@@ -501,6 +501,14 @@ def adapters(
     include_identity_candidate: bool = False,
     include_project_ownership: bool = False,
 ) -> dict[str, str]:
+    if (
+        any(
+            isinstance(node, ast.FunctionDef) and node.name == "asks"
+            for node in ast.parse(donors["bin/workitems.py"]).body
+        )
+        and "bin/wi_fields.py" not in donors
+    ):
+        raise ValueError("missing human-intent classifier donor")
     result = {
         path: text
         for path, text in donors.items()
@@ -520,6 +528,8 @@ def adapters(
             + ", ".join(f"{name} as {name}" for name in names)
             + ")\n"
         )
+    if "bin/wi_fields.py" in donors:
+        result["bin/wi_fields.py"] = fields_adapter(donors["bin/wi_fields.py"])
     source = donors["bin/wi_quality.py"]
     urls = [
         node.value
@@ -607,6 +617,17 @@ def adapters(
         path: _clean_adapter_imports(text, unused.get(path, set()))
         for path, text in result.items()
     }
+
+
+def fields_adapter(source: str) -> str:
+    """One classifier authority; other field/answer/gate helpers stay in place."""
+    return replace_symbols(
+        source,
+        {
+            name: f"from orchestra_dashboard.text import {name} as {name}"
+            for name in ("CALL_KINDS", "ACTION_RE", "ask_kind")
+        },
+    )
 
 
 def _read_originals(donor: Path, expected: dict[str, str]) -> dict[str, str]:

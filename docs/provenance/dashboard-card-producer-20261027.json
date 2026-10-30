@@ -2,6 +2,13 @@
   "schema": "orchestra-dashboard-source/v1",
   "donors": [
     {
+      "donor": "bin/wi_fields.py",
+      "sha256": "a8767633bd978f21f1ea833b769a0b858b13533adbe5259414adb08519bac1d4",
+      "symbols": ["CALL_KINDS", "ACTION_RE", "ask_kind"],
+      "canonical": "src/orchestra/dashboard/text.py",
+      "source_revision": "2026-10-30 human-intent; source-code-only extraction"
+    },
+    {
       "donor": "bin/wi_common.py",
       "sha256": "afe8f39b1467103b26562230f160dcf5c88344ab4f85be6ab6f74924cd74a570",
       "symbols": [
