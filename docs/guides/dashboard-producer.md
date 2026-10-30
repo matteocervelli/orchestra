@@ -201,7 +201,7 @@ must add no findings. The existing `E741` on `wi_common.O` remains a disclosed
 legacy finding, not a globally suppressed rule. Explicit re-exports preserve the
 consumer API. Verify served curated fields and legacy task headings afterwards.
 
-The default core does not replace identity/dedupe adapters. Their optional
+The default core does not replace identity/collapse adapters. Their optional
 candidate requires a separate identity dry run and proof that old exact-ID links,
 asks, steps, priority and answers survive; retaining aliases alone is insufficient.
 Verify the whole assembly → note merge → exact-ID consumer path: grouping tests
@@ -347,9 +347,18 @@ source function AST and fixture bytes to the reviewed donor hash.
 
 The new global selector lookup changes shadow callback dependencies. Any future
 shadow admission needs separately reviewed callback/dependency pins; existing
-pins remain unchanged and shadow stays OFF. This repair cannot reconstruct the
+pins remain unchanged and shadow stays OFF. Canonical curation pins and the
+`_apply_text_fields` / `_apply_edited_text` selector dependencies also need
+separate review; the drift began with human-intent and includes this rename.
+This repair cannot reconstruct the
 provenance of mismatched needs/intent pairs already persisted by older merges:
 a migrated canonical target remains its own editable source. Do not silently
 migrate legacy notes or infer a marker's original author from matching text.
 If an explicitly authorized future migration rewrites a target, invalid marker
 schemas are sanitized by the canonical selector; assess those records separately.
+
+The CLI builds its full candidate output before checking an applied-bundle delta.
+A rejected old inventory can therefore leave a full candidate directory, although
+no delta artifacts are written. Never use that directory as an accepted delta.
+Inventory transition diagnostics do not replace comparison of the entire target
+set: other additions or removals may coexist with the new dedupe candidate.
