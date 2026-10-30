@@ -6,6 +6,10 @@ All notable changes to Orchestra are documented here.
 
 ### Fixed
 
+- SOURCE author-derived titles reject recognizable token, opaque-run and email
+  shapes before display. Curated titles retain precedence; this bounded filter
+  does not provide general PII anonymization.
+
 - Inactive SOURCE dashboard distinguishes exact-text author information from
   human requests and infers mockup approval from an explicit approval question;
   later questions, independent gates and recorded answers remain authoritative.

@@ -19,6 +19,15 @@ AUTHOR_UNSAFE = re.compile(
     r"\b(?:git|uv|pnpm|npm|docker|ssh|sudo|bash|sh|python3?|exec)\s",
     re.I,
 )
+# Conservative admission filter for recognizable sensitive shapes, not a PII scrubber.
+# authored_title bounds the candidate before any of these expressions run.
+AUTHOR_SENSITIVE = re.compile(
+    r"(?<![a-z0-9])(?:ghp_|sk-)[a-z0-9_-]{8,}|AKIA[A-Z0-9]{16}|"
+    r"[a-f0-9]{24,}|"
+    r"(?<![a-z0-9])[a-z0-9_+/=-]{40,}(?![a-z0-9])|"
+    r"[\w.!#$%&'*+/=?^`{|}~-]+@[\w-]+(?:\.[\w-]+)+",
+    re.I,
+)
 AUTHOR_GENERIC = re.compile(
     r"\bgoal\s+attivo\b|^(?:riprendi|ripresa|resume|read|leggi|non|preserva|mantieni)\b|"
     r"^(?:base\s+[a-f0-9]{6,}|processo precedente|review delta finale\s*\d)|"
@@ -110,7 +119,7 @@ ITALIAN_NOUNS = frozenset(
 
 def authored_title(value: str) -> str:
     """Retain bounded Italian author text, never translate or mine a slug."""
-    if len(value) > 400:
+    if len(value) > 400 or AUTHOR_SENSITIVE.search(value):
         return ""
     value = re.sub(r"^#+\s*", "", value.strip())
     value = re.sub(
@@ -121,7 +130,11 @@ def authored_title(value: str) -> str:
     )
     value = AUTHOR_PREFIX.sub("", value)
     value = re.sub(r"[,;]\s*fonte accettata\s*$", "", value, flags=re.I)
-    if AUTHOR_UNSAFE.search(value) or AUTHOR_GENERIC.search(value):
+    if (
+        AUTHOR_UNSAFE.search(value)
+        or AUTHOR_SENSITIVE.search(value)
+        or AUTHOR_GENERIC.search(value)
+    ):
         return ""
     words = set(re.findall(r"[^\W_]+", value.casefold()))
     if not _italian_author_text(value, words):
