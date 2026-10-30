@@ -9,6 +9,9 @@ All notable changes to Orchestra are documented here.
 - SOURCE author-derived titles reject recognizable token, opaque-run and email
   shapes before display. Curated titles retain precedence; this bounded filter
   does not provide general PII anonymization.
+- Inactive SOURCE dashboard export pairs alias-merged needs with its author's
+  intent marker, clearing stale metadata when an unmarked alias wins. Its narrow
+  dedupe adapter remains a runtime-unaccepted candidate, separate from identity.
 
 - Inactive SOURCE dashboard distinguishes exact-text author information from
   human requests and infers mockup approval from an explicit approval question;
