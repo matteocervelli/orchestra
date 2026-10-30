@@ -78,6 +78,7 @@ def full_caller(tmp_path):
         },
         "heuristic_text": lambda *_: None,
         "note_status": lambda *_: None,
+        "settle": lambda *_: None,
         "fill_text": lambda *_: None,
         "gates_of": lambda it, *_: it["gates"],
         "ask_of": text.ask_of,
@@ -95,8 +96,14 @@ def full_caller(tmp_path):
         "issue_title": lambda *_: "Synthetic issue",
     }
     for name in ("wi_fields", "wi_sources", "wi_pages", "wi_dedupe"):
+        source = selected(name + "_selected.py.txt")
+        if name == "wi_fields":
+            source = module.fields_adapter(source)
+            source = source.replace(
+                "orchestra_dashboard.text", "orchestra.dashboard.text"
+            )
         code = compile(
-            selected(name + "_selected.py.txt"),
+            source,
             name,
             "exec",
             flags=__future__.annotations.compiler_flag,
