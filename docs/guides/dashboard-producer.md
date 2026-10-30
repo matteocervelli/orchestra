@@ -308,3 +308,48 @@ requires the real caller budget, atomic storage contract, coverage and consumer
 proofs. The global budget of 25 requests, collector allowance of at most 20 and
 reserve of 5 are unchanged. Shadow capture remains default OFF; SOURCE
 persistence does not authorize runtime installation or activation.
+
+
+### Inactive alias intent export candidate (2026-10-30)
+
+Normal SOURCE export now includes `bin/wi_dedupe.py` with only its reviewed
+`merge_notes` function adapted and an import of canonical
+`curation.select_needs_intent`. The function's entire Python 3.12 AST (name,
+signature, guards, alias ordering and merge operations) must match the reviewed
+fingerprint; a changed donor fails export before bundle creation. This is not a
+full-module canonical replacement. All other donor symbols remain intact.
+
+Each scalar `needs` winner also selects or clears its own intent metadata,
+including when two aliases supply exactly the same text. A marker-only alias,
+a skipped migrated alias, or a superseded note cannot supply metadata for another
+source's text. Existing target priority, asks, step routes, flags and ordering
+remain governed by the donor merge. The existing exact-text classifier still
+validates the selected marker against the final text.
+
+The manifest explicitly records `dedupe_intent_candidate` with
+`runtime_accepted: false`, and only `bin/wi_identity.py` remains deferred in normal
+export. Identity opt-in is unnecessary and remains separate. Export output is
+inert: the frozen runtime composition has no exception or apply authorization
+from this SOURCE change. Any runtime use requires a separately reviewed manifest
+and protected-file decision. Provenance records this candidate surface and the current canonical curation hash;
+historical donor and shadow pins remain unchanged and do not attest acceptance.
+
+The old applied-bundle mode cannot extend a prior inventory that excluded dedupe.
+It raises `DedupeInventoryTransitionError` naming the dedupe candidate and the
+required separately reviewed six-file composition with a fresh before vector.
+It emits no delta artifacts and does not extend the existing five-file freeze.
+Missing/unbound dedupe donors raise `MissingDedupeDonorError` before output;
+ownership vectors also require this effective rewritten donor.
+
+Python 3.12 is required for the reviewed AST fingerprint; other Python minor
+versions fail with an explicit diagnostic. Fixture provenance binds the selected
+source function AST and fixture bytes to the reviewed donor hash.
+
+The new global selector lookup changes shadow callback dependencies. Any future
+shadow admission needs separately reviewed callback/dependency pins; existing
+pins remain unchanged and shadow stays OFF. This repair cannot reconstruct the
+provenance of mismatched needs/intent pairs already persisted by older merges:
+a migrated canonical target remains its own editable source. Do not silently
+migrate legacy notes or infer a marker's original author from matching text.
+If an explicitly authorized future migration rewrites a target, invalid marker
+schemas are sanitized by the canonical selector; assess those records separately.

@@ -79,7 +79,11 @@
         "unique",
         "collapse"
       ],
-      "canonical": "src/orchestra/dashboard/curation.py"
+      "canonical": "src/orchestra/dashboard/curation.py",
+      "intent_candidate_symbols": [
+        "merge_notes"
+      ],
+      "intent_candidate_runtime_accepted": false
     }
   ],
   "adaptations": [
@@ -108,7 +112,7 @@
     "src/orchestra/dashboard/__init__.py": "5fbf458033b1df4fe3ffdab5f33deba3bb47da157f8f1b61adf3e5bf9186c011",
     "src/orchestra/dashboard/collector.py": "1944831ec5e73bfea0f5f86934dec1eae125ca6748d0b818338417bbe4d6a97c",
     "src/orchestra/dashboard/common.py": "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
-    "src/orchestra/dashboard/curation.py": "1cfec50cadd1b6493772bc361e77b2a9cb8d67e38ba08a0ec9845d09696b7b66",
+    "src/orchestra/dashboard/curation.py": "4ca2b7e0773ea47844366dac12f12cdae8227c369370639b780203285a14dcb8",
     "src/orchestra/dashboard/history.py": "be04cd505688401e92b0395533ae213e35a8d4e1fdd1f8ed2e0369b63c170d1d",
     "src/orchestra/dashboard/identity.py": "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
     "src/orchestra/dashboard/notes.py": "799a2c36f9046a65186fbc5b7246fdbe7074060cb37b1573f4340f15c1d351d2",
@@ -129,12 +133,21 @@
   },
   "runtime_export": {
     "core_excludes": [
-      "bin/wi_identity.py",
-      "bin/wi_dedupe.py"
+      "bin/wi_identity.py"
     ],
     "identity_candidate_flag": "--include-identity-candidate",
     "applied": false,
-    "runtime_ready": false
+    "runtime_ready": false,
+    "dedupe_intent_candidate": {
+      "path": "bin/wi_dedupe.py",
+      "symbols": [
+        "merge_notes"
+      ],
+      "canonical_helper": "curation.select_needs_intent",
+      "runtime_accepted": false,
+      "applied_delta_transition": "typed rejection; separate six-file composition review and fresh before vector required",
+      "shadow_admission": "requires separately reviewed callback/dependency pins; current shadow pins unchanged and OFF"
+    }
   },
   "source_revision": {
     "basis": "e7363b1",
