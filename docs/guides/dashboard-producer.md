@@ -106,6 +106,14 @@ instructions and unsafe path/command text retain the quality finding; this is
 not universal title prevention or a translation service. Explicit curated titles
 remain authoritative.
 
+Before and after stripping author prefixes, recovery rejects token-like `ghp_`/`sk-`
+values with at least 8 suffix characters, `AKIA` plus 16 alphanumeric characters,
+contiguous hexadecimal runs of at least 24 characters, opaque base64/URL-safe runs of at
+least 40 characters, and email shapes without a fixed domain suffix list.
+These conservative presentation thresholds can reject legitimate long strings
+and do not provide general secret or PII anonymization. Curated `title_it` and
+`title` precedence is unchanged.
+
 This title recovery is limited to task sources. Uncurated PR/issue titles keep
 their existing fallback and quality finding. The changed canonical `text.py`
 requires a fresh core export; the historical applied-delta export accepts only
