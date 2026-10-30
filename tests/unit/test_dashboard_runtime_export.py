@@ -31,6 +31,10 @@ def synthetic_donors(root: Path) -> dict[str, str]:
         ),
         "wi_status": "STATUSES = []\nCLOSED = ()\n",
         "wi_text": "def fill_text(it, curated, asking): return None\n",
+        "wi_fields": (
+            "CALL_KINDS = ()\nACTION_RE = None\n"
+            "def ask_kind(a, it, decision): return 'legacy'\n"
+        ),
         "wi_repos": (
             "ALIASES = {}\nNAME = URL = REF = None\n"
             "def canonical(value): return value\ndef clean(values): return values\n"
@@ -159,6 +163,77 @@ def test_donor_drift_fails_before_any_output(tmp_path: Path) -> None:
     assert not output.exists()
 
 
+def test_exported_fields_preserve_symbols_and_use_one_classifier(tmp_path: Path):
+    module = exporter()
+    donor = tmp_path / "donor"
+    expected = synthetic_donors(donor)
+    selected = ROOT / "tests/fixtures/dashboard_ownership/wi_fields_selected.py.txt"
+    source = "from __future__ import annotations\nimport re\n" + selected.read_text()
+    (donor / "bin/wi_fields.py").write_text(source)
+    expected["bin/wi_fields.py"] = hashlib.sha256(source.encode()).hexdigest()
+    output = tmp_path / "bundle"
+    module.build_bundle(donor, output, expected)
+    emitted = (output / "bin/wi_fields.py").read_text()
+    assert set(module.module_exports(source)) - {
+        "CALL_KINDS",
+        "ACTION_RE",
+        "ask_kind",
+    } <= set(module.module_exports(emitted))
+    code = """import wi_fields
+from orchestra_dashboard import text
+assert wi_fields.ask_kind is text.ask_kind
+assert wi_fields.CALL_KINDS is text.CALL_KINDS
+assert wi_fields.ACTION_RE is text.ACTION_RE
+item = dict(id='synthetic-item', aliases=['synthetic-alias'], slugs=[],
+            ask=[dict(id='', question='Il mockup è respinto. Quale pagina?', rec='')],
+            pr=None, labels=[], gates={}, ui=False, status='Backlog')
+wi_fields.enrich_asks(item, {}, [])
+assert item['ask'][0]['kind'] == 'decide'
+assert item['ask'][0]['answered'] is False
+assert wi_fields.MOCKUP_RE.search('mockup')
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        cwd=output / "bin",
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("mutation", ["missing", "duplicate"])
+def test_classifier_binding_drift_fails_before_output(tmp_path: Path, mutation: str):
+    donor = tmp_path / "donor"
+    expected = synthetic_donors(donor)
+    path = donor / "bin/wi_fields.py"
+    source = path.read_text()
+    if mutation == "missing":
+        source = source.replace("def ask_kind", "def other_kind")
+    else:
+        source += "\ndef ask_kind(a, it, decision): return 'second'\n"
+    path.write_text(source)
+    expected["bin/wi_fields.py"] = hashlib.sha256(source.encode()).hexdigest()
+    output = tmp_path / "bundle"
+    with pytest.raises(ValueError, match="missing or duplicate donor binding"):
+        exporter().build_bundle(donor, output, expected)
+    assert not output.exists()
+
+
+def test_real_ask_caller_requires_hash_bound_classifier_donor(tmp_path: Path):
+    donor = tmp_path / "donor"
+    expected = synthetic_donors(donor)
+    path = donor / "bin/workitems.py"
+    source = path.read_text() + "\ndef asks(*args): pass\n"
+    path.write_text(source)
+    expected["bin/workitems.py"] = hashlib.sha256(source.encode()).hexdigest()
+    expected.pop("bin/wi_fields.py")
+    output = tmp_path / "bundle"
+    with pytest.raises(ValueError, match="missing human-intent classifier donor"):
+        exporter().build_bundle(donor, output, expected)
+    assert not output.exists()
+
+
 def test_default_cli_invocations_require_explicit_input(tmp_path: Path) -> None:
     for name in ("dashboard_producer_title.py", "export_dashboard_producer.py"):
         result = subprocess.run(
@@ -225,7 +300,7 @@ def test_export_adds_no_ruff_errors_and_preserves_partial_module_api(
     output = tmp_path / "bundle"
     exporter().build_bundle(donor, output, expected)
     assert_only_known_legacy_ruff(ruff_issues(output / "bin"))
-    code = """import wi_common, wi_notes, wi_status, wi_text
+    code = """import wi_common, wi_notes, wi_status, wi_text, wi_fields
 import orchestra_dashboard.common as common
 import orchestra_dashboard.notes as notes
 import orchestra_dashboard.text as text
@@ -235,6 +310,9 @@ assert wi_common.O == 0
 assert wi_notes.notes_lock is notes.notes_lock
 assert wi_status.STATUSES is common.STATUSES
 assert wi_text.fill_text is text.fill_text
+assert wi_fields.ask_kind is text.ask_kind
+assert wi_fields.CALL_KINDS is text.CALL_KINDS
+assert wi_fields.ACTION_RE is text.ACTION_RE
 assert all(
     not hasattr(module, "__all__")
     for module in (wi_common, wi_notes, wi_status)

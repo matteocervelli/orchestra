@@ -58,6 +58,15 @@ PREFIX_RE = re.compile(
     "(?:^|\\]\\s*|\\s)(" + "|".join(PREFIX_IT) + ")(?:\\([^)]*\\))?!?:", re.I
 )
 ADVICE_RE = re.compile("\\s*\\bConsiglio:\\s*")
+CALL_KINDS = ("decide", "approve mockup", "approve UI", "approve merge", "action")
+ACTION_RE = re.compile(
+    r"(?i)\b(token\w*|chiav[ei]|keys?|vapid|1password|deploy\w*|sudo\w*)\b"
+)
+MOCKUP_REQUEST_RE = re.compile(
+    r"(?i)^\s*(?:approvi|approvate|approvare|confermi|confermate|confermare|"
+    r"accetti|accettate|accettare|validi|validate|validare)\s+"
+    r"(?:(?:il|questo|un)\s+)?(?:nuovo\s+)?mockup\b"
+)
 
 
 def fallback_title(it: dict[Any, Any], raw: str) -> str:
@@ -81,6 +90,26 @@ def uncurated_open(data: dict[Any, Any]) -> list[dict[Any, Any]]:
 
 def is_nothing(needs: str) -> bool:
     return needs.startswith("Niente")
+
+
+def clean_needs_intent(raw: object) -> dict[str, str] | None:
+    """Accept only the two scalar contract fields; never project extra payload."""
+    if not isinstance(raw, dict) or raw.keys() != {"kind", "text"}:
+        return None
+    if raw["kind"] not in ("information", "request"):
+        return None
+    value = raw["text"]
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return {"kind": raw["kind"], "text": value}
+
+
+def needs_information(it: dict[Any, Any]) -> bool:
+    """Only the selected author's declaration for this exact text can opt out."""
+    intent = clean_needs_intent(it.get("needs_intent"))
+    return bool(
+        intent and intent["kind"] == "information" and intent["text"] == it.get("needs")
+    )
 
 
 def fill_text(
@@ -118,6 +147,8 @@ def _human_asking(
     ask_note: dict[Any, Any] | None,
     legacy_asking: bool,
 ) -> bool:
+    if needs_information(it):
+        return bool(ask_of(it, (ask_note or {}).get("ask")))
     if not asking or legacy_asking:
         return asking
     if _technical_failure(it):
@@ -194,9 +225,54 @@ def _ask_rows(
             }
             for decision in it["decisions"]
         ]
-    if it["needs"] and not is_nothing(it["needs"]):
-        return [{"link": ask_link(it)}]
+    return _needs_ask_rows(it)
+
+
+def _needs_ask_rows(it: dict[Any, Any]) -> list[dict[Any, Any]]:
+    needs = needs_of(it) if needs_information(it) else it["needs"]
+    if needs and not is_nothing(needs):
+        return [{"question": needs, "link": ask_link(it)}]
     return []
+
+
+def ask_kind(
+    a: dict[Any, Any], it: dict[Any, Any], decision: dict[Any, Any] | None
+) -> str:
+    """Classify requests; an incidental mockup mention is not an approval ask."""
+    if a.get("kind") in CALL_KINDS:
+        return str(a["kind"])
+    if decision and decision.get("call") in CALL_KINDS:
+        return str(decision["call"])
+    pr = it["pr"] or {}
+    if pr.get("state") == "open" and "needs-human" in it["labels"]:
+        return "approve merge"
+    question = a.get("question", "")
+    text = f"{question} {a.get('rec', '')}"
+    choice_or_mine = re.search(r"\so\s", question) or re.match(r"\W*\w+o\b", question)
+    if ACTION_RE.search(text) and not choice_or_mine:
+        return "action"
+    return _visual_ask_kind(question, it)
+
+
+def _visual_ask_kind(question: str, it: dict[Any, Any]) -> str:
+    if _mockup_approval_requested(question):
+        return "approve mockup"
+    gates = it["gates"]
+    if (
+        it["ui"]
+        and it["status"] == "Merge"
+        and gates["comparison"]
+        and gates["preview"]
+    ):
+        return "approve UI"
+    return "decide"
+
+
+def _mockup_approval_requested(question: str) -> bool:
+    if len(question) > 2000:
+        return False
+    parts = re.split(r"[.!?;\n]+", question, maxsplit=16)
+    return len(parts) <= 16 and any(MOCKUP_REQUEST_RE.match(part) for part in parts)
 
 
 def split_advice(a: dict[Any, Any], needs: str) -> dict[Any, Any]:

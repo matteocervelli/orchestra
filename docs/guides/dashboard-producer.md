@@ -119,6 +119,50 @@ Explicit ask rows retain their order and answer ownership, including kind/link
 rows without question text. Only the needs-derived technical-failure placeholder
 is retired, before question normalization; explicit rows are never filtered.
 
+To distinguish an authored result from a human request, put `needs_intent`
+beside the `needs` field in the same note or child card:
+
+```json
+{
+  "needs": "Candidata respinta; il riesame resta a carico dell'agente.",
+  "needs_intent": {
+    "kind": "information",
+    "text": "Candidata respinta; il riesame resta a carico dell'agente."
+  }
+}
+```
+
+Only `kind` (`information` or `request`) and a nonblank string `text` are
+accepted. Unknown keys, wrong types, missing fields and a stale text match
+preserve legacy request behavior. Curation selects this metadata from the same
+source that supplied `needs`, including pin and `edited_fields`; a winning
+source without metadata does not inherit a losing source's declaration.
+`information` removes only the question derived from that exact needs text and
+the generated asking fallback. Explicit asks, decisions, answer ownership and
+independent PR `needs-human` / triage gates remain; those gates receive their
+existing concrete request text. A changed needs string or a later explicit ask
+can open a new question without clearing the old marker. The declaration
+neither answers a question nor changes lifecycle state. Do not persist `ask: []`
+to hide an informational result.
+
+Mockup approval inference uses the question, never its recommendation. It
+recognizes sentence-start requests such as `Approvi il nuovo mockup?`, including
+a request after a sentence rejecting an older candidate. It accepts only the
+listed approval/confirmation/acceptance/validation verbs and a direct mockup
+object, within 2000 characters and at most 16 sentence fragments. Other wording
+stays an answerable `decide`; supply an explicit `kind` for unsupported phrasing.
+Explicit ask kinds and decision calls retain priority. This is a conservative
+request classifier, not an attestation that the proposal was accepted.
+
+The inert core exporter now binds `wi_fields.py` and re-exports its classifier
+and constants from canonical SOURCE. An ask-capable caller without that pinned
+donor, or a missing/duplicate classifier binding, fails before bundle output.
+Existing answer, gate and page helpers remain in that adapter. Use a fresh core
+export with the complete reviewed before vector; the historical sources-only
+applied-delta path does not admit this change. Existing unmarked rejection
+notes require their author/root to adopt the metadata. SOURCE tests alone do not
+clear the currently reported human-card errors or authorize a runtime apply.
+
 `duplicate_ask_id` reports a nonempty ID repeated among open asks. It retains all
 asks, does not answer them, and excludes already-answered entries from that check.
 

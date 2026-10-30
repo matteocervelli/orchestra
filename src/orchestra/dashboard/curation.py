@@ -9,6 +9,7 @@ from .common import FULL, STATUSES
 from .history import HistoricalBindings, protected_values
 from .identity import groups
 from .provenance import github_primary
+from .text import clean_needs_intent
 from .titles import note_title
 
 TEXT_KEYS = ("problem", "solution", "needs", "title", "kind", "repo", "title_it")
@@ -89,7 +90,17 @@ def _apply_text_fields(
     for key in TEXT_KEYS:
         if isinstance(source.get(key), str) and (source.get(key) or key == "needs"):
             it[key] = source[key]
+            if key == "needs":
+                _select_needs_intent(it, source)
             curated.add(key)
+
+
+def _select_needs_intent(it: dict[Any, Any], source: dict[Any, Any]) -> None:
+    """Never inherit metadata from a different source, even for identical text."""
+    it.pop("needs_intent", None)
+    intent = clean_needs_intent(source.get("needs_intent"))
+    if intent is not None:
+        it["needs_intent"] = intent
 
 
 def _page_value_applies(
@@ -138,6 +149,8 @@ def _apply_edited_text(
         for key in TEXT_KEYS:
             if key in edited and key in note and isinstance(note[key], str):
                 it[key] = note[key]
+                if key == "needs":
+                    _select_needs_intent(it, note)
                 curated.add(key)
 
 

@@ -6,6 +6,9 @@ All notable changes to Orchestra are documented here.
 
 ### Fixed
 
+- Inactive SOURCE dashboard distinguishes exact-text author information from
+  human requests and infers mockup approval from an explicit approval question;
+  later questions, independent gates and recorded answers remain authoritative.
 - SOURCE presentation reuses specific Italian task subjects without changing
   task identity inputs; failed technical work no longer creates a placeholder
   human question while explicit decisions and curated text remain authoritative.
