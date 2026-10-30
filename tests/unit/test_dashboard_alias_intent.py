@@ -254,11 +254,8 @@ def test_provenance_describes_current_inactive_candidate() -> None:
         provenance["runtime_export"]["dedupe_intent_candidate"]["runtime_accepted"]
         is False
     )
-    path = "src/orchestra/dashboard/curation.py"
-    assert (
-        provenance["canonical_files"][path]
-        == hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
-    )
+    for path, expected in provenance["canonical_files"].items():
+        assert expected == hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), path
 
 
 def test_core_bundle_keeps_other_symbols_and_imports_and_imports_helper(

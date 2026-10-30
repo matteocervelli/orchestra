@@ -126,8 +126,8 @@
     "src/orchestra/dashboard/shadow_profile.py": "8ab21fdd2f437307ca5b487c817e644d9ed97cdf3a48250cf17ea6461355179d",
     "src/orchestra/dashboard/shadow_schema.py": "d5d8d57b3e7050ad4479970d09a27230aa93b1dac01422c292da4fdf4ab26828",
     "src/orchestra/dashboard/shadow_store.py": "083dbecaa8bc671303e7d5386e0381e54d076e1c7a56a7eca3854ece964b312e",
-    "src/orchestra/dashboard/sources.py": "f6e56fec87bcf3b243182a7b39f5f84736e00295e1602651db56893ea9fbb999",
-    "src/orchestra/dashboard/text.py": "4decd6af7ea43d7911209b6f1aabe84f5ee0bae0aaacca09721448d28b2b2fb0",
+    "src/orchestra/dashboard/sources.py": "8b529916e7e328e26570386a0aaecec6c14b73f55d1562567eb7ae06c6db52c3",
+    "src/orchestra/dashboard/text.py": "307e786dfb6240df34366941532a55e93d32a52aa36937725292824c5abbf4e8",
     "src/orchestra/dashboard/titles.py": "79d89d781de596534a83e32f57864a05bf689d6d533e9f72e39cef4223f34d07",
     "src/orchestra/dashboard/shadow_profile_pins.json": "cc4e1369fc61d8fa52621e4e1f10847a0799cb795fd8bc3914502b36e49f6faa"
   },
