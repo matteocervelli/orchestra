@@ -91,11 +91,11 @@ def _apply_text_fields(
         if isinstance(source.get(key), str) and (source.get(key) or key == "needs"):
             it[key] = source[key]
             if key == "needs":
-                _select_needs_intent(it, source)
+                select_needs_intent(it, source)
             curated.add(key)
 
 
-def _select_needs_intent(it: dict[Any, Any], source: dict[Any, Any]) -> None:
+def select_needs_intent(it: dict[Any, Any], source: dict[Any, Any]) -> None:
     """Never inherit metadata from a different source, even for identical text."""
     it.pop("needs_intent", None)
     intent = clean_needs_intent(source.get("needs_intent"))
@@ -150,7 +150,7 @@ def _apply_edited_text(
             if key in edited and key in note and isinstance(note[key], str):
                 it[key] = note[key]
                 if key == "needs":
-                    _select_needs_intent(it, note)
+                    select_needs_intent(it, note)
                 curated.add(key)
 
 

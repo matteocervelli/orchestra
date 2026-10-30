@@ -60,8 +60,13 @@ def synthetic_donors(root: Path) -> dict[str, str]:
             "def tasks(): return {str(C.O): {}}\n"
         ),
         "wi_dedupe": (
-            "def unique(rows): return rows\ndef collapse(asm, note"
-            "s, tasks): return {}\n"
+            "import copy\nimport hashlib\nfrom wi_status import STATUSES\n"
+            "def clean_steps(rows): return rows or []\n"
+            "def is_nothing(text): return text.startswith('Niente')\n"
+            + (
+                ROOT / "tests/fixtures/dashboard_alias_intent/merge_selected.py.txt"
+            ).read_text()
+            + "\ndef collapse(asm, notes, tasks): return {}\n"
         ),
         "workitems": (
             "from pathlib import Path\nimport wi_repos\nfrom wi_common import REPOS\n"
@@ -252,11 +257,23 @@ def test_identity_candidate_is_separate_and_never_runtime_ready(tmp_path: Path) 
     expected = synthetic_donors(donor)
     module = exporter()
     core = module.build_bundle(donor, tmp_path / "core", expected)
-    assert not {"bin/wi_identity.py", "bin/wi_dedupe.py"} & {
-        row["path"] for row in core["files"]
+    assert not {"bin/wi_identity.py"} & {row["path"] for row in core["files"]}
+    assert "bin/wi_dedupe.py" in {row["path"] for row in core["files"]}
+    assert core["deferred_targets"] == ["bin/wi_identity.py"]
+    assert core["dedupe_intent_candidate"] == {
+        "path": "bin/wi_dedupe.py",
+        "symbols": ["merge_notes"],
+        "canonical_helper": "curation.select_needs_intent",
+        "runtime_accepted": False,
     }
+    before = {path: (donor / path).read_bytes() for path in expected}
     candidate = module.build_bundle(
         donor, tmp_path / "candidate", expected, include_identity_candidate=True
+    )
+    assert {path: (donor / path).read_bytes() for path in expected} == before
+    assert (
+        "select_needs_intent(out, note)"
+        in (tmp_path / "candidate/bin/wi_dedupe.py").read_text()
     )
     assert candidate["identity_candidate"] and candidate["runtime_ready"] is False
     assert {"bin/wi_identity.py", "bin/wi_dedupe.py"} <= {

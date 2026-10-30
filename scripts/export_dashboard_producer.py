@@ -8,6 +8,7 @@ import ast
 import difflib
 import hashlib
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -495,6 +496,77 @@ def _clean_adapter_imports(source: str, unused_candidates: set[str]) -> str:
     return _imports_after_future("".join(lines), "".join(hoisted))
 
 
+# Reviewed AST includes the function name, signature, ordering and merge guards.
+# Changes require explicit donor review; runtime/identity activation is separate.
+MERGE_NOTES_AST_SHA256 = (
+    "14addbab8955dfb1f63bb14d0f8a435ca84482766190685fe484c376bcc63b59"
+)
+
+
+class MissingDedupeDonorError(ValueError):
+    """A candidate donor must be explicitly bound before generating output."""
+
+
+class DedupeInventoryTransitionError(ValueError):
+    """Old core inventories cannot authorize an extra protected runtime target."""
+
+
+def dedupe_intent_adapter(source: str) -> str:
+    """Pair metadata at the existing scalar winner boundary, changing no identity."""
+    if sys.version_info[:2] != (3, 12):
+        raise ValueError("dedupe intent adapter requires Python 3.12 for reviewed AST")
+    tree = ast.parse(source)
+    bound = [name for node in tree.body for name in bindings(node)]
+    if bound.count("merge_notes") != 1 or "select_needs_intent" in bound:
+        raise ValueError("ambiguous merge_notes intent binding")
+    nodes = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "merge_notes"
+    ]
+    if len(nodes) != 1:
+        raise ValueError("missing merge_notes donor function")
+    merge = nodes[0]
+    digest = hashlib.sha256(
+        ast.dump(merge, include_attributes=False).encode()
+    ).hexdigest()
+    if digest != MERGE_NOTES_AST_SHA256:
+        raise ValueError("unreviewed merge_notes donor shape or signature")
+    # Exact reviewed shape above makes these positions unambiguous.
+    aliases = next(
+        node
+        for node in merge.body
+        if isinstance(node, ast.For)
+        and isinstance(node.target, ast.Name)
+        and node.target.id == "alias"
+    )
+    scalar = next(
+        node
+        for node in aliases.body
+        if isinstance(node, ast.For) and isinstance(node.target, ast.Tuple)
+    )
+    guard = scalar.body[0]
+    if not isinstance(guard, ast.If) or not isinstance(guard.test, ast.BoolOp):
+        raise ValueError("invalid merge_notes scalar guard")
+    comparison = guard.test.values[1]
+    if not isinstance(comparison, ast.Compare):
+        raise ValueError("invalid merge_notes scalar comparison")
+    excluded = comparison.comparators[0]
+    if not isinstance(excluded, ast.Tuple):
+        raise ValueError("invalid merge_notes scalar exclusions")
+    excluded.elts.append(ast.Constant("needs_intent"))
+    index = aliases.body.index(scalar)
+    aliases.body[index + 1 : index + 1] = ast.parse(
+        "if not superseded and 'needs' in note:\n    select_needs_intent(out, note)"
+    ).body
+    changed = replace_symbols(
+        source, {"merge_notes": ast.unparse(ast.fix_missing_locations(merge))}
+    )
+    return _imports_after_future(
+        changed, "from orchestra_dashboard.curation import select_needs_intent\n"
+    )
+
+
 def adapters(
     donors: dict[str, str],
     *,
@@ -509,11 +581,12 @@ def adapters(
         and "bin/wi_fields.py" not in donors
     ):
         raise ValueError("missing human-intent classifier donor")
+    if "bin/wi_dedupe.py" not in donors:
+        raise MissingDedupeDonorError("missing dedupe intent donor: bin/wi_dedupe.py")
     result = {
         path: text
         for path, text in donors.items()
-        if include_identity_candidate
-        or path not in {"bin/wi_identity.py", "bin/wi_dedupe.py"}
+        if include_identity_candidate or path != "bin/wi_identity.py"
     }
     modules = (
         [("wi_text", "text")]
@@ -588,9 +661,10 @@ def adapters(
                 for name in names
             },
         )
+    result["bin/wi_dedupe.py"] = dedupe_intent_adapter(donors["bin/wi_dedupe.py"])
     if include_identity_candidate:
         result["bin/wi_dedupe.py"] = replace_symbols(
-            donors["bin/wi_dedupe.py"],
+            result["bin/wi_dedupe.py"],
             {
                 "unique": "from orchestra_dashboard.curation import unique as unique",
                 "collapse": (
@@ -699,6 +773,7 @@ def _package_sources() -> dict[str, str]:
 
 def _ownership_vector(donor: Path, originals: dict[str, str]) -> None:
     required = {
+        "bin/wi_dedupe.py",
         "bin/wi_repos.py",
         "bin/workitems.py",
         "bin/wi_common.py",
@@ -776,6 +851,12 @@ def build_bundle(
         include_identity_candidate=include_identity_candidate,
         include_repository_compat=include_repository_compat,
     )
+    if "bin/wi_dedupe.py" not in expected:
+        if include_project_ownership:
+            raise ValueError("incomplete ownership source vector: bin/wi_dedupe.py")
+        raise MissingDedupeDonorError("missing dedupe intent donor: bin/wi_dedupe.py")
+    if not (donor / "bin/wi_dedupe.py").is_file():
+        raise MissingDedupeDonorError("missing dedupe intent donor: bin/wi_dedupe.py")
     originals = _read_originals(donor, expected)
     if include_project_ownership:
         _ownership_vector(donor, originals)
@@ -824,7 +905,13 @@ def build_bundle(
         "runtime_ready": False,
         "deferred_targets": []
         if include_identity_candidate
-        else ["bin/wi_identity.py", "bin/wi_dedupe.py"],
+        else ["bin/wi_identity.py"],
+        "dedupe_intent_candidate": {
+            "path": "bin/wi_dedupe.py",
+            "symbols": ["merge_notes"],
+            "canonical_helper": "curation.select_needs_intent",
+            "runtime_accepted": False,
+        },
     }
     (output / "patch.diff").write_text("".join(patch))
     (output / "manifest.json").write_text(json.dumps(report, indent=2) + "\n")
@@ -865,6 +952,12 @@ def build_applied_delta(applied: Path, output: Path) -> dict[str, Any]:
     if (output / "delta.diff").exists() or (output / "delta-manifest.json").exists():
         raise ValueError("delta output already exists")
     before, after = _bundle_snapshot(applied), _bundle_snapshot(output)
+    if "bin/wi_dedupe.py" not in before and "bin/wi_dedupe.py" in after:
+        raise DedupeInventoryTransitionError(
+            "dedupe intent candidate inventory transition: bin/wi_dedupe.py requires "
+            "a separate six-file composition review and fresh before vector; "
+            "the existing five-file freeze cannot be extended by applied delta"
+        )
     if before.keys() != after.keys():
         raise ValueError("core target inventory changed")
     changed = sorted(path for path in before if before[path] != after[path])
