@@ -11,6 +11,14 @@
   boundary cases.
 
 Dashboard regression files (`test_dashboard_*.py`) use invented tmp_path data:
+- history_index/history_export: all 22 present fields, absence and hidden/hide,
+  bounded summaries versus full raw/details, strict terminal/schema and stamp
+  validation, same-stamp summary mismatch, actual UTF-8 cap/cap+1 for index and
+  detail, and failure before mkdir/write. The copied pinned ordinary publisher
+  verifies case-insensitive terminal partition, detail/raw/quality/index/active
+  order, failure before active, exact outside-publish bytes, donor hash guards,
+  byte-identical helper export and no deletion. Tests execute selected static
+  source with synthetic inputs only; they never import or run a runtime build.
 - titles/sources/text: shared admission, curated title precedence, meaningful
   parentheses, transactional note preservation, deterministic lock contention
   and atomic-write failure; edited_fields projection and explicit blank fallback;

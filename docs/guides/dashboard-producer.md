@@ -6,6 +6,42 @@ runtime consumer; importing the package never starts services or discovers a
 runtime directory. See the [repository boundary](../../README.md#runtime-boundary)
 and the [implementation contract](../specs/2026-10-27-dashboard-card-producer.md).
 
+## Prepare compact history for review
+
+The inactive R1 history publisher keeps the raw terminal archive and complete
+stamped details, and adds `work-items-history-index.json` for compact history
+lists. It restores all 22 present compatibility fields and hidden/hide values
+after the existing bounded projection; it preserves full asks, steps and their
+order. Missing or nonboolean terminal `your_call` is rejected rather than inferred.
+
+Use Python 3.12 and isolated static donor copies matching the reviewed relative
+hash vector in [provenance](../provenance/dashboard-history-publisher-r1-20261104.json):
+
+```sh
+uv run python scripts/export_dashboard_history.py \
+  --donor "$isolated_donor_copy" --output "$new_review_bundle"
+```
+
+The output directory must be new and outside the donor copy. The export binds
+the caller and its existing quality dependency, requires the new history helper
+to be absent, and emits only the adapted caller, canonical history helper,
+manifest and patch. Its only caller changes are `publish` and one import; it
+preserves identity, curation, build and main. The broad producer exporter is not
+the R1 composition path. Python 3.12 is required for the reviewed AST pins.
+
+Before any directory creation or artifact write, the ordinary publisher validates
+generation, statuses, safe unique/disjoint IDs, public/detail membership, stamps
+and projected summary parity. Each fully stamped detail and the single index
+must fit 10 MiB inclusive in compact UTF-8 JSON; cap+1 and nonfinite JSON fail.
+This finite index does not introduce partitioning or cleanup. Existing files
+are never deleted. Writes remain atomic per file and ordered detail → raw
+archive → quality → index → active; a write failure leaves the active board at
+its previous generation, without promising a transaction across all files.
+
+This command creates a review bundle only. Development and review do not
+authorize runtime application, migration, merge or deployment. See the
+[SOURCE contract](../specs/2026-11-04-dashboard-history-publisher-r1.md).
+
 ## Author a new task
 
 Supply a specific Italian title describing the subject and intended change.

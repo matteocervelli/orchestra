@@ -367,7 +367,7 @@ def test_ownership_composes_with_current_repository_exporter(tmp_path, monkeypat
     assert (output / "bin/orchestra_dashboard/ownership.py").read_bytes() == Path(
         ownership.__file__
     ).read_bytes()
-    assert len(list((output / "bin/orchestra_dashboard").glob("*.py"))) == 23
+    assert len(list((output / "bin/orchestra_dashboard").glob("*.py"))) == 24
     for relative, digest in expected.items():
         assert hashlib.sha256((donor / relative).read_bytes()).hexdigest() == digest
 

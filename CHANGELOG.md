@@ -25,6 +25,8 @@ All notable changes to Orchestra are documented here.
 
 ### Added
 
+- Inactive SOURCE R1 compact history publisher with preserved rich details/raw
+  archive, 10 MiB preflight bounds and a separate narrow hash-bound review export.
 - Inert legacy dashboard repository-alias companion with pinned Native helper
   generation, exact donor hashes and a standalone JavaScript behavior gate.
 - Dedicated repository baseline with dual-forge flow and Forgejo-only CI.
