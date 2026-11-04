@@ -24,6 +24,7 @@ PACKAGE_FILES = (
     "repository.py",
     "curation.py",
     "history.py",
+    "history_index.py",
     "identity.py",
     "notes.py",
     "ownership.py",

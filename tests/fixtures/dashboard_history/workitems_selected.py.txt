@@ -1,0 +1,148 @@
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+TERMINAL_STATUSES = frozenset({"Deployed", "Dropped"})
+
+
+PUBLIC_LIST_LIMIT = 5
+
+
+_SAFE_ITEM_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+
+
+PUBLIC_ITEM_KEYS = frozenset(
+    {
+        "id",
+        "repo",
+        "kind",
+        "title",
+        "status",
+        "issue",
+        "pr",
+        "branch",
+        "problem",
+        "solution",
+        "needs",
+        "pages",
+        "child",
+        "slugs",
+        "updated",
+        "priority",
+        "priority_src",
+        "order",
+        "your_call",
+        "call_kind",
+        "ask",
+        "steps",
+        "links",
+        "issue_no",
+        "pr_no",
+        "taken",
+        "proposals",
+        "history",
+        "blocked",
+        "dropped",
+        "agent",
+        "review",
+        "gates",
+        "labels",
+        "raw_title",
+        "evidence",
+        "cost",
+    }
+)
+
+
+def _write_compact(data: dict, out: Path) -> None:
+    """Atomically write a UTF-8 JSON artifact without payload-only whitespace."""
+    out.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out.with_suffix(out.suffix + ".tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")))
+    tmp.replace(out)
+
+
+def _compact_fields(row: dict, *, required: set[str] | frozenset[str] = frozenset()) -> dict:
+    """Drop values for which Atrium applies the same default; retain meaningful zero values."""
+    empty = (None, "", [], {})
+    return {
+        key: value
+        for key, value in row.items()
+        if key in required or (value not in empty and value is not False)
+    }
+
+
+def _ledger_for(item: dict, ledger: list[dict]) -> list[dict]:
+    slugs = set(item.get("slugs") or [])
+    return [row for row in ledger if row.get("slug") in slugs]
+
+
+def _public_item(item: dict, ledger: list[dict]) -> dict:
+    """Project one full card into the Atrium contract plus bounded list summaries."""
+    row = {key: value for key, value in item.items() if key in PUBLIC_ITEM_KEYS}
+    history = item.get("history") if isinstance(item.get("history"), list) else []
+    children = item.get("children") if isinstance(item.get("children"), list) else []
+    item_ledger = _ledger_for(item, ledger)
+    row.update(
+        {
+            # A child's complete report and execution metadata live in the detail artifact. The
+            # public list only needs stable identities; Atrium reads sessions from top-level rows.
+            "children": [
+                {"slug": child["slug"]}
+                for child in children[-PUBLIC_LIST_LIMIT:]
+                if isinstance(child, dict) and isinstance(child.get("slug"), str)
+            ],
+            "children_total": len(children),
+            "history": history[-PUBLIC_LIST_LIMIT:],
+            "history_total": len(history),
+            "ledger": item_ledger[-PUBLIC_LIST_LIMIT:],
+            "ledger_total": len(item_ledger),
+        }
+    )
+    return _compact_fields(
+        row,
+        required={
+            "id",
+            "status",
+            "children_total",
+            "history_total",
+            "ledger_total",
+        },
+    )
+
+
+def _detail_item(item, ledger, *, board, snapshot_digest):
+    return bind_detail({**item, "ledger": _ledger_for(item, ledger)}, board, snapshot_digest=snapshot_digest)
+
+
+def publish(data: dict, out: Path | None=None) -> None:
+    """Publish the live board, terminal archive and complete per-card detail artifacts."""
+    out = out or C.OUT
+    data = {**data, 'generated': publication_generated(read_json(out, {}).get('generated'))}
+    archive_out = out.with_name('work-items-archive.json')
+    detail_dir = out.parent / 'work-items-detail'
+    items = [item for item in data.get('items', []) if isinstance(item, dict)]
+    ledger = [row for row in data.get('ledger', []) if isinstance(row, dict)]
+    live = [item for item in items if item.get('status') not in TERMINAL_STATUSES]
+    terminal = [item for item in items if item.get('status') in TERMINAL_STATUSES]
+    recent_slugs = {child.get('slug') for item in live for child in (item.get('children') or [])[-PUBLIC_LIST_LIMIT:] if isinstance(child, dict) and isinstance(child.get('slug'), str)}
+    public_children = [_compact_fields(child, required={'slug'}) for child in data.get('children', []) if isinstance(child, dict) and (child.get('slug') in recent_slugs or child.get('running') is True)]
+    public = {key: data[key] for key in ('generated', 'statuses', 'decisions', 'host') if key in data}
+    public['items'] = [_public_item(item, ledger) for item in live]
+    public['children'] = public_children
+    terminal_slugs = {slug for item in terminal for slug in item.get('slugs', []) if isinstance(slug, str)}
+    archive = dict(data)
+    archive['items'] = terminal
+    archive['children'] = [child for child in data.get('children', []) if isinstance(child, dict) and child.get('slug') in terminal_slugs]
+    detail_dir.mkdir(parents=True, exist_ok=True)
+    snapshot_digest = board_digest(public)
+    for item in items:
+        item_id = item.get('id')
+        if not isinstance(item_id, str) or not _SAFE_ITEM_ID.fullmatch(item_id):
+            raise ValueError(f'unsafe work item id: {item_id!r}')
+        _write_compact(_detail_item(item, ledger, board=public, snapshot_digest=snapshot_digest), detail_dir / f'{item_id}.json')
+    _write_compact(archive, archive_out)
+    _write_compact(quality_audit({**data, 'items': live}), out.with_name('work-items-quality.json'))
+    _write_compact(public, out)
