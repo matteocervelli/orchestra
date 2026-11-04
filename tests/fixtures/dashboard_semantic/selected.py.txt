@@ -1,0 +1,334 @@
+from __future__ import annotations
+
+@dataclass
+class Ctx:
+    pages: list[str]
+    triage: dict
+    notes: dict
+    probes: Probes
+    now: float
+    decisions: dict[str, dict]
+    ledger: dict[str, list[dict]]
+    answered: list  # wi_fields.AnswerRec
+    acted: set[str]
+    issue_prio: dict = field(default_factory=dict)
+    html: dict = field(default_factory=dict)
+    previews: dict = field(default_factory=dict)  # item id -> live preview url
+    number_repos: dict[str, set[str]] = field(default_factory=dict)
+    tasks: dict = field(default_factory=dict)
+    spawns: dict = field(default_factory=dict)
+
+def build(
+    now: float | None = None,
+    budget_calls: int = GH_BUDGET,
+    probes: Probes | None = None,
+) -> dict:
+    now = now or time.time()
+    C.CACHE.mkdir(parents=True, exist_ok=True)
+    probes = probes or Probes(C.CACHE, budget_calls, now)
+    spawns = {
+        d["slug"]: d for d in read_jsonl(C.O / "logs" / "spawns.jsonl") if "slug" in d
+    }
+    tk = tasks()
+    runs = child_runs(spawns, now)
+    ledger = read_jsonl(C.O / "ledger.jsonl")
+    led: dict[str, dict] = {}
+    by_slug: dict[str, list[dict]] = {}
+    for r in ledger:
+        led[r.get("slug")] = r
+        by_slug.setdefault(r.get("slug"), []).append(r)
+    decisions = read_json(C.O / "decisions.json", [])
+    triage = {
+        (short_repo(t["repo"]), t["number"]): t
+        for t in read_json(C.O / "scratch" / "issues-triage.json", [])
+    }
+    all_prs = list(
+        {
+            (p["repository"]["name"], p["number"]): p
+            for p in [*fetch_prs(probes), *H.fetch_proposals(probes),
+                      *card_sources(probes, [p[0] for p in R.PROJECTS])]
+        }.values()
+    )
+    ordinary_tasks = {s: t for s, t in tk.items() if not H.RUN_RE.fullmatch(s)}
+    asm = Assembly(spawns, led, [p for p in all_prs if not H.is_proposal(p)], probes)
+    asm.register_producers(ordinary_tasks)
+    revs = reviews()
+    asm.add_prs(revs)
+    asm.add_tasks(ordinary_tasks, runs, now)
+    asm.add_decisions(decisions)
+    asm.add_queue(read_json(C.O / "queue.json", []))
+    asm.add_triage(triage)
+    ctx = Ctx(
+        pages=sorted(
+            p.name
+            for p in (C.O / "pages").glob("*.html")
+            if p.name not in ("dashboard.html", "dashboard-classic.html", "index.html")
+        ),
+        triage=triage,
+        notes=read_json(C.O / "workitems-notes.json", {}),
+        probes=probes,
+        now=now,
+        decisions={str(d.get("id")): d for d in decisions if isinstance(d, dict)},
+        ledger=by_slug,
+        answered=answer_records(C.O / "answers"),
+        acted=acted_ids(C.O / "actions"),
+        issue_prio=issue_priorities(probes),
+        previews=live_previews(C.O),
+        tasks=tk,
+        spawns=spawns,
+    )
+    ctx.notes = collapse(asm, ctx.notes, tk)
+    if "--migrate-notes" in sys.argv:
+        result = migrate_notes(
+            C.O,
+            {iid: it["_note_aliases"] for iid, it in asm.items.items()},
+            {iid: it["children"] for iid, it in asm.items.items()},
+        )
+        print("notes migration:", json.dumps(result))
+        latest = read_json(C.O / "workitems-notes.json", {})
+        ctx.notes = dict(latest)
+        for iid, it in asm.items.items():
+            ctx.notes[iid] = (
+                effective_note(latest, it["_note_aliases"], iid, it["children"])
+                if it.get("_deduped")
+                else latest.get(iid, {})
+            )
+            it["_ask_overrides"] = ctx.notes.get(iid, {}).get("ask_overrides", [])
+    # Keep health proposals out of ordinary dedupe; each repo owns its whole nightly history.
+    asm.pr_by.update(
+        {
+            (short_repo(p["repository"]["name"]), p["number"]): p
+            for p in all_prs
+            if H.is_proposal(p)
+        }
+    )
+    ctx.notes = H.attach(asm, tk, runs, ctx.notes)
+    for it in asm.items.values():
+        repo = short_repo(it["repo"] or "")
+        for ref in (it["issue"], it["pr"]):
+            if ref and repo:
+                ctx.number_repos.setdefault(str(ref["number"]), set()).add(repo)
+    for iid, it in asm.items.items():
+        finish(it, iid, ctx)
+        H.finish_health(it, asm, revs)
+    releases = R.snapshot(list(asm.items.values()), probes, now)
+    R.reconcile(list(asm.items.values()), releases)
+    for it in asm.items.values():
+        it["release_operation"] = R.is_release_item(it)
+    attach_taken(asm.items, runs, spawns)
+    probes.save()
+    ordered = sorted(
+        (i for i in asm.items.values() if not i.pop("hidden")),
+        key=lambda x: x["updated"],
+        reverse=True,
+    )
+    return {
+        "generated": iso(now),
+        "releases": releases,
+        "statuses": STATUSES,
+        "items": ordered,
+        "children": sorted(
+            (
+                {k: v for k, v in c.items() if k != "final"}
+                | {"goal": tk.get(s, {}).get("goal", "")}
+                for s, c in runs.items()
+            ),
+            key=lambda c: c["start"],
+            reverse=True,
+        ),
+        "ledger": ledger,
+        "decisions": decisions,
+        "host": host(),
+        "gh_calls_left": probes.budget,
+        "probe_calls": dict(probes.calls),
+    }
+
+def identify(it: dict, iid: str, repo: str, ctx: Ctx) -> None:
+    """Title, kind and branch from the sources, before any curated text."""
+    if it["issue"]:
+        t = issue_title(repo, it["issue"]["number"], ctx.triage, ctx.probes)
+        it["title"] = it["title"] or t
+    it["title"] = (
+        it["title"] or (it["pr"] or {}).get("title", "") or it.get("goal", iid)
+    )
+    if not it["kind"]:
+        it["kind"] = kind_of(iid, it["title"])
+    elif iid.startswith("issue-") and it["kind"] in (
+        "issue",
+        "feature",
+        "test",
+        "docs",
+        "fix",
+    ):
+        it["kind"] = kind_of("issue-x", it["title"])
+    if not it["branch"] and it["slugs"]:
+        s = [x for x in it["slugs"] if not x.endswith(("-fix", "-review"))]
+        it["branch"] = f"auto/{s[0]}" if s and it["pr"] else ""
+
+def finish(it: dict, iid: str, ctx: Ctx) -> None:
+    note = ctx.notes.get(iid) or {}
+    ch = sorted(it['children'], key=lambda c: c['start'])
+    card = next((c['card'] for c in reversed(ch) if c.get('card')), {})
+    rows = [r for slug in it['slugs'] for r in ctx.ledger.get(slug, [])]
+    it['repos'] = wi_repos.derive(it, card, note, ctx.tasks, ctx.spawns, rows)
+    if not (it.get('pr') or it.get('issue')):
+        it['repo'] = it['repos'][0]
+    repo = REPOS.get(it['repo'], it['repo'])
+    identify(it, iid, repo, ctx)
+    match_pages(it, iid, repo, ctx.pages, number_repos=ctx.number_repos, html=ctx.html)
+    ch = sorted(it['children'], key=lambda c: c['start'])
+    running = any((c['running'] for c in ch))
+    if ch:
+        active = [c for c in ch if c['running']]
+        it['child'] = {k: (active or ch)[-1][k] for k in ('slug', 'tool', 'model', 'duration', 'cost', 'running')}
+    outcomes = it.get('outcomes', [])
+    it['evidence'] = ' · '.join((clip(o.get('gates') or '', 200) for o in outcomes if o.get('gates')))
+    res = compute(it, outcomes, ctx.probes)
+    it['status'] = res['status']
+    heuristic_text(it, outcomes)
+    card = next((c['card'] for c in reversed(ch) if c.get('card')), {})
+    it['raw_title'] = it['title']
+    it['steps'] = steps_of(note, card)
+    it['work_provenance'] = resolve_work_provenance(note, [ctx.tasks[s] for s in it.get('slugs', []) if s in ctx.tasks], card)
+    curated, preview = curate(it, note, card)
+    preview = preview or ctx.previews.get(iid, '')
+    if 'needs' in curated:
+        settle(it, res, it['needs'])
+    override = None if running else note_status(note.get('status'), res['status'])
+    if ch and (not running) and (override == 'Doing'):
+        override = None
+    if it.get('_deduped') and res['status'] in ('Integration', 'Main', 'Deployed') and override:
+        if override == 'Dropped' or STATUSES.index(override) < STATUSES.index(res['status']):
+            override = None
+    it['status'] = override or res['status']
+    if note.get('status') in ASKING_OLD and (not running):
+        res['asking'] = True
+    if isinstance(note.get('blocked'), str):
+        res['blocked'] = clip(note['blocked'], 160)
+    it['blocked'] = res['blocked']
+    it['dropped'] = drop_reason(res, note, it['needs']) if it['status'] == 'Dropped' else ''
+    it['stage'] = res['stage']
+    it['repo'] = it['repo'] or 'orchestra'
+    it['hidden'] = bool(note.get('hide'))
+    ask_note = note if 'health' in it else merged_asks(it, note, card)
+    res['asking'] = fill_text(it, curated, res['asking'], ask_note, note.get('status') in ASKING_OLD, [ctx.tasks[s] for s in it.get('slugs', []) if s in ctx.tasks])
+    it['ui'] = ui_of(it, note)
+    it['gates'] = gates_of(it, preview, note, ctx.probes, ctx.html)
+    asks(it, ask_note, curated, res['asking'], ctx)
+    if it['ask'] and note.get('ask') and (res['done'] == 'Deployed') and (not (running or override or it['pr'])):
+        it['status'] = 'Backlog'
+    it['links'] = links_of(it)
+    led_rows = [r for s in it['slugs'] for r in ctx.ledger.get(s, [])]
+    attach_refs(it, note, it.pop('_reftext', []) + [f"{r.get('note') or ''} {r.get('gates') or ''}" for r in led_rows])
+    it['agent'], it['reviewer'] = (agent_of(ch), reviewer_of(it))
+    it['history'] = history_of(it, led_rows)
+    for c in it['children']:
+        c.pop('card', None)
+    it.pop('goal', None)
+    it['cost'] = round(sum((c['cost'] or 0 for c in it['children'])), 2)
+    it['priority'], it['priority_src'] = priority_of(it, note, ctx.issue_prio)
+    it['order'] = order_of(note)
+    it['proposals'] = [p for p in note.get('proposals') or [] if isinstance(p, dict)][-5:]
+    it.pop('_deduped', None)
+    it.pop('_ask_overrides', None)
+    it.pop('_note_aliases', None)
+
+def heuristic_text(it: dict, outcomes: list[dict]) -> None:
+    tri = it.get("triage") or {}
+    it["problem"] = clip(it["title"], 200)
+    if tri.get("why"):
+        it["problem"] += " — " + clip(tri["why"], 200)
+    last_gates = outcomes[-1].get("gates") if outcomes else ""
+    it["solution"] = clip((it["pr"] or {}).get("title", "") or last_gates or "", 240)
+    it["needs"] = needs_of(it)
+
+def asks(it: dict, note: dict, curated: set[str], asking: bool, ctx: Ctx) -> None:
+    """Your call: notes ask > decisions > needs; a curated "Niente…" answers every question."""
+    it["ask"] = ask_of(it, note.get("ask"))
+    raw_asks = note.get("ask")
+    raw_asks = [raw_asks] if isinstance(raw_asks, dict) else raw_asks
+    raw_asks = [a for a in raw_asks if isinstance(a, dict)] if raw_asks else raw_asks
+    for a, raw in zip(it["ask"], raw_asks or it["ask"]):
+        if isinstance(raw, dict):
+            a["_item"] = raw.get("_item", it["id"])
+            a["_answered"] = raw.get("_answered", False)
+    if (
+        "needs" in curated
+        and is_nothing(it["needs"])
+        and not (it.get("_deduped") and note.get("ask"))
+    ):
+        it["ask"] = []
+    elif asking and not it["ask"] and "ask" not in note:
+        it["ask"] = [split_advice({"link": ask_link(it)}, it["needs"])]
+    for a in it["ask"]:
+        a["question"] = a["question"] or it["needs"]
+        a["rec"] = a["rec"] or NO_REC
+    enrich_asks(it, ctx.decisions, ctx.answered)
+    # answered on the dashboard (answer file or dispatch/comment action): out of Your call until a new ask appears
+    for a in it["ask"]:
+        if "health" not in it and (
+            a.get("_item", it["id"]) in ctx.acted or card_ids(it) & ctx.acted
+        ):
+            a["answered"] = True
+    open_asks = [a for a in it["ask"] if not a["answered"]]
+    # closed by Orchestra in the notes (released or dropped): its old questions are moot
+    if ctx.notes.get(it["id"], {}).get("status") in ("Deployed", "Dropped"):
+        open_asks = []
+    it["your_call"] = bool(open_asks)
+    it["call_kind"] = (open_asks or it["ask"] or [{"kind": ""}])[0]["kind"]
+    # an item whose only open work is its checklist is a "Da fare tu"; open questions come first
+    if it.get("steps") and not open_asks:
+        it["call_kind"] = "action"
+    it["serve_te"] = it["your_call"]
+def enrich_asks(it: dict, decisions: dict[str, dict], answers: list[AnswerRec]) -> None:
+    """Final kind, decisions.json questions and answered flag on every ask."""
+    mine = owned(it, answers)
+    for a in it["ask"]:
+        d = decisions.get(a["id"]) if a["id"] else None
+        a["kind"] = ask_kind(a, it, d)
+        qs = (d or {}).get("questions")
+        a["questions"] = qs if isinstance(qs, list) else []
+        # an ask without id is answered under the item id (the modal posts decision=<item id>)
+        a["answered"] = bool(a.get("_answered") or ask_answered(a, it, mine))
+
+def qualified_pr(raw: object, repo: str) -> dict[str, Any] | None:
+    if (
+        not isinstance(raw, dict)
+        or type(raw.get("number")) is not int
+        or raw["number"] < 1
+    ):
+        return None
+    url = raw.get("url")
+    if not isinstance(url, str):
+        return None
+    try:
+        parsed = urlsplit(url)
+    except ValueError:
+        return None
+    if (
+        parsed.scheme != "https"
+        or parsed.netloc not in ("github.com", "git.adlimen.dev")
+        or parsed.query
+        or parsed.fragment
+    ):
+        return None
+    match = re.fullmatch(r"/([\w.-]+)/([\w.-]+)/(pull|pulls)/(\d+)/?", parsed.path)
+    if (
+        not match
+        or int(match[4]) != raw["number"]
+        or f"{match[1]}/{match[2]}" != repository_authority(repo)
+    ):
+        return None
+    if match[3] != ("pull" if parsed.netloc == "github.com" else "pulls"):
+        return None
+    repository = f"{match[1]}/{match[2]}"
+    if ("host" in raw and raw["host"] != parsed.netloc) or (
+        "repo" in raw and raw["repo"] != repository
+    ):
+        return None
+    return {
+        "host": parsed.netloc,
+        "repo": repository,
+        "number": raw["number"],
+        "url": url,
+    }

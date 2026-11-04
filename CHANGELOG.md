@@ -6,6 +6,11 @@ All notable changes to Orchestra are documented here.
 
 ### Fixed
 
+- Inactive SOURCE recovers bounded authored descriptions from the exact primary
+  PR after curation, marks absent evidence honestly and reports duplicate title
+  details. The text layer stops partial outcomes inventing human asks while
+  preserving lifecycle settlement and acquired descriptions before assembly dedupe.
+
 - SOURCE author-derived titles reject recognizable token, opaque-run and email
   shapes before display. Curated titles retain precedence; this bounded filter
   does not provide general PII anonymization.

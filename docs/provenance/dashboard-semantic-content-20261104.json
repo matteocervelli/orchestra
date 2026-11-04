@@ -1,0 +1,123 @@
+{
+  "schema": "orchestra-dashboard-semantic-source/v1",
+  "python": "3.12",
+  "before_vectors": {
+    "current": {
+      "bin/workitems.py": "651d2b9c4bd204bf93649ffbbf8d1e01351c6633cd1c947c3a11803939d1f26e",
+      "bin/wi_status.py": "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "bin/wi_fields.py": "a96927b3e728f9f0cace39707cc6993bcaa23bd81343554f992771b55ecaaa79",
+      "bin/wi_dedupe.py": "fba36aed834b447c9c0a5f9d09a654022fddc19fa66b7105460730bc916bdd08",
+      "bin/orchestra_dashboard/__init__.py": "5fbf458033b1df4fe3ffdab5f33deba3bb47da157f8f1b61adf3e5bf9186c011",
+      "bin/orchestra_dashboard/curation.py": "f766d0c6f87f2f9079efe6d1fc399eb3a07238fa7938f26b0b62932c37287e3f",
+      "bin/orchestra_dashboard/text.py": "307e786dfb6240df34366941532a55e93d32a52aa36937725292824c5abbf4e8",
+      "bin/orchestra_dashboard/quality.py": "d76696a6836e1fa21527d7fdcd9377269bde4303c2fbbe36dfe4caf2e3812996",
+      "bin/orchestra_dashboard/provenance.py": "0308b09a6cba4c1bc0c035f0e037e74ea2b1a05f94592158b6774445bcfbfb55",
+      "bin/orchestra_dashboard/common.py": "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
+      "bin/orchestra_dashboard/titles.py": "79d89d781de596534a83e32f57864a05bf689d6d533e9f72e39cef4223f34d07",
+      "bin/orchestra_dashboard/sources.py": "8b529916e7e328e26570386a0aaecec6c14b73f55d1562567eb7ae06c6db52c3",
+      "bin/wi_sources.py": "db4f54c2f816ee2726edf1ffb1c0241cd164ccf9da99311297b32b78e90c0320",
+      "bin/wi_health.py": "227cbfd1f908ff94ad0be6a4ad6ba93a125618733e089a86049e8618939c2d23",
+      "bin/wi_release_links.py": "be18f26e6430dcbbe581a2fa6cab8386ed84e099be27c1305959180c1278a20b"
+    },
+    "planned_r1": {
+      "bin/workitems.py": "b7ea800befad409b4a60673f7df9ea12994bf51d6cfdefd1ae449ed7fe5d209d",
+      "bin/wi_status.py": "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+      "bin/wi_fields.py": "a96927b3e728f9f0cace39707cc6993bcaa23bd81343554f992771b55ecaaa79",
+      "bin/wi_dedupe.py": "fba36aed834b447c9c0a5f9d09a654022fddc19fa66b7105460730bc916bdd08",
+      "bin/orchestra_dashboard/__init__.py": "5fbf458033b1df4fe3ffdab5f33deba3bb47da157f8f1b61adf3e5bf9186c011",
+      "bin/orchestra_dashboard/curation.py": "f766d0c6f87f2f9079efe6d1fc399eb3a07238fa7938f26b0b62932c37287e3f",
+      "bin/orchestra_dashboard/text.py": "307e786dfb6240df34366941532a55e93d32a52aa36937725292824c5abbf4e8",
+      "bin/orchestra_dashboard/quality.py": "d76696a6836e1fa21527d7fdcd9377269bde4303c2fbbe36dfe4caf2e3812996",
+      "bin/orchestra_dashboard/provenance.py": "0308b09a6cba4c1bc0c035f0e037e74ea2b1a05f94592158b6774445bcfbfb55",
+      "bin/orchestra_dashboard/common.py": "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
+      "bin/orchestra_dashboard/titles.py": "79d89d781de596534a83e32f57864a05bf689d6d533e9f72e39cef4223f34d07",
+      "bin/orchestra_dashboard/sources.py": "8b529916e7e328e26570386a0aaecec6c14b73f55d1562567eb7ae06c6db52c3",
+      "bin/orchestra_dashboard/history_index.py": "0e46821c4fd3f777c8119efa6429ae81e488a67b75e398c314fddb4487b764cf",
+      "bin/wi_sources.py": "db4f54c2f816ee2726edf1ffb1c0241cd164ccf9da99311297b32b78e90c0320",
+      "bin/wi_health.py": "227cbfd1f908ff94ad0be6a4ad6ba93a125618733e089a86049e8618939c2d23",
+      "bin/wi_release_links.py": "be18f26e6430dcbbe581a2fa6cab8386ed84e099be27c1305959180c1278a20b"
+    }
+  },
+  "caller_ast_sha256": {
+    "Ctx": "a786d7e3e59483fb696a2d525f850c4551a0f5c25aee12ad0276edf759f2f8ca",
+    "build": "a0b4d128ff13cba01ad63e02d6f45a0d91816d4d0e11018e40eb19a129807181",
+    "finish": "a4521f7e0a69a2a5ab535048d301404277830bff3431e653a48c4ca249caba76"
+  },
+  "status_ast_sha256": {
+    "no_pr_status": "f60a0ee8dfe001afc83bbf1438d477b16ce699a3d188819a95bf579e8a297d04"
+  },
+  "dependency_ast_sha256": {
+    "provenance.py": {
+      "qualified_pr": "6dff9159dd15d57cbce3e07b28fb50b4ab75ed480feba4c64d5fd25583e1d82b"
+    },
+    "common.py": {
+      "short_repo": "f803e618fec35e4204c30afa2e4011973c2c9e81eb50ca5fe4daf22d54367480",
+      "repository_authority": "79c58d2b563415bd1e73ef5f83869c204915497d55ae4decb9908ee721f25626"
+    },
+    "text.py": {
+      "fill_text": "128f15dc6fb10c536602085931298156cf2eb60428a6303bec1797d03e552334"
+    },
+    "quality.py": {
+      "findings": "7c326b4a5c723d3aead1fe5817efa60612453f7193307bd9a570634ac8de62d6"
+    }
+  },
+  "applied": false,
+  "runtime_ready": false,
+  "canonical_dependency_ast_sha256": {
+    "provenance.py": {
+      "qualified_pr": "a8dce00aa3028aa4aa5e75e9bb8c80ba8d2b33e000def362cd2d0a2c4b9c6fb2",
+      "_pr_location": "0b9ca4894ee072f8d256755618dc23664748a51b78c64216b1f19ed3613ee377",
+      "_pr_path_repository": "f4bc1c77a0463af35822cf82e57c84db0f7ce7f259a63e62231d9689821c7c04",
+      "_pr_fields_match": "3136c27de066d0b8fcd327b451200181995356a5ebc00c77a9b66887be3395cf"
+    },
+    "common.py": {
+      "short_repo": "f803e618fec35e4204c30afa2e4011973c2c9e81eb50ca5fe4daf22d54367480",
+      "repository_authority": "79c58d2b563415bd1e73ef5f83869c204915497d55ae4decb9908ee721f25626"
+    }
+  },
+  "acquisition_evidence": [
+    {
+      "source": "bin/wi_sources.py",
+      "source_sha256": "db4f54c2f816ee2726edf1ffb1c0241cd164ccf9da99311297b32b78e90c0320",
+      "symbol": "fetch_prs",
+      "selected_sha256": "dbe976b10ee5e7436342ee8023babfd27922e883699b0b639d479cb917008454"
+    },
+    {
+      "source": "bin/wi_health.py",
+      "source_sha256": "227cbfd1f908ff94ad0be6a4ad6ba93a125618733e089a86049e8618939c2d23",
+      "symbol": "fetch_proposals",
+      "selected_sha256": "f4190777dc964c4a22cac2c576a40c50747bd423a69f6a024b7d81385fecf313"
+    },
+    {
+      "source": "bin/wi_release_links.py",
+      "source_sha256": "be18f26e6430dcbbe581a2fa6cab8386ed84e099be27c1305959180c1278a20b",
+      "symbol": "card_sources",
+      "selected_sha256": "5954e665d1c7b07c9fc4b55c3682c3d413c886b64b6577157e310a4dd1021bcc"
+    }
+  ],
+  "acquisition_fixture_sha256": "b551e004af2afd6f3fe062d20f43f574072501b10730370e334620546b2fa0f0",
+  "acquisition_ast_sha256": {
+    "fetch_prs": "8029e7abccb8a16d5f79632bec11dd9b43ec1a81d78d8139c9fc16c17c590efa",
+    "fetch_proposals": "69c6ae4ec924b3b8bc5e8eaaa5f4adbf1e36b83ab4a58f4f3f2aaab26c0af19f",
+    "card_sources": "af81c50af503bce3d96057d5e1fde3bcc6f29ba4a97f56c1725dccd71f7aa18a"
+  },
+  "followup_acquisition_shapes": {
+    "project_keys": [
+      "app-himalaia",
+      "app-ratio",
+      "atrium",
+      "adlimen-cicd",
+      "claude-dotfiles"
+    ],
+    "projects_source_sha256": "24945da51f2a82969f6ac940bd56abd8273f9756f6a7d55f8784a311d932c40b",
+    "release_pr_field_strings": [
+      "number,title,state,body,url,baseRefName,mergeCommit,mergedAt,labels,files"
+    ],
+    "release_source_sha256": "ed3a2c236e39cc2074eeaa938f1cae8e902d8b0c788840eff291741df0f0bf04",
+    "release_row_added_fields": [
+      "older_than_tag",
+      "included_in_tag",
+      "included_in_main"
+    ]
+  }
+}

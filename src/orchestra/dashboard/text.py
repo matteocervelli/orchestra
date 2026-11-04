@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from .common import CLOSED, REPOS, STATUSES
+from .descriptions import fill_descriptions
 from .sources import task_display_title
 from .titles import meaningful_title
 
@@ -119,12 +120,17 @@ def fill_text(
     ask_note: dict[Any, Any] | None = None,
     legacy_asking: bool = False,
     tasks: list[dict[Any, Any]] | None = None,
+    *,
+    source_prs: list[dict[Any, Any]] | None = None,
 ) -> bool:
     """Fill missing card text and record actual fallback fields."""
     asking = _human_asking(it, asking, ask_note, legacy_asking)
     title = _selected_title(it, curated, tasks)
     auto = [] if title else ["title_it"]
     it["title"] = title or fallback_title(it, it["raw_title"])
+    described = (
+        fill_descriptions(it, curated, source_prs) if source_prs is not None else set()
+    )
     if not it["problem"].strip():
         it["problem"] = it["title"]
     if not it["solution"].strip():
@@ -134,9 +140,7 @@ def fill_text(
         it["needs"], automatic = _needs_fallback(it, asking)
         if automatic:
             auto.append("needs")
-    for key in ("problem", "solution"):
-        if key not in curated and key not in auto:
-            auto.append(key)
+    auto.extend({"problem", "solution"} - curated - set(auto) - described)
     it["auto"] = sorted(auto)
     return asking
 
@@ -151,6 +155,8 @@ def _human_asking(
         return bool(ask_of(it, (ask_note or {}).get("ask")))
     if not asking or legacy_asking:
         return asking
+    if _partial_without_human(it, ask_note):
+        return False
     if _technical_failure(it):
         override = (ask_note or {}).get("ask")
         if isinstance(override, (dict, list)):
@@ -161,6 +167,19 @@ def _human_asking(
             it["needs"] = ""
         return bool(ask_of(it))
     return asking
+
+
+def _partial_without_human(it: dict[Any, Any], ask_note: dict[Any, Any] | None) -> bool:
+    if it.get("status") != "Backlog" or _independent_human_signal(it):
+        return False
+    outcomes = it.get("outcomes") or []
+    last = outcomes[-1] if outcomes else {}
+    partial = str(last.get("outcome") or "").lower().startswith("partial")
+    return bool(
+        partial
+        and not str(it.get("needs") or "").strip()
+        and not ask_of(it, (ask_note or {}).get("ask"))
+    )
 
 
 def _technical_failure(it: dict[Any, Any]) -> bool:

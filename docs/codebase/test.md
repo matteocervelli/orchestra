@@ -11,6 +11,14 @@
   boundary cases.
 
 Dashboard regression files (`test_dashboard_*.py`) use invented tmp_path data:
+- descriptions/semantic_export: exact primary URL/owner/repo/number and head
+  qualification, conflicting bodies/heads, bounded explicit markdown sections,
+  sensitive/control/HTML rejection, unwired/empty-source behavior, post-curation
+  precedence, blank fallback and curated partial closure, field-bound digest
+  provenance, read-only findings, and actual selected compute/finish/asks paths.
+  Pinned runtime/canonical qualification share a positive/negative corpus; narrow
+  exports preserve donor and untouched output bytes, enforce acquisition/fixture
+  pins, and reject unknown vectors before output.
 - history_index/history_export: all 22 present fields, absence and hidden/hide,
   bounded summaries versus full raw/details, strict terminal/schema and stamp
   validation, same-stamp summary mismatch, actual UTF-8 cap/cap+1 for index and
