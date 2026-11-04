@@ -117,7 +117,7 @@
     "src/orchestra/dashboard/identity.py": "3b2855bcc1c4c1047a61177b247d14ffefbda34616739d2f43dd312cc9bc2780",
     "src/orchestra/dashboard/notes.py": "799a2c36f9046a65186fbc5b7246fdbe7074060cb37b1573f4340f15c1d351d2",
     "src/orchestra/dashboard/provenance.py": "369f366d0efd33f51f8b7b87794870b6459c68d6b32b5ca77e8b3c6dfe3cf783",
-    "src/orchestra/dashboard/quality.py": "491ef4c9ce642902d6d66a879ced601bf34a1b521564347660b2c5fea1e3aec5",
+    "src/orchestra/dashboard/quality.py": "b21c93288e9c1ac9ae6b5bb9553060008ff450c33b8701ad51cd5bba41f7a156",
     "src/orchestra/dashboard/repository.py": "c14012185c1a434e26acf8cfcb7d1248987378648c8399e9c9daa0ae88a9b97e",
     "src/orchestra/dashboard/shadow.py": "82022c384c23cd7622ca95662213142b1d0dd8964001234ff8a9d43b3ea6d2ee",
     "src/orchestra/dashboard/shadow_graph.py": "e08a62dc491833f3de36738dc90bd2f4e37424df5c1f46141e8c823b3e24fc52",
@@ -127,9 +127,10 @@
     "src/orchestra/dashboard/shadow_schema.py": "d5d8d57b3e7050ad4479970d09a27230aa93b1dac01422c292da4fdf4ab26828",
     "src/orchestra/dashboard/shadow_store.py": "083dbecaa8bc671303e7d5386e0381e54d076e1c7a56a7eca3854ece964b312e",
     "src/orchestra/dashboard/sources.py": "8b529916e7e328e26570386a0aaecec6c14b73f55d1562567eb7ae06c6db52c3",
-    "src/orchestra/dashboard/text.py": "307e786dfb6240df34366941532a55e93d32a52aa36937725292824c5abbf4e8",
+    "src/orchestra/dashboard/text.py": "d0fa1b007acd78194e47ff8cfefddcb2b4beb9fe383862b3c3ecff6fdfc31e9c",
     "src/orchestra/dashboard/titles.py": "79d89d781de596534a83e32f57864a05bf689d6d533e9f72e39cef4223f34d07",
-    "src/orchestra/dashboard/shadow_profile_pins.json": "cc4e1369fc61d8fa52621e4e1f10847a0799cb795fd8bc3914502b36e49f6faa"
+    "src/orchestra/dashboard/shadow_profile_pins.json": "cc4e1369fc61d8fa52621e4e1f10847a0799cb795fd8bc3914502b36e49f6faa",
+    "src/orchestra/dashboard/descriptions.py": "75bd9d216fd3ee96b70d43f7d1e73b92c4da3d6af36acdbda7f2c47c07d50f5c"
   },
   "runtime_export": {
     "core_excludes": [

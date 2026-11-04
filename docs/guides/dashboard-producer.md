@@ -398,3 +398,64 @@ A rejected old inventory can therefore leave a full candidate directory, althoug
 no delta artifacts are written. Never use that directory as an accepted delta.
 Inventory transition diagnostics do not replace comparison of the entire target
 set: other additions or removals may coexist with the new dedupe candidate.
+
+
+## Grounded PR descriptions (inactive SOURCE)
+
+`export_dashboard_semantic.py --donor <isolated-copy> --output <new-bundle>`
+prepares four files for review against the explicit current before vector. For
+`--variant planned_r1`, the donor copy must already contain the separately
+reviewed R1 caller and history helper. Neither form applies its output.
+
+The caller retains its acquired PR list before existing assembly last-wins
+deduplication and passes that original list through defaulted `Ctx.source_prs`
+into `fill_text` after curation. Provider calls/order and assembly selection stay
+unchanged. Body-absent matching rows supply no description evidence; they do not
+shadow a valid body. Identical acquired bodies remain usable; differing raw body
+bytes (including line-ending differences) conflict and reject. Comparison of one
+real search/release body pair remains a preactivation check; this SOURCE task
+authorizes no new fetch. Identity/head conflicts still reject. Only blank or
+exact primary-PR title fallback fields may use authored H2 Problem/Problema and
+Solution/Soluzione (preferred) or Summary sections. The source must match exact
+qualified URL, owner/repository, number and any supplied heads. Conflicts fail
+closed. Bodies are limited to 64 KiB UTF-8 and sections to 1200 characters;
+oversized, conflicting, fenced-code, HTML, control/bidi or recognized sensitive
+sections are rejected without truncation or raw-body export. This filter is
+bounded and does not claim general secret/PII detection. Generic token keys in
+YAML/equal assignments and quoted credential keys are included in that finite
+filter, including the exact secret_key/secret-key keyword family. Arbitrary
+credential-word suffixes are not rejected by that keyword branch. Canonical
+app-ratio/app-himalaia project keys and the observed release body field are
+documented in provenance; repository qualification remains strict.
+
+Recovered text explicitly says it is the PR author's description. It supplies
+no delivery or deployment proof and performs no translation. Curated and edited
+fields stay authoritative, including existing ordinary fallback behavior after
+an explicit empty edit. Without evidence, blank fields keep ordinary fallbacks;
+only exact technical-title fields receive an honest placeholder and read-only
+finding. `source_prs=None` preserves ordinary unwired caller behavior; an explicit
+empty list means recovery is wired without usable evidence. An explicitly empty
+Solution section remains authoritative over Summary. Even one exact technical
+field receives a finding; existing severity applies (error for human cards,
+warning otherwise). Exact-title detection intentionally does not match
+clipped titles or a problem title augmented with triage prose.
+
+`description_provenance` binds each recovered field to its selected text hash,
+exact qualified primary URL and source-body hash. It is producer-only metadata:
+the current consumer preserves the text but ignores this provenance. It is
+separate from work-provenance and never grants approval or lifecycle authority.
+The status/settle source stays byte-identical. After lifecycle settlement, the
+text layer suppresses only the generated question for a partial Backlog outcome
+with empty needs and no independent or explicit request. Curated closures,
+authored requests, independent signals and legacy overrides remain visible; the
+existing `Orchestra:` finding still does not suppress any question.
+
+The static acquisition fixture pins the observed body/repository field requests
+and merged bodyless-row shape; synthetic probes exercise it without provider
+calls. Both donor vectors also bind the complete copied wi_sources.py,
+wi_health.py and wi_release_links.py bytes against their inspected source hashes;
+omission or drift rejects before output. Current/R1 vectors contain 15/16 files;
+the output still contains four. Fixture byte/AST pins and output preservation
+checks are enforced before export. Adding Ctx.source_prs invalidates dormant
+closed shadow schema/callable pins: shadow remains OFF pending separately
+reviewed profile/schema updates.

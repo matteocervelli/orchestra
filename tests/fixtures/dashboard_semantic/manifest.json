@@ -1,0 +1,29 @@
+{
+  "source_paths": [
+    "bin/workitems.py",
+    "bin/wi_status.py",
+    "bin/wi_fields.py",
+    "bin/orchestra_dashboard/provenance.py",
+    "bin/wi_sources.py",
+    "bin/wi_health.py",
+    "bin/wi_release_links.py"
+  ],
+  "selected_ast_sha256": {
+    "Ctx": "a786d7e3e59483fb696a2d525f850c4551a0f5c25aee12ad0276edf759f2f8ca",
+    "build": "a0b4d128ff13cba01ad63e02d6f45a0d91816d4d0e11018e40eb19a129807181",
+    "identify": "4c60341938424d57d770eb71d7cb214c1cd19d610dbb0dc0eeccb4bf3d3635f3",
+    "finish": "a4521f7e0a69a2a5ab535048d301404277830bff3431e653a48c4ca249caba76",
+    "heuristic_text": "77e502a586288d5d7063131bbb08feece7fdb731903072b0880b9522283e7a32",
+    "asks": "2c881949d27d4e748f5d2db11df5a988fa687833f9c8b0fb03e8c600602ed289",
+    "enrich_asks": "393fdbd7fe10c4b7887126c74ca762271b1dfa9f10a577d90a9ef0528fce3e3b",
+    "qualified_pr": "6dff9159dd15d57cbce3e07b28fb50b4ab75ed480feba4c64d5fd25583e1d82b",
+    "fetch_prs": "8029e7abccb8a16d5f79632bec11dd9b43ec1a81d78d8139c9fc16c17c590efa",
+    "fetch_proposals": "69c6ae4ec924b3b8bc5e8eaaa5f4adbf1e36b83ab4a58f4f3f2aaab26c0af19f",
+    "card_sources": "af81c50af503bce3d96057d5e1fde3bcc6f29ba4a97f56c1725dccd71f7aa18a"
+  },
+  "fixture_sha256": {
+    "selected.py.txt": "79359bf2d0d555b4e02cf9bcb513c7b8f3cc3b6b07ab577a8206248239403e44",
+    "status.py.txt": "20abed18037105e0fc93a843472912d460c5e6763121ba61f051d0693079a9fe",
+    "acquisition.py.txt": "b551e004af2afd6f3fe062d20f43f574072501b10730370e334620546b2fa0f0"
+  }
+}

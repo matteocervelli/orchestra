@@ -31,6 +31,12 @@ isolation, scoped registry coverage or live activation.
 
 ## Dashboard producer source
 
+`dashboard/descriptions.py` recovers bounded authored primary-PR sections after
+curation. `scripts/export_dashboard_semantic.py` composes only three ordinary
+caller sites (including pre-dedupe metadata retention), text/helper and findings-only quality
+changes against explicit copied current or planned-R1 vectors. It never applies
+a bundle. See the [semantic content contract](../specs/2026-11-04-dashboard-semantic-content.md).
+
 `src/orchestra/dashboard/` contains inert canonical title, note-lock, task-header,
 card-text, provenance and quality helpers. Identity/collapse is a separate dormant
 candidate; core export does not replace runtime grouping.
@@ -45,4 +51,4 @@ the donor tree and never applies them. See the
 [producer contract](../specs/2026-10-27-dashboard-card-producer.md) and
 [relative donor provenance](../provenance/dashboard-card-producer-20261027.json).
 
-Public repository projection reuses `dashboard/repository.py` from ROOT, with no new registry. The existing exporter can produce one explicitly requested producer+repository compatibility bundle. Its fixed package inventory is25 (including the dormant R1 history helper). See `docs/specs/2026-10-27-dashboard-public-repository-projection.md`.
+Public repository projection reuses `dashboard/repository.py` from ROOT, with no new registry. The existing exporter can produce one explicitly requested producer+repository compatibility bundle. Its fixed package inventory is26 (including the dormant R1 history helper). See `docs/specs/2026-10-27-dashboard-public-repository-projection.md`.

@@ -23,6 +23,7 @@ PACKAGE_FILES = (
     "collector_checkpoint.py",
     "repository.py",
     "curation.py",
+    "descriptions.py",
     "history.py",
     "history_index.py",
     "identity.py",

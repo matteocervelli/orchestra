@@ -16,6 +16,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from .descriptions import description_findings
 from .provenance import local_review, qualified_pr
 from .repository import repository_key
 from .titles import generic_title
@@ -33,6 +34,10 @@ def findings(item: dict[Any, Any]) -> list[dict[Any, Any]]:
     human = bool(item.get("your_call"))
     severity = "error" if human else "warning"
     rows = _title_findings(item, severity)
+    rows.extend(
+        _finding(code, message, severity)
+        for code, message in description_findings(item)
+    )
     asks = _open_asks(item)
     rows.extend(_duplicate_ask_findings(asks, severity))
     if human and not asks:
