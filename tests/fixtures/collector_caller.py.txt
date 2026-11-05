@@ -1,0 +1,65 @@
+"""Declared synthetic REST data and atomic in-memory storage, never runtime data."""
+
+NOW = 1_800_000_000.0
+
+
+def legacy_prior():
+    """gh-search field shape only, with declared synthetic identity and dates."""
+    return {
+        "number": 7,
+        "repository": {"name": "synthetic", "nameWithOwner": "matteocervelli/synthetic"},
+        "url": "https://github.com/matteocervelli/synthetic/pull/7",
+        "state": "open",
+        "createdAt": "2026-10-20T00:00:00Z",
+        "updatedAt": "2026-10-23T00:00:00Z",
+        "closedAt": "0001-01-01T00:00:00Z",
+    }
+
+
+def payload(number=1, *, repository="synthetic", base="auto/integration", **changes):
+    row = {
+        "number": number,
+        "url": f"https://api.github.com/repos/matteocervelli/{repository}/pulls/{number}",
+        "html_url": f"https://github.com/matteocervelli/{repository}/pull/{number}",
+        "title": f"Synthetic change {number}",
+        "body": "Synthetic description",
+        "state": "open",
+        "created_at": "2026-10-20T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "closed_at": None,
+        "merged_at": None,
+        "merge_commit_sha": "b" * 40,
+        "head": {"ref": "synthetic-work", "sha": "a" * 40},
+        "base": {"ref": base, "repo": {"full_name": f"matteocervelli/{repository}"}},
+        "labels": [],
+    }
+    return row | changes
+
+
+class MemoryStore:
+    """All-or-none staged replacement; failure hooks never publish staged bytes."""
+
+    def __init__(self):
+        self.data = {"prs.json": b"[]"}
+        self.reads = []
+        self.writes = 0
+        self.fail = ""
+
+    def read(self, name, limit):
+        self.reads.append((name, limit))
+        value = self.data.get(name)
+        return value[:limit] if value is not None else None
+
+    def commit(self, checkpoint, mirror):
+        self.writes += 1
+        staged = dict(self.data)
+        if self.fail == "before_stage":
+            raise OSError("synthetic storage fault")
+        staged["prs-rest-v1.json"] = checkpoint
+        if self.fail == "checkpoint_staged":
+            raise OSError("synthetic storage fault")
+        if mirror is not None:
+            staged["prs.json"] = mirror
+        if self.fail == "mirror_staged":
+            raise OSError("synthetic storage fault")
+        self.data = staged

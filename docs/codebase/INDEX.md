@@ -1,5 +1,7 @@
 # Codebase map
 
+Operator workflow: [dashboard producer](../guides/dashboard-producer.md).
+
 | Path | Responsibility |
 | --- | --- |
 | `src/orchestra/` | Python source extracted for review and reuse. |
@@ -26,3 +28,27 @@ there is no success stub. The [checkpoint spec](../specs/2026-10-23-security-env
 retains mandatory B→D adapters, consumer/policy, fenced evidence and exact-pair
 CI. Synthetic subprocess tests do not certify immutable runtime mounts, OS
 isolation, scoped registry coverage or live activation.
+
+## Dashboard producer source
+
+`dashboard/descriptions.py` recovers bounded authored primary-PR sections after
+curation. `scripts/export_dashboard_semantic.py` composes only three ordinary
+caller sites (including pre-dedupe metadata retention), text/helper and findings-only quality
+changes against explicit copied current or planned-R1 vectors. It never applies
+a bundle. See the [semantic content contract](../specs/2026-11-04-dashboard-semantic-content.md).
+
+`src/orchestra/dashboard/` contains inert canonical title, note-lock, task-header,
+card-text, provenance and quality helpers. Identity/collapse is a separate dormant
+candidate; core export does not replace runtime grouping.
+`dashboard/history_index.py` adds the R1 compact-history projector and preflight
+with no filesystem access. `scripts/export_dashboard_history.py` prepares a
+separate narrow hash-bound review bundle for the ordinary publisher; it changes
+only publish and one import, retaining the existing identity/curation stack.
+See the [history publisher contract](../specs/2026-11-04-dashboard-history-publisher-r1.md).
+`scripts/dashboard_producer_title.py` requires an explicit root/item/title/phase;
+`scripts/export_dashboard_producer.py` creates hash-checked review bundles outside
+the donor tree and never applies them. See the
+[producer contract](../specs/2026-10-27-dashboard-card-producer.md) and
+[relative donor provenance](../provenance/dashboard-card-producer-20261027.json).
+
+Public repository projection reuses `dashboard/repository.py` from ROOT, with no new registry. The existing exporter can produce one explicitly requested producer+repository compatibility bundle. Its fixed package inventory is26 (including the dormant R1 history helper). See `docs/specs/2026-10-27-dashboard-public-repository-projection.md`.

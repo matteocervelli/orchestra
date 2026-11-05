@@ -1,0 +1,29 @@
+STEP_LIMITS = {'text': 500, 'cmd': 1000, 'link': 500}
+
+def _step(raw: object) -> dict | None:
+    """One human-task step {id, text, cmd, link}, or None if it breaks the schema."""
+    if not isinstance(raw, dict) or not isinstance(raw.get('id'), str) or (not STEP_RE.fullmatch(raw['id'])):
+        return None
+    out = {'id': raw['id']}
+    for k, limit in STEP_LIMITS.items():
+        v = raw.get(k, '')
+        if not isinstance(v, str) or len(v.strip()) > limit:
+            return None
+        out[k] = v.strip()
+    return out if out['text'] else None
+
+def clean_steps(raw: object) -> list[dict]:
+    """Valid steps of a card or note `steps` list; invalid entries are dropped."""
+    if not isinstance(raw, list):
+        return []
+    return [s for s in map(_step, raw) if s]
+
+def classify_page(name: str) -> str:
+    n = name.lower()
+    if '-pre' in n:
+        return 'pre'
+    if '-post' in n:
+        return 'post'
+    if 'mockup' in n:
+        return 'mockup'
+    return 'display'

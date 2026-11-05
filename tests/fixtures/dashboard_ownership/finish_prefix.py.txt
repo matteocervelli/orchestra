@@ -1,0 +1,4 @@
+it['repos'] = wi_repos.derive(it, card, note, ctx.tasks, ctx.spawns, rows)
+if not (it.get('pr') or it.get('issue')):
+    it['repo'] = it['repos'][0]
+repo = REPOS.get(it['repo'], it['repo'])

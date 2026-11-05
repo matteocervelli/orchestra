@@ -1,0 +1,5 @@
+# Unified-diff context encodes an empty source line as one space. The Node gate
+# checks JavaScript delta whitespace separately with Git's defaults.
+/src/orchestra/dashboard/legacy/repository-aliases.patch whitespace=-blank-at-eol,-blank-at-eof
+/src/orchestra/dashboard/legacy/callchips-aliases.patch whitespace=-blank-at-eol,-blank-at-eof
+/src/orchestra/dashboard/legacy/release-visibility.patch whitespace=-blank-at-eol,-blank-at-eof

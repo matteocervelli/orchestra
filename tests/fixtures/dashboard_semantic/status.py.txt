@@ -1,0 +1,243 @@
+"""Deterministic pipeline status of a work item (contract: scratch/dashboard-model-contract.md).
+
+Backlog → Doing → PR review → PR fix → Merge → Integration → Main → Deployed, or Dropped.
+`blocked` and Your call are tags, never statuses.
+"""
+
+from __future__ import annotations
+from orchestra_dashboard.common import STATUSES as STATUSES
+from orchestra_dashboard.common import CLOSED as CLOSED
+
+import re
+
+from wi_common import REPOS, clip, iso, refs
+
+# Italian statuses of the first model; None = no override (the pipeline decides).
+OLD_STATUS = {
+    "In coda": "Backlog",
+    "In corso": "Doing",
+    "In review": "PR review",
+    "Da correggere": "PR fix",
+    "Serve te": None,
+    "Serve una tua azione": None,
+    "Fatto in integration": None,
+    "Non serve": "Dropped",
+}
+# old values that meant "Matteo must answer": no status, but the item stays a Your call
+ASKING_OLD = ("Serve te", "Serve una tua azione")
+DEPLOY_RULE = {
+    "atrium": "atrium container",
+    "nexus": "fj deploy",
+    "adlimenui": "tag",
+    "ratio": "tag",
+    "himalaia": "tag",
+    "dotfiles": "stops at Main",
+}
+TAG_PATTERN = {"adlimenui": "ui/v*", "ratio": "v*", "himalaia": "v*"}
+ALREADY_DONE = ("already-fixed", "already fixed")
+NOT_NEEDED = ("obsolete", "not-reproduc", "not reproduc")
+SUPERSEDED = ("superseded",)
+DROP_REASONS = ("already done", "not needed", "superseded")
+# kinds whose finished output is already in effect: a verdict, a page, an audit, an ops action
+IN_EFFECT_KINDS = ("review", "docs", "ops")
+
+
+def note_status(value, computed: str) -> str | None:
+    """A notes `status` override in the new model, or None to keep the computed one."""
+    if value in STATUSES:
+        return value
+    new = OLD_STATUS.get(value)
+    if new == "PR review" and is_later(computed, "PR review"):
+        return None
+    return new
+
+
+def is_later(status: str, than: str) -> bool:
+    return status != "Dropped" and STATUSES.index(status) > STATUSES.index(than)
+
+
+def blocked_reason(outcome: str, gates: str | None) -> str:
+    rest = re.sub(r"^blocked[\s:—–-]*", "", outcome.strip(), flags=re.I).strip()
+    return clip(rest or gates or "bloccata", 160)
+
+
+def done_status(it: dict, outcomes: list[dict], probes) -> str:
+    """Status of a finished task (ledger done / exit 0) that has no PR card of its own.
+
+    1. Deployed when its output is already in effect: any orchestra task (a live page), or a
+       review, triage, audit, research, page or ops action (kind review|docs|ops, slug review-*).
+    2. Otherwise the least advanced stage (Integration/Main/Deployed) of the PRs merged into
+       auto/integration that its ledger rows name ("PRs ratio#1476", "#270 synced -> merged").
+    3. Otherwise Deployed only for a ledger ``done`` outcome: the task itself is complete, while
+       any open PR remains visible as its own card. Other or missing outcomes return to Backlog.
+    """
+    short = REPOS.get(it["repo"], it["repo"])
+    if (
+        (it["repo"] or "orchestra") == "orchestra"
+        or it["kind"] in IN_EFFECT_KINDS
+        or any(s.startswith("review-") for s in it["slugs"])
+    ):
+        return "Deployed"
+    stages = []
+    for o in outcomes:
+        text = " ".join(str(o.get(k) or "") for k in ("outcome", "gates", "note"))
+        for repo, n in refs(text, default=short or None):
+            meta = probes.pr_meta(repo).get(n, {})
+            if (meta.get("state") or "").lower() == "merged":
+                stages.append(merged_stage(repo, meta, probes)[0])
+    if stages:
+        return min(stages, key=STATUSES.index)
+    return "Deployed" if lo_is_done(outcomes[-1].get("outcome", "") if outcomes else "") else "Backlog"
+
+
+def lo_is_done(outcome: str) -> bool:
+    """True only for the terminal success value emitted by ledger_sync."""
+    return (outcome or "").strip().lower() == "done"
+
+
+def deployed(short: str, commit: str, probes) -> bool | None:
+    rule = DEPLOY_RULE.get(short, "")
+    if rule == "tag":
+        return probes.tag_contains(short, commit, TAG_PATTERN[short])
+    if rule == "stops at Main":
+        return True
+    if rule not in ("atrium container", "fj deploy"):
+        return None
+    if short == "atrium":
+        version = probes.atrium_version()
+        if version and probes.is_ancestor(short, commit, version):
+            return True
+    shas = probes.deploy_shas(short)
+    if shas is None:
+        return False if short == "atrium" and probes.atrium_version() else None
+    return any(probes.is_ancestor(short, commit, s) for s in shas)
+
+
+def merged_stage(short: str, meta: dict, probes) -> tuple[str, dict]:
+    stage = {"main": None, "deployed": None, "deploy_rule": DEPLOY_RULE.get(short, "")}
+    commit = (meta.get("mergeCommit") or {}).get("oid", "")
+    if not commit:
+        return "Integration", stage
+    stage["main"] = probes.main_contains(short, commit)
+    if not stage["main"]:
+        return "Integration", stage
+    stage["deployed"] = deployed(short, commit, probes)
+    return ("Deployed" if stage["deployed"] else "Main"), stage
+
+
+def fixed_after_block(it: dict) -> bool:
+    rev = it["review"]
+    return any(
+        c["slug"].endswith("-fix") and c["end"] and c["end"] > iso(rev["mtime"])
+        for c in it["children"]
+    )
+
+
+def compute(it: dict, outcomes: list[dict], probes) -> dict:
+    """{status, dropped, blocked, stage, asking}; `asking` = the state itself asks Matteo."""
+    short = REPOS.get(it["repo"], it["repo"])
+    res = {
+        "status": "Backlog",
+        "dropped": "",
+        "blocked": "",
+        "stage": {"main": None, "deployed": None, "deploy_rule": ""},
+        "asking": False,
+        "done": "",
+    }
+    last = outcomes[-1] if outcomes else {}
+    lo = (last.get("outcome") or "").lower()
+    if lo.startswith("blocked"):
+        res["blocked"] = blocked_reason(last.get("outcome") or "", last.get("gates"))
+    ch = it["children"]
+    running = [c for c in ch if c["running"]]
+    pr = it["pr"]
+    meta = probes.pr_meta(short).get(pr["number"], {}) if pr else {}
+    state = (meta.get("state") or (pr or {}).get("state") or "").lower()
+    if pr and state == "merged":
+        res["status"], res["stage"] = merged_stage(short, meta, probes)
+    elif pr and state == "closed":
+        res["status"] = "Dropped"
+    elif pr:
+        res["status"] = open_pr_status(it, meta)
+        res["asking"] = "needs-human" in it["labels"]
+    else:
+        res["done"] = done_status(it, outcomes, probes)
+        no_pr_status(it, lo, res)
+    if running:
+        active_status = (
+            "PR review" if all("review" in c["slug"] for c in running) else "Doing"
+        )
+        if not (it.get('_deduped') and res['status'] != 'Dropped'
+                and STATUSES.index(res['status']) > STATUSES.index(active_status)):
+            res['status'] = active_status
+    return res
+
+
+def open_pr_status(it: dict, meta: dict) -> str:
+    rev = it["review"]
+    if (rev and rev["verdict"] == "BLOCK" and not fixed_after_block(it)) or meta.get(
+        "mergeable"
+    ) == "CONFLICTING":
+        return "PR fix"
+    if (rev and rev["verdict"] == "APPROVE") or meta.get(
+        "reviewDecision"
+    ) == "APPROVED":
+        return "Merge"
+    return "PR review"
+
+
+def no_pr_status(it: dict, lo: str, res: dict) -> None:
+    ch = it["children"]
+    failed = bool(ch) and ch[-1]["exit"] not in (None, "0")
+    if any(w in lo for w in ALREADY_DONE):
+        res["status"], res["dropped"] = "Dropped", "already done"
+    elif any(w in lo for w in SUPERSEDED):
+        res["status"], res["dropped"] = "Dropped", "superseded"
+    elif any(w in lo for w in NOT_NEEDED):
+        res["status"], res["dropped"] = "Dropped", "not needed"
+    elif lo.startswith("partial"):
+        res["status"], res["asking"] = "Backlog", True
+    elif lo.startswith("blocked"):
+        res["status"] = "Backlog"
+    elif it.get("outcomes") or any(c["exit"] == "0" for c in ch):
+        if failed and not it.get("outcomes"):
+            res["status"], res["asking"] = "Backlog", True
+        else:
+            res["status"] = res["done"]
+    elif failed:
+        res["status"], res["asking"] = "Backlog", True
+    elif (it.get("triage") or {}).get("verdict") == "done?":
+        res["asking"] = True
+    if it.get("decisions"):
+        res["asking"] = True
+
+
+def settle(it: dict, res: dict, needs: str) -> None:
+    """A curated "Niente: …" answers the item: asking states become done or dropped."""
+    if not needs.startswith("Niente:"):
+        return
+    res["blocked"] = ""
+    if not res["asking"] or it["pr"] or res["status"] not in ("Backlog", "Doing"):
+        return
+    if any(c["running"] for c in it["children"]):
+        return
+    if needs.startswith("Niente: vedi"):
+        res["status"], res["dropped"] = "Dropped", "superseded"
+    elif needs.startswith("Niente: non serve"):
+        res["status"], res["dropped"] = "Dropped", "not needed"
+    else:
+        # the curator says it is done: keep a landed stage, never fall back to Doing
+        res["status"] = res["done"] if res["done"] in CLOSED else "Deployed"
+    res["asking"] = False
+
+
+def drop_reason(res: dict, note: dict, needs: str) -> str:
+    if note.get("dropped") in DROP_REASONS:
+        return note["dropped"]
+    if res["dropped"]:
+        return res["dropped"]
+    if needs.startswith("Niente: vedi"):
+        return "superseded"
+    if needs.startswith("Niente: già fatto"):
+        return "already done"
+    return "not needed"

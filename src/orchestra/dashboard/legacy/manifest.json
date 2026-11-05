@@ -1,0 +1,54 @@
+{
+  "schema": "orchestra-legacy-repository-aliases/v1",
+  "base": "ec33bdb39d5950b2686ffe8b1810afbc2c9f4a37",
+  "files": [
+    {
+      "path": "assets/cb-state.js",
+      "before_sha256": "4ecedecbb9d9dc924351df28765425b9c89f69b54e0865a7387c4395cbb9a8da",
+      "after_sha256": "2d63f85b02ccae26ecd4b488d458266680e3dae345d92f60abc62ebf5ccf25ca"
+    },
+    {
+      "path": "assets/cb-dedupe.js",
+      "before_sha256": "4efbbf022a0dd3ca629cc232c83d0933aa009cc9b85ad732484599405ba89fe5",
+      "after_sha256": "2d1614e71c64c7ef18b301fe96c35ead532d1b88f2819330db51e0e721570cc9"
+    },
+    {
+      "path": "assets/cb-toolbar.js",
+      "before_sha256": "7e502cf9079f66e992438bcd1642a72a82ec518e457bdbdc75a13f7f2b8ba5c3",
+      "after_sha256": "ba2f74eb730061c034f17a4e8359a53d667313d0d7010fdbb35eaaa3344d4a87"
+    }
+  ],
+  "helper": {
+    "upstream_repository": "atrium",
+    "upstream_head": "ac0cb1fa26392bb800902857943784f7aaef6dd5",
+    "upstream_path": "apps/webapp/src/features/orchestra/repositoryFilter.ts",
+    "pinned_source": "tests/fixtures/dashboard_legacy/repositoryFilter.ts",
+    "source_sha256": "cd8a4b271bdfbc7478c6eca56a35a3843a22e1c524c48a30e349d088d40371ab",
+    "generated_sha256": "24346b9108d55629d13bb785268fce2987523c2354f1462e068758618badc49a",
+    "typescript_version": "5.9.3",
+    "compiler_options": [
+      "--target",
+      "ES2022",
+      "--module",
+      "ES2022",
+      "--strict",
+      "--skipLibCheck"
+    ],
+    "destination": "assets/repository-filter.js"
+  },
+  "patch_sha256": "b50f1c9cd9b51981817e21b08bbab6231a08f3f20309c63328bdbda6535dde9a",
+  "baseline_assets": {
+    "cb-bits.js": "6ce646e832a3e081eaa1656ece4a2282dedc1ee6cd3b4db06bb858f804b6acbe",
+    "cb-counts.js": "eef9500c45b0a416fbb8184a710ed94e80cb7b21a9132126bed24fb61a39db91",
+    "cb-dedupe.js": "4efbbf022a0dd3ca629cc232c83d0933aa009cc9b85ad732484599405ba89fe5",
+    "cb-icons.js": "1871f2433b6c7ad696a4760ec597eba4a24ba39d56ba40a7f1c59e4591b08386",
+    "cb-priority.js": "2e5ffbbefdb8bdd1e7cbcf3d873554299988d026440a2ed55796908d8d2cbb5d",
+    "cb-state.js": "4ecedecbb9d9dc924351df28765425b9c89f69b54e0865a7387c4395cbb9a8da",
+    "cb-tasks.js": "943e73718d00d8794626337166ed0f80f09aa8680e2f81add9b3f79c529e408e",
+    "cb-util.js": "0c9821229c4aeefe9907ab1758d35815d4b6564f1fa8ce9290abf2116cbce5c8",
+    "v3/fields.js": "91e5a42d80034954e860c1b89eb7c0098257437440800bfb50389fc79e8963d2",
+    "v3/model.js": "920675be746299888b4392595209d174bdfca7e58b114a153539fa2c269e18e5",
+    "cb-toolbar.js": "7e502cf9079f66e992438bcd1642a72a82ec518e457bdbdc75a13f7f2b8ba5c3"
+  },
+  "activation": "not applied; owner hash verification and separate authorization required"
+}

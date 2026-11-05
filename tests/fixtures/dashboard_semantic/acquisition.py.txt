@@ -1,0 +1,84 @@
+from __future__ import annotations
+
+def fetch_prs(probes) -> list[dict]:
+    """PRs into auto/integration (gh search, cached); head branch from the per-repo PR meta."""
+    fields = (
+        "repository,number,title,state,labels,url,closedAt,updatedAt,body,createdAt"
+    )
+    args = [
+        "search",
+        "prs",
+        "--owner",
+        "matteocervelli",
+        "--base",
+        "auto/integration",
+        "--created",
+        ">=2026-10-13",
+        "--limit",
+        "200",
+        "--json",
+        fields,
+    ]
+    prs = probes.gh_json(args, C.CACHE / "prs.json", 100) or []
+    for p in prs:
+        repo = p["repository"]["nameWithOwner"]
+        meta = probes.pr_meta(short_repo(p["repository"]["name"])).get(p["number"], {})
+        if meta.get("headRefName"):
+            p["headRefName"] = meta["headRefName"]
+            continue
+        c = C.CACHE / f"pr-{repo.replace('/', '_')}-{p['number']}.json"
+        head = probes.gh_json(
+            ["pr", "view", str(p["number"]), "-R", repo, "--json", "headRefName"],
+            c,
+            10**9,
+        )
+        p["headRefName"] = (head or {}).get("headRefName", "")
+    return prs
+
+
+def fetch_proposals(probes) -> list[dict]:
+    """Older open proposals must survive the ordinary recent-PR search window."""
+    fields = (
+        "repository,number,title,state,labels,url,closedAt,updatedAt,body,createdAt"
+    )
+    rows = probes.gh_json(
+        [
+            "search",
+            "prs",
+            "--owner",
+            "matteocervelli",
+            "--base",
+            "auto/integration",
+            "--state",
+            "open",
+            "--label",
+            "health-proposal",
+            "--limit",
+            "200",
+            "--json",
+            fields,
+        ],
+        C.CACHE / "health-prs.json",
+        100,
+    )
+    return [p for p in rows or [] if is_proposal(p)]
+
+
+def card_sources(probes, projects: list[str]) -> list[dict]:
+    """Feed real merged PRs into the existing card assembler, including main PRs."""
+    probe = getattr(probes, "release_facts", None)
+    result = []
+    for repo in projects:
+        facts = (probe(repo) if callable(probe) else {}) or {}
+        for row in facts.get("prs", []):
+            if (not isinstance(row, dict) or not isinstance(row.get("number"), int)
+                    or str(row.get("state", "")).upper() != "MERGED"):
+                continue
+            result.append(row | {
+                "repository": {"name": repo, "nameWithOwner": f"matteocervelli/{repo}"},
+                "url": row.get("url") or f"https://github.com/matteocervelli/{repo}/pull/{row['number']}",
+                "title": row.get("title") or f"PR #{row['number']}",
+                "closedAt": row.get("mergedAt", ""),
+                "updatedAt": row.get("mergedAt", ""),
+            })
+    return result

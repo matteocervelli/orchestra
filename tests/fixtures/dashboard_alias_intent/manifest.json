@@ -1,0 +1,12 @@
+{
+  "schema": "orchestra-dashboard-alias-intent-fixture/1",
+  "scope": "Inactive SOURCE fixture; source code only, no operational notes",
+  "python_ast_version": "3.12",
+  "donor": "bin/wi_dedupe.py",
+  "donor_sha256": "0d804f68f5f40b8944bdf50dc0a1d2b2d2cd6435aeec6476511ad4898feb68c1",
+  "source_function": "merge_notes",
+  "source_function_ast_sha256": "14addbab8955dfb1f63bb14d0f8a435ca84482766190685fe484c376bcc63b59",
+  "fixture": "merge_selected.py.txt",
+  "fixture_sha256": "28fb8aa42dab0f0a40f13149185a341ba819825615a7179e9d62b21a728bab7f",
+  "runtime_accepted": false
+}

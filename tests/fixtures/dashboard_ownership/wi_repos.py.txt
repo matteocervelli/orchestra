@@ -1,0 +1,58 @@
+ALIASES = {**REPOS, 'orchestra': 'orchestra', 'adlimen-infra': 'adlimen-infra', 'adlimen-cicd': 'adlimen-cicd'}
+NAME = re.compile('(?<![\\w-])(' + '|'.join(sorted(ALIASES, key=len, reverse=True)) + ')(?![\\w-])', re.I)
+URL = re.compile('https://(?:github\\.com|git\\.adlimen\\.dev)/[\\w.-]+/([\\w.-]+)/(?:pulls?|issues)/\\d+', re.I)
+REF = re.compile('(?<![\\w-])(' + '|'.join(sorted(ALIASES, key=len, reverse=True)) + ')\\s*#\\d+', re.I)
+
+def canonical(value: object) -> str:
+    if not isinstance(value, str):
+        return ''
+    name = value.strip().lower()
+    if re.fullmatch('[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*', name):
+        name = name.split('/')[-1]
+    if not re.fullmatch('[a-z0-9][a-z0-9._-]{0,99}', name):
+        return ''
+    return FULL.get(short_repo(name), name)
+
+def clean(values: object) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    return list(dict.fromkeys((r for v in values if (r := canonical(v)))))
+
+def reference_repos(text: str) -> list[str]:
+    hits = sorted([(m.start(), m[1]) for rx in (URL, REF) for m in rx.finditer(text)])
+    return clean([name for _, name in hits])
+
+def task_repos(text: str) -> list[str]:
+    if re.search('no repo changes', text, re.I) and re.search('pages/dashboard\\.html|/artifacts/orchestra', text):
+        return ['orchestra']
+    scope = re.search('^Repos?:\\s*(.+)$', text, re.I | re.M)
+    text = scope[1] if scope else text
+    paths = re.findall('/data/dev/(?:projects|services|libs)/([\\w.-]+)', text)
+    names = clean(paths + [m[1] for m in NAME.finditer(text)])
+    return [r for r in names if r != 'orchestra'] or names
+
+def derive(it: dict, card: dict, note: dict, tasks: dict, spawns: dict, ledger: list[dict]) -> list[str]:
+    declared = next((r for c in reversed(sorted(it.get('children', []), key=lambda c: c['start'])) if (r := clean(c.get('card', {}).get('repos')))), [])
+    declared = declared or clean(card.get('repos')) or clean(note.get('repos'))
+    declared = declared or clean([card.get('repo') or note.get('repo')])
+    if declared:
+        return declared
+    texts = [tasks.get(s, {}).get('text', '') for s in it.get('slugs', [])]
+    references = [p.get('url', '') for p in [it.get('pr'), it.get('issue'), *it.get('prs', [])] if p]
+    references += [f"{r.get('gates', '')} {r.get('note', '')}" for r in ledger]
+    found = clean([*reference_repos('\n'.join(references)), *(r for c in it.get('children', []) for r in c.get('repo_refs', [])), *reference_repos('\n'.join(texts))])
+    if found:
+        return found
+    found = clean([r for text in texts for r in task_repos(text)])
+    if found:
+        return found
+    directories = []
+    for slug in it.get('slugs', []):
+        parts = Path(spawns.get(slug, {}).get('workdir', '')).parts
+        known = [part for part in parts if part.lower() in ALIASES]
+        if known:
+            directories.extend(known[-1:])
+        elif '.worktrees' in parts:
+            index = parts.index('.worktrees')
+            directories.extend(parts[max(0, index - 1):index])
+    return clean(directories) or clean([it.get('repo')]) or ['orchestra']

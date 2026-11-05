@@ -1,0 +1,87 @@
+{
+  "schema": "orchestra-repository-runtime-compat-source/v1",
+  "basis": "ec33bdb39d5950b2686ffe8b1810afbc2c9f4a37",
+  "scope": "Pure shared SOURCE key plus three-target contained compatibility proposal; no runtime apply",
+  "api": [
+    "repository_key(value)",
+    "preview_item(item, recipes)",
+    "normalize_action_scope(step, scope)"
+  ],
+  "authority": "Delegate to existing common.repository_authority; no copied registry; exact single final period only, preserve unknown/foreign/qualified short aliases/multiple periods/whitespace/case",
+  "authority_dependency_sha256": "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
+  "recipe_allowlist": "All four original runtime recipes unchanged; normalization only, no added project or conditions",
+  "dedupe": "Only existing promote/release repo scopes canonicalized; old records compared in memory, item IDs exact, shipping snapshot scopes unchanged",
+  "fixture_policy": "Four real function ASTs (normalize_item,new_entry,scope_of,find_active) preserved with explicit synthetic recipe/index/process dependencies. Full new_entry body, no execution of runtime modules.",
+  "runtime_targets": [
+    {
+      "path": "bin/preview_recipes.py",
+      "before_sha256": "240ef73f884294b91495cd5e5b4135611f6d30edca0d4f92cd337694b136f7a0",
+      "after_sha256": "d87da1d2ebd07cd79cc7a14d2bb5e01a369949fb03a9cdb5df3023dc615122cb"
+    },
+    {
+      "path": "bin/action_dedupe.py",
+      "before_sha256": "b1032aa4b5666f6609695ae59bc460ca1178669a5506a133a11acff396bbe2cb",
+      "after_sha256": "97e6d81716274d8575c9d841366db929cb9abbab3995729f3d9a1be163ddb8f0"
+    },
+    {
+      "path": "bin/orchestra_dashboard/repository.py",
+      "before_sha256": null,
+      "after_sha256": "c14012185c1a434e26acf8cfcb7d1248987378648c8399e9c9daa0ae88a9b97e"
+    }
+  ],
+  "source_sha256": {
+    "src/orchestra/dashboard/repository.py": "c14012185c1a434e26acf8cfcb7d1248987378648c8399e9c9daa0ae88a9b97e",
+    "scripts/export_repository_compat.py": "176c3fccaced3b647fdbdaf61024cae3ec66987e17bd21de2fcb25197959b2b8",
+    "tests/unit/test_dashboard_repository.py": "6caeb24084e3186dfe74f1f74d3b60c189f45866166f774f0c943ba146acc32e",
+    "tests/unit/test_repository_compat_export.py": "2039a2508e2c042051234796fe64ef6b3a9fc1edd19d65bf96d0987313a380cc",
+    "tests/fixtures/repository_compat/preview_recipes.py": "2f6e26ce2d133dbb96c43db88cb40331badf5135f9b39b2f229999dbbd464535",
+    "tests/fixtures/repository_compat/action_dedupe.py": "154ef8427bc51a17ab377433dd8913f72db1c3d00700a66ff8ecee0207780963",
+    "tests/unit/test_dashboard_runtime_export.py": "b652075bb5db64915a2ac8cc991578e9abe41ed0a93372bbb5146983d48a7aae",
+    "docs/specs/2026-10-27-dashboard-repository-runtime-compat.md": "945ee42849388eccf2243e7d64c0e62e1f8f5fcb0fb530b3cb714e56e2536f2b"
+  },
+  "author_gates": {
+    "helper_red": "87 failing cases before module existed",
+    "behavioral_red": "4 confirmed failures on unchanged donor functions: himalaia/ratio preview and promote/release scope",
+    "behavioral_red_limit": "Initial baseline harness failed on missing synthetic ItemIndex, not counted as behavioral proof; verified RED receipt is the later corrected harness on original donor AST.",
+    "inventory_red": "1 failed test before approved count-only12to13 change",
+    "focused_tests": 117,
+    "full_unit_tests": 581,
+    "coverage_percent": 85.4,
+    "ruff_format_check": "PASS src/tests/new exporter",
+    "ruff_check": "PASS src/tests/new exporter",
+    "mypy_strict": "PASS29sourcefiles",
+    "vulture80": "PASS",
+    "radon": "all changed production functions A/B",
+    "bandit_medium_plus": "PASS src/scripts and final new exporter",
+    "security_verify_findings": 0,
+    "readiness": "PASS5REQ0warnings",
+    "docs_coverage": "SKIP no manifest; pure helper NOT_VISIBLE with own specification",
+    "inert_import_smoke": "PASS with socket/subprocess forbidden",
+    "runtime_patch_apply_check": "PASS without apply",
+    "secondary_m3_pins": "17/17 static hashes unchanged; no target overlap"
+  },
+  "independent_review": "ORIGINAL_BLOCK_B1_B2_AUTHOR_FIXED_FOLLOWUP_PENDING_ROOT",
+  "commit_created": false,
+  "runtime_applied": false,
+  "limits": [
+    "Source static proposal and synthetic consumer tests only, not running previews or processes.",
+    "Native bridge golden regeneration is separate; its writer receives frozen SOURCE after-files and exact common/init dependencies.",
+    "Actual dedupe caller identified statically; subsequent promotion/release execution or repoCanon runner safety not claimed.",
+    "New inert package module changes inventory; M3S composition/old-delta compatibility must be reviewed by root before any apply."
+  ],
+  "donor_admission": "Default build_bundle/CLI requires both complete donor modules to match the exact before_sha256 pins in this SOURCE receipt before transformation or any output. Synthetic tests inject their reviewed fixture pin manifest; no CLI override or runtime import.",
+  "exporter_utility_sha256": "1ca3c91719181d0b805526b013627e7c6b8885f127932665fed99185780bb841",
+  "followup": {
+    "original_freeze_sha256": "1a6d49dc3274422621c89785ad325490b44a6c9871619e6de61ed0bdb264014e",
+    "accepted_findings": [
+      "B1 unexpected donor normalize_item/find_active bodies",
+      "B2 unverified donor REPO_STEPS/REPOS key-name-gh invariants"
+    ],
+    "fix": "Exact whole-module before hash pins already recorded in SOURCE provenance; no helper/authority/recipe behavior change.",
+    "red": "4 failed,18 deselected: normalizer body,matching body,repo steps,recipe owner",
+    "green": "22 exporter cases PASS; includes three additional no-match intent/item scope cases plus exact-item positive controls",
+    "source_module_unchanged": true,
+    "runtime_after_files_unchanged": true,
+    "quality": "Ruff format/check src/tests/script,Radon A/B,Bandit script,security-verify script0finding,readiness5REQ0warning PASS; original unchanged SOURCE mypy/Vulture/security gates retained by hash"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "orchestra-legacy-callchips-followup/v1",
+  "prerequisite": "manifest.json and repository-aliases.patch (R2 frozen)",
+  "files": [
+    {
+      "path": "assets/v3/callchips.js",
+      "before_sha256": "37b4821e6684affab6df328f0ba931829eb44bbb9a6221f36b5855460f4b937e",
+      "after_sha256": "ed427f9b0b3ebe10efde56bd8d7f56aab8044c94818efa35c4f63ec86e5769cc"
+    }
+  ],
+  "patch": "callchips-aliases.patch",
+  "patch_sha256": "d2f40e399a57c73c1d9919955f2968eafb2c727cfd6b756d044efdb28d62fa27",
+  "baseline_assets": {
+    "v3/callchips.js": "37b4821e6684affab6df328f0ba931829eb44bbb9a6221f36b5855460f4b937e",
+    "v3/ui.js": "c7656393edf8d02e6e97cb3c39addadfd5ad3ba2d27245b4e09ca713dcd00a08"
+  },
+  "generated_helper": "repository-filter.js reused unchanged; digest in R2 manifest",
+  "static_action_path_hashes": {
+    "v3/bulk.js": "a5e1de58cf12bc94cd69e4371066787b1796e510474a1a2fac21c8b7a616146a",
+    "cb-actions.js": "4b1864f2f8d45267efaff30430900cc6e01f4b35c88b52c1d76f6c0c7f4ba294",
+    "v3/bulk-ui.js": "b31b655846d40afd39c80fc91c301518197f79e897b528388e0d32222959e971",
+    "v3/board.js": "88d5daa36f6959f921faa175a18cf7b14c8e119d2643b24b57f711f2cc613757",
+    "answer-editor.js": "ab72072ff23d482a23e0b301f9709189a48e177776bc247ebfca2aa2206f1014"
+  },
+  "activation": "not applied; independent review and owner authorization required",
+  "static_chip_caller_hashes": {
+    "v3/board.js": "88d5daa36f6959f921faa175a18cf7b14c8e119d2643b24b57f711f2cc613757",
+    "v3/groups.js": "90fd0ef53d95e338d1f17860b35d4fe402584bf02208a2e9c2917422753755e1"
+  }
+}

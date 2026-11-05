@@ -1,0 +1,90 @@
+{
+  "schema": "orchestra-dashboard-collector-source/v1",
+  "basis": "2a42a2b6964fb39725cfca58a5877b7e633e7a12",
+  "scope": "Pure source module, synthetic tests and documentation only",
+  "primary_reference": {
+    "url": "https://docs.github.com/en/rest/pulls/pulls#list-pull-requests",
+    "api_version": "2026-03-10",
+    "contract_facts_supplied_for_implementation": [
+      "state open/closed/all",
+      "base filter",
+      "created descending",
+      "maximum per_page100",
+      "list response with head/base/body metadata"
+    ]
+  },
+  "fixture_policy": "Synthetic REST-shaped payloads explicitly declared; observed schema summaries were not copied into full payloads",
+  "transport": "Explicit callback; no network client or configuration reader",
+  "cache_and_resume": "Caller-injected snapshot copied and returned; no persistence or scheduler",
+  "budget": {
+    "maximum_shared_requests": 25,
+    "one_unit_per_uncached_callback": true
+  },
+  "bounds": {
+    "records_per_page": 100,
+    "pages_per_feed": 100,
+    "serialized_page_bytes": 2097152
+  },
+  "runtime_wired": false,
+  "collector_applied": false,
+  "real_inventory_proven": false,
+  "semantic_owner_proven": false,
+  "independent_review": "PASS_SOURCE_ONLY; two IMPORTANT findings fixed and independently verified",
+  "clock": "Fixed explicit as-of frame or optional injected clock before admission/after transport/final receipt; no hidden system clock or rewritten observation timestamps",
+  "conflict_policy": "Exclude conflicting URLs from new observations; preserve prior known rows. Only contributing feeds are invalidated; retain error/stale/budget reasons, preserve completed scan_status/scan_reason on downgrade, and allow independent complete last-good refresh.",
+  "author_validation": {
+    "full_unit_tests": 472,
+    "dedicated_collector_cases": 53,
+    "coverage_percent": 85.31,
+    "ruff_format_check": "PASS",
+    "ruff_check": "PASS",
+    "mypy_strict": "PASS28files",
+    "vulture_confidence80": "PASS",
+    "radon_max_grade": "B",
+    "bandit_medium_plus": "PASS",
+    "security_verify_findings": 0,
+    "readiness": "PASS6requirements0warnings",
+    "docs_coverage": "SKIP no project manifest; pure collector NOT_VISIBLE, own guide written",
+    "inert_import_synthetic_smoke": "PASS with network/process forbidden",
+    "independent_review": "PASS follow-up, zero IMPORTANT/CRITICAL"
+  },
+  "source_files_sha256": {
+    "src/orchestra/dashboard/collector.py": "1944831ec5e73bfea0f5f86934dec1eae125ca6748d0b818338417bbe4d6a97c",
+    "tests/unit/test_dashboard_collector.py": "f522f9c0020fddc76a33c2ed4d83cc178f76db57f597d6bab2a681af51748cc6",
+    "tests/unit/test_dashboard_runtime_export.py": "4e196aa6c23543c2523fa5ae737a43de9e232e2877aca680484bcb1e7b53f3ab",
+    "docs/specs/2026-10-27-dashboard-upstream-coverage.md": "37a4d57890104dc85268200c9d1157aa71b6114081bfc52a48df85c3d2686b8e",
+    "docs/guides/dashboard-collector.md": "d2c37ddf30aef70854ba14ca6c140f1a382593e51ea27b036a1150d4e213b733"
+  },
+  "recovery_policy": "Next invocation restarts stale or nontransient-invalidated traversal and logically invalidates only that feed pages in the copied state; no same-run retry, extra budget, filesystem purge, or known/last-good loss.",
+  "limitations": {
+    "clock": "Valid nondecreasing callable required; exceptions may follow spent calls and caller must retain actual request counter.",
+    "scope_handoff": "Changing scope with prior retained/cache references requires explicit caller handoff; incompatible qualified references fail closed; no automatic pruning.",
+    "exporter": "Complete bundle includes inert twelfth module; old deltas require matching inventory. No runtime integration or apply.",
+    "real_replay": "ROOT repeated real SOURCE preview after follow-up:525unique/81complete feeds,44known+471legacy URLs present; not normal producer, semantic ownership or M4."
+  },
+  "followup": {
+    "original_freeze_sha256": "be71245ead0ad76f98b377bd061fdc44d810a9fcf884f621c8065abced7b7a81",
+    "accepted_findings": [
+      "IMPORTANT conflict diagnostic isolation and independent last-good refresh",
+      "IMPORTANT next-run coherent-prefix recovery after invalid/stale progress"
+    ],
+    "targeted_red": "5 failed,48 deselected; isolated conflict error/stale/budget plus real offset shift recovery with fresh/stale prefix",
+    "targeted_green": "5 passed,48 deselected",
+    "other_suggestions_implemented": false
+  },
+  "root_acceptance": {
+    "at": "2026-10-27T22:41:45.317860+00:00",
+    "reviewed_freeze_sha256": "48b677c894195c8a820cd7d54328f54e1f70db091f1a48fa16de351ee12f9bff",
+    "review_receipt_sha256": "26cc0d89604c7c13c8d06726317636300a7728d02ff4f7aa217444167882b68c",
+    "postpatch_preview_sha256": "bf6a5c6265ab22c4004f054d8f3a26590a38b28b64221168b4a36fecc77542b6",
+    "source_module_sha256": "1944831ec5e73bfea0f5f86934dec1eae125ca6748d0b818338417bbe4d6a97c",
+    "source_unchanged_during_preview": true,
+    "unique_pr_urls": 525,
+    "complete_feeds": 81,
+    "provider_calls": 82,
+    "legacy_inventory_present": 471,
+    "known44_present": 44,
+    "normal_runtime_or_owner_proven": false,
+    "metadata_only_finalization_after_review": true
+  }
+}

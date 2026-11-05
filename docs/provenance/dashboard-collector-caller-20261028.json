@@ -1,0 +1,148 @@
+{
+  "schema": "orchestra-collector-caller-phase-a-source/v1",
+  "basis": "ec33bdb39d5950b2686ffe8b1810afbc2c9f4a37",
+  "scope": "Pure callback, codec, budget, precedence and synthetic storage only; Phase B not authorized",
+  "owner": "/root/card_content_audit",
+  "core_sha256": "1944831ec5e73bfea0f5f86934dec1eae125ca6748d0b818338417bbe4d6a97c",
+  "profile": {
+    "global_budget": 25,
+    "collector_allowance": "min(20,max(0,remaining-5))",
+    "freshness_seconds": 900,
+    "cadence_seconds_unchanged": 120,
+    "document_limit_bytes": 67108864
+  },
+  "file_manifest": [
+    "src/orchestra/dashboard/collector_caller.py",
+    "src/orchestra/dashboard/collector_checkpoint.py",
+    "tests/unit/test_dashboard_collector_caller.py",
+    "tests/unit/test_dashboard_collector_precedence.py",
+    "tests/fixtures/collector_caller.py.txt",
+    "docs/specs/2026-10-28-dashboard-collector-caller.md",
+    "docs/provenance/dashboard-collector-caller-20261028.json",
+    "tests/unit/test_dashboard_runtime_export.py"
+  ],
+  "refactor_authorization": "Root internal codec-refactor GO 2026-10-28 after measured667/854line module and actual Radon findings; Parent acceptance required before commit/push",
+  "inventory_amendment": "Parent A7 plus Root codec split; fixed12to14 only after RED, no other assertion weakened",
+  "status": "AUTHOR_LEGACY_PRIOR_ABI_FIXED_PENDING_PARENT_V3_FOLLOWUP",
+  "independent_review": "V2_B1_NB1_PASS_SCOPED_AS_REPORTED_BY_ROOT; V3_PARENT_SAME_REVIEWER_FOLLOWUP_PENDING",
+  "runtime_wired": false,
+  "provider_calls": 0,
+  "real_storage_used": false,
+  "phase_b_readiness": false,
+  "limitation": "Synthetic atomic commit contract does not prove actual two-file filesystem replacement, remaining real probe demand or M3S/ownership/consumer equivalence",
+  "api": [
+    "Snapshot",
+    "Budget",
+    "Prepared",
+    "Selection",
+    "encode_checkpoint",
+    "decode_checkpoint",
+    "prepare_collection",
+    "decode_page",
+    "qualified_key",
+    "select_prs",
+    "bulk_meta"
+  ],
+  "fixture_policy": "Declared synthetic REST data and atomic in-memory staged storage only. No actual cache/provider/task/session/auth/environment data imported.",
+  "codec_contract": "Strict bounded complete UTF8 JSON, depth16, exact record fields, finite/nonfuture observation clocks, canonical unique digests, scope/core pin, qualified references and prefix witness checks. All Page/Progress/LastGood/known/cursor/lineage fields preserved; accepted empty Page.error remains empty.",
+  "failure_contract": "Attempt counter charged before injected fetch and not refunded; codec/load/clock failures do not commit; atomic synthetic storage faults before/after staging preserve both prior byte strings; real filesystem transaction remains Phase B.",
+  "metadata_contract": "Qualified freshness/version selection without first/last winner or stale field merging; invalid/conflicting optional caches never manufacture approvals; actual present core fields only, missing review/mergeable/issue/files/base remain unknown, no provider callback exists in bulk_meta.",
+  "author_validation": {
+    "dedicated_caller_cases": 112,
+    "focused_with_existing_runtime_export": 120,
+    "full_unit_tests": 584,
+    "coverage_percent": 86.84,
+    "ruff_format_check": "PASS src/tests",
+    "ruff_check": "PASS src/tests",
+    "mypy_strict": "PASS30sourcefiles",
+    "vulture80": "PASS",
+    "radon": "all source A/B",
+    "bandit_medium_plus": "PASS src/scripts",
+    "security_verify_findings": 0,
+    "readiness": "PASS6REQ0warnings",
+    "docs_coverage": "SKIP no manifest; pure helpers NOT_VISIBLE, own spec supplied",
+    "inert_import_smoke": "Prior v2 smoke retained by unchanged module/core pins; new ingress exercised in23 synthetic cases without providers",
+    "precommit": "Deterministic scoped gates run; final precommit/independent acceptance Parent-owned, no commit requested",
+    "toolchain": "Existing Python3.12 environment reused with explicit new SOURCE PYTHONPATH, frozen dependencies unchanged; no install",
+    "gitleaks_findings": 0
+  },
+  "tdd_evidence": {
+    "initial": "Missing helper RED across initial caller and precedence requirements; then51 first-pass GREEN",
+    "edge": "11behavioral RED -> GREEN for exact UTF8 cap, invalid clocks/enums/feed ownership, counter mismatch, prior/meta conflict handling",
+    "scalar": "2RED invalid provider scalar fields -> GREEN; serialized offset/conflict recovery already verified",
+    "fixed_error_codes": "2RED budget total and large integer errors -> GREEN",
+    "envelope": "Verified2RED on empty Page.error compatibility and malformed HTTP envelope -> GREEN; earlier failed frozen-page test mutation not counted as behavioral proof",
+    "record_keys": "2RED unknown Snapshot/CollectionState attributes -> reject without silent field loss",
+    "inventory": "Original12expected/13actual RED, then separate12expected/14actual RED after approved Root codec split, only count changed",
+    "http_failure_diagnostic": "2RED CRLF/LF variants:403 cannot be called rate-limit without proof;429specific and403unavailable now pass in final547suite"
+  },
+  "phase_b_constraints": {
+    "authorized": false,
+    "normal_caller_demand": "Read-only actual inventory15cold (14withhealthbulk) exceeds5reserve; no parity or normal-caller replay claimed",
+    "needed": [
+      "Residual proof coverage/freshness/degraded contract",
+      "Composed base and sole exporter owner",
+      "Updated M3S callable/memo/root schema",
+      "Actual complete state size measurement",
+      "Normal caller/F1/consumer parity for27scope/44known/104refs, not104newcards"
+    ],
+    "pure_a_does_not_prove": [
+      "Real provider/caller feasibility",
+      "Filesystem pair atomicity",
+      "Ownership or action/archive compatibility",
+      "New M3S profile equivalence",
+      "Runtime apply or publication authority"
+    ]
+  },
+  "source_sha256": {
+    "src/orchestra/dashboard/collector_caller.py": "7b89aaf171123373cf07e4cc8c115778bdaa7716760aa61d8c2e2e0b6317ae26",
+    "src/orchestra/dashboard/collector_checkpoint.py": "6e4afac0fb3c3fde8f65abf27d40520690b2d5208db5e276f466c0a521085fe9",
+    "tests/unit/test_dashboard_collector_caller.py": "e74e840e4f6852a66e2a16d597c085d3cf0c373336322a362b18e89052a085ef",
+    "tests/unit/test_dashboard_collector_precedence.py": "9e5d0bfcd4fa2b79766f1057a5b2026e36afe975c0d69220eebc453db350d8b6",
+    "tests/fixtures/collector_caller.py.txt": "cbaf945ff6e12d06999b095aca97cf0b92b47f5856bdd47054ee0e10d6a4653d",
+    "docs/specs/2026-10-28-dashboard-collector-caller.md": "341fe6088ff54654c00a17d0d906120777155ad43189b650296044804089b4dd",
+    "tests/unit/test_dashboard_runtime_export.py": "8b844780ed814eeb99a0e518b94925263ad34aab47d1d981387144b540c3942f"
+  },
+  "unchanged_source": {
+    "src/orchestra/dashboard/collector.py": "1944831ec5e73bfea0f5f86934dec1eae125ca6748d0b818338417bbe4d6a97c",
+    "src/orchestra/dashboard/common.py": "9749d5d5d48347c149751d08e9679543a296fb0d2170e77614c1842a7812338a",
+    "scripts/export_dashboard_producer.py": "1ca3c91719181d0b805526b013627e7c6b8885f127932665fed99185780bb841"
+  },
+  "source_lines": {
+    "src/orchestra/dashboard/collector_caller.py": 502,
+    "src/orchestra/dashboard/collector_checkpoint.py": 451
+  },
+  "crossprovider_review": "NOT_CLOSED_BY_PARENT_SAME_FAMILY_REVIEW",
+  "followup_v2": {
+    "original_freeze_sha256": "7865d3e6b61995bd4b724be514919bbf6b50e67ba808492797cec9e59379cc12",
+    "parent_review": "CHANGES_REQUIRED, separate OpenAI/Sol reviewer; not crossprovider acceptance",
+    "parent_review_sha256": "245c8875ecb80398c2a85b3291f68f01fc207612100e5a5101a77785915364e9",
+    "root_fix_go_sha256": "a858a0d957fc25e5d1bae3423e7e544010760aecef728af09b031b6254f422e4",
+    "accepted_findings": [
+      "B1 ordinary RuntimeError at read/commit boundary",
+      "NB1 bool False accepted as last_created epoch0"
+    ],
+    "change": "Confined ordinary Exception conversion at the three storage call sites only, no BaseException/internal-collector catch expansion; last_created timestamp type checked before prefix equality.",
+    "read_unknown": "If first read raises, Prepared.mirror remains None because bytes were never read; stored bytes stay unchanged and no retry occurs.",
+    "red": "5failed9passed75deselected; three RuntimeError sites and encode/decode epochFalse",
+    "green": "14passed75deselected, including9 SystemExit/KeyboardInterrupt/CancelledError propagation cases",
+    "first_green_limit": "An initial assertion incorrectly required unread prior bytes in Prepared; corrected to unknown None with the same actual byte-preservation/no-retry checks.",
+    "atomicity_limit": "No repair or rollback of a callback that publishes partially and then raises; all-or-none remains callback/FutureB contract."
+  },
+  "legacy_prior_v3_contract": {
+    "root_go_sha256": "0c9a0bac23668e7c686259f6d64a7ad9858a9852571d55c38292f73b8f561048",
+    "v2_freeze_sha256": "4654d36cc1e1194dbbf413950801e23e2c820f175c4c01e9ff85f8d3d475064e",
+    "normalization": "Only exact open.closedAt=0001-01-01T00:00:00Z -> None in private legacy LIST working copy",
+    "raw_bytes": "Original read bytes preserved for fallback and partial/error mirror; rewrite only complete/fresh/nonconflicting",
+    "row_guard": "Every legacy LIST member must be a JSON object before typed core, else fixed load_error",
+    "unchanged": "Strict checkpoint codec/date/time guards, all other date/state values, budget, freshness, cap, scope, callbacks/modules",
+    "parent_v2_review": "PASS scoped B1/NB1 as reported by Root; new ABI delta requires separate Parent follow-up",
+    "proof_sha256": "7480bd679e43f3e3cac87387700329e81c114213c9ba51d61d86fc1b635b10d8",
+    "tdd_red": "10failed13passed89deselected: exact GoZero ingress and invalid LIST row types",
+    "tdd_green": "23passed89deselected, final includes opaque equal-looking string preserved",
+    "regression": "Warm partial checkpoint resumes2remaining feeds, then0attempt cache-hit; corrupt checkpoint fails0attempt load_error and preserves both byte strings",
+    "strict_codec_sha256_unchanged_from_v2": "6e4afac0fb3c3fde8f65abf27d40520690b2d5208db5e276f466c0a521085fe9",
+    "evidence_limit": "Root one-row legacy ABI witness plus declared synthetic fixtures; no actual prior-cache, normal caller or PhaseB execution proved",
+    "storage_limit": "Original bytes stay untouched until globally complete/fresh/nonconflicting; synthetic atomic callback does not prove filesystem pair transaction"
+  }
+}

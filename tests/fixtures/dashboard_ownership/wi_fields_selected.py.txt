@@ -1,0 +1,133 @@
+CALL_KINDS = ('decide', 'approve mockup', 'approve UI', 'approve merge', 'action')
+ACTION_RE = re.compile('(?i)\\b(token\\w*|chiav[ei]|keys?|vapid|1password|deploy\\w*|sudo\\w*)\\b')
+MOCKUP_RE = re.compile('(?i)mockup')
+PAGE_SUFFIXES = set('.html .htm .png .jpg .jpeg .webp .gif .avif .svg'.split())
+
+def is_himalaia(it: dict) -> bool:
+    return any((C.short_repo(r) == 'himalaia' for r in [it.get('repo', ''), *it.get('repos', [])]))
+
+def local_page(name: object) -> Path | None:
+    """Resolve only existing page assets, including our absolute URLs; never fetch URLs."""
+    if not isinstance(name, str) or not name or re.search('\\s|[\\\\\\x00-\\x1f\\x7f]', name):
+        return None
+    try:
+        url = urlsplit(name)
+        if url.scheme or url.netloc:
+            if f'{url.scheme.lower()}://{url.netloc.lower()}' != PAGES_ORIGIN:
+                return None
+        elif url.query or (url.fragment and (not re.fullmatch('[\\w\\-.:]+', url.fragment))):
+            return None
+        rel = unquote(url.path).lstrip('/')
+        if not re.fullmatch('[A-Za-z0-9_./-]+', rel) or '..' in rel:
+            return None
+        root = (C.O / 'pages').resolve()
+        path = (root / rel).resolve()
+        if path.is_dir():
+            path = (path / 'index.html').resolve()
+        if path.is_relative_to(root) and path.suffix.lower() in PAGE_SUFFIXES and path.is_file():
+            return path
+    except (OSError, ValueError):
+        pass
+    return None
+
+def first_page(names: list) -> str:
+    for name in names:
+        if (path := local_page(name)):
+            if urlsplit(name).scheme:
+                return name
+            fragment = urlsplit(name).fragment
+            return path.relative_to((C.O / 'pages').resolve()).as_posix() + (f'#{fragment}' if fragment else '')
+    return ''
+
+def page_text(name: str, cache: dict) -> str:
+    if '://' in name:
+        return ''
+    if name not in cache:
+        path = C.O / 'pages' / name
+        try:
+            cache[name] = path.read_text(errors='replace') if path.is_file() else ''
+        except OSError:
+            cache[name] = ''
+    return cache[name]
+
+def links_of(it: dict) -> dict:
+    g, pages = (it['gates'], it['pages'])
+    if is_himalaia(it):
+        comparison = g['comparison']
+        post = first_page(pages['post'])
+        pre = first_page([name for name in pages['pre'] if local_page(name) != local_page(post)])
+        comparison_page = local_page(comparison)
+        mockup = g['mockup'] if local_page(g['mockup']) != comparison_page else ''
+        display = first_page([name for name in pages['display'] if local_page(name) != comparison_page])
+        return {'pre': pre, 'mockup': mockup, 'post': post, 'comparison': comparison, 'preview': g['preview'], 'display': display, 'pr': (it['pr'] or {}).get('url', ''), 'issue': (it['issue'] or {}).get('url', '')}
+    return {'mockup': g['mockup'], 'comparison': g['comparison'] or (pages['post'] or [''])[0], 'preview': g['preview'], 'display': (pages['display'] or [''])[0], 'pr': (it['pr'] or {}).get('url', ''), 'issue': (it['issue'] or {}).get('url', '')}
+
+def ui_of(it: dict, note: dict) -> bool:
+    p = it['pages']
+    return bool(p['pre'] or p['post'] or p['mockup']) or note.get('ui') is True
+
+def ask_kind(a: dict, it: dict, decision: dict | None) -> str:
+    if a.get('kind') in CALL_KINDS:
+        return a['kind']
+    if decision and decision.get('call') in CALL_KINDS:
+        return decision['call']
+    pr = it['pr'] or {}
+    if pr.get('state') == 'open' and 'needs-human' in it['labels']:
+        return 'approve merge'
+    text = f"{a.get('question', '')} {a.get('rec', '')}"
+    q = a.get('question', '')
+    choice_or_mine = re.search('\\so\\s', q) or re.match('\\W*\\w+o\\b', q)
+    if ACTION_RE.search(text) and (not choice_or_mine):
+        return 'action'
+    if MOCKUP_RE.search(text):
+        return 'approve mockup'
+    g = it['gates']
+    if it['ui'] and it['status'] == 'Merge' and g['comparison'] and g['preview']:
+        return 'approve UI'
+    return 'decide'
+RERUN_RE = re.compile('(?<=[a-z])\\d+$')
+
+def norm_q(text: object) -> str:
+    """Question text compared without case, punctuation, backticks or spacing."""
+    return re.sub('[\\W_]+', ' ', str(text or '').lower()).strip()
+
+def _heads(decision: str) -> list[str]:
+    """dashboard-tasks2-q1 -> [dashboard-tasks2-q1, dashboard-tasks2, dashboard] (long enough only)."""
+    parts = decision.split('-')
+    return [h for h in ('-'.join(parts[:n]) for n in range(len(parts), 0, -1)) if len(h) > 6]
+
+def owned(it: dict, recs: list[AnswerRec]) -> list[AnswerRec]:
+    """Answers that belong to the item: its id, slugs or ask ids, or a re-run of one (tasks2 -> tasks3)."""
+    keys = {k.lower() for k in [it['id'], *it.get('aliases', []), *it.get('slugs', []), *(a['id'] for a in it['ask'])] if k}
+    stems = {RERUN_RE.sub('', k) for k in keys}
+    return [r for r in recs if any((h in keys or RERUN_RE.sub('', h) in stems for h in _heads(r.decision))) or r.decision in keys]
+
+def ask_answered(a: dict, it: dict, mine: list[AnswerRec]) -> bool:
+    """An answer under the ask id (any case), or under the item id for an ask without id when it
+    answered this question (or recorded no text), or any of the item's answers to the same question."""
+    q = norm_q(a['question'])
+    sub = {norm_q(x.get(k)) for x in a.get('questions') or [] if isinstance(x, dict) for k in ('id', 'text')}
+    for r in mine:
+        if a['id'] and r.decision == a['id'].lower():
+            return True
+        if not a['id'] and r.decision in {k.lower() for k in [it['id'], *it.get('aliases', []), a.get('_item', it['id'])]} and (not r.questions or q in r.questions or r.questions & sub):
+            return True
+        if q and q in r.questions:
+            return True
+    return False
+
+def steps_of(note: dict, card: dict) -> list[dict]:
+    """Human-task steps: notes `steps` > card `steps`; checked from notes `steps_checked`."""
+    raw = note.get('steps') if isinstance(note.get('steps'), list) else card.get('steps')
+    checked = note.get('steps_checked') if isinstance(note.get('steps_checked'), dict) else {}
+    return [s | {'checked': checked.get(s['id']) is True} for s in clean_steps(raw)]
+
+def enrich_asks(it: dict, decisions: dict[str, dict], answers: list[AnswerRec]) -> None:
+    """Final kind, decisions.json questions and answered flag on every ask."""
+    mine = owned(it, answers)
+    for a in it['ask']:
+        d = decisions.get(a['id']) if a['id'] else None
+        a['kind'] = ask_kind(a, it, d)
+        qs = (d or {}).get('questions')
+        a['questions'] = qs if isinstance(qs, list) else []
+        a['answered'] = bool(a.get('_answered') or ask_answered(a, it, mine))
