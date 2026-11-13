@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+
+# Editors and local tooling
+.DS_Store
+.idea/
+.vscode/
+.worktrees/
+
+# Secrets and machine-local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*token*
+credentials/
+secrets/
+
+# Orchestra runtime state and artifacts
+STATE.md
+continuation.md
+ledger.jsonl
+queue.json
+answers/
+logs/
+pages/
+scratch/
+sessions/
+runtime/
+tasks/
+*.jsonl
+*.log
+*.pid

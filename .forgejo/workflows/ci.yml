@@ -1,0 +1,22 @@
+# Forgejo owns executable CI. GitHub remains review/communication-only.
+name: CI
+
+on:
+  pull_request:
+    branches: [auto/integration]
+
+jobs:
+  quality:
+    uses: matteocervelli/adlimen-cicd/.forgejo/workflows/lib-py-ci.yml@v3.6.0
+    with:
+      package_path: "."
+      typecheck_target: "src"
+    secrets: inherit
+
+  tests:
+    uses: matteocervelli/adlimen-cicd/.forgejo/workflows/lib-py-ci-test.yml@v3.6.0
+    with:
+      caller_event_name: pull_request
+      package_path: "."
+      python_versions: '["3.12"]'
+    secrets: inherit
