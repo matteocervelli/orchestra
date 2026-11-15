@@ -262,6 +262,9 @@ def test_nightly_start_from_other_directory(tmp_path):
                 )
             )
             assert command == ["/usr/bin/python3", str(script)]
+            # The CI image may only provide /usr/local/bin/python. Validate the
+            # service command above, then exercise the source on the test runner.
+            command[0] = sys.executable
         else:
             command = [sys.executable, str(script)]
         result = subprocess.run(
