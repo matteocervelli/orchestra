@@ -4,6 +4,9 @@ All notable changes to Orchestra are documented here.
 
 ## [Unreleased]
 
+- Add reviewable Slack sink and nightly relay sources: configured release routing,
+  explicit fallback, and silent CI recovery. Runtime installation remains separate.
+
 ### Fixed
 
 - Inactive SOURCE recovers bounded authored descriptions from the exact primary
