@@ -48,3 +48,11 @@ and verify delivery before retiring the relay. This PR keeps relay ownership.
 The generic sink has no CI outcome field; its generic `ci` route is preserved.
 Failure/success filtering belongs to outcome-aware producers. Callers must use
 `alert` for CI failures.
+
+The promotion preserves the live orange Italian title, Europe/Rome times and
+trailing machine envelope. CI log text, job names and SHAs are capped and
+sanitized against Slack mentions and injected envelope markers. The historical
+operational tests that expect release routing to Orchestra or recovery posts
+must be retired or updated with the runtime promotion; the versioned unit tests
+are the notification policy contract. An empty ORCHESTRA_DIR uses the installed
+source root. Normalize the nightly owner value before comparing it.

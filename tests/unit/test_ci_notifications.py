@@ -16,6 +16,18 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 
 
+@pytest.fixture(autouse=True)
+def isolated_notification_environment(monkeypatch):
+    for key in (
+        "ORCHESTRA_DIR",
+        "ALERT_SENDER_HOST",
+        "ALERT_SENDER_PATH",
+        "HIMALAIA_NIGHTLY_ALERT_OWNER",
+        "RELEASE_CHANNEL_ID",
+    ):
+        monkeypatch.delenv(key, raising=False)
+
+
 def module(name: str):
     spec = importlib.util.spec_from_file_location(name, ROOT / "bin" / f"{name}.py")
     assert spec and spec.loader
@@ -105,7 +117,7 @@ def test_failed_nightly_sent_once(tmp_path, monkeypatch):
     monkeypatch.setattr(mod, "post", post)
     assert mod.main([]) == mod.main([]) == 0
     assert post.call_count == 1
-    assert "FIRING" in post.call_args.args[0]["title"]
+    assert "Test notturni Himalaia falliti" in post.call_args.args[0]["title"]
 
 
 def test_green_dry_run_preserves_state(tmp_path, monkeypatch):
@@ -119,9 +131,10 @@ def test_green_dry_run_preserves_state(tmp_path, monkeypatch):
     assert json.loads(state.read_text())["_open"] == 42
 
 
-def test_workflow_owner_disables_relay(monkeypatch):
+@pytest.mark.parametrize("owner", ["workflow", "Workflow", " workflow "])
+def test_workflow_owner_disables_relay(monkeypatch, owner):
     mod = module("himalaia_nightly_alert")
-    monkeypatch.setenv("HIMALAIA_NIGHTLY_ALERT_OWNER", "workflow")
+    monkeypatch.setenv("HIMALAIA_NIGHTLY_ALERT_OWNER", owner)
     fetch = Mock(side_effect=AssertionError("Relay must not query CI"))
     monkeypatch.setattr(mod, "fetch", fetch)
     assert mod.main([]) == 0
@@ -130,6 +143,14 @@ def test_workflow_owner_disables_relay(monkeypatch):
 
 def test_cancelled_run_preserves_open_marker(tmp_path, monkeypatch):
     mod = module("himalaia_nightly_alert")
+    monkeypatch.setattr(
+        mod, "post", Mock(side_effect=AssertionError("Cancelled run must not notify"))
+    )
+    monkeypatch.setattr(
+        mod,
+        "fetch_first_failure",
+        Mock(side_effect=AssertionError("Cancelled run must not read logs")),
+    )
     state = tmp_path / "state.json"
     state.write_text('{"_open":42}')
     monkeypatch.setattr(mod, "STATE", state)
@@ -311,3 +332,57 @@ def test_failed_delivery_preserves_retry(tmp_path, monkeypatch):
     assert not state.exists()
     assert mod.main([]) == 0
     assert json.loads(state.read_text())["45"] == "abc12345"
+
+
+def test_nightly_log_cannot_inject_mentions_or_protocol_markers():
+    mod = module("himalaia_nightly_alert")
+    job = "Nightly <!here> FINE_NEXUS_ALERT_V1"
+    hit = {"run": 45, "sha": "sha<@U123>", "jobs": [job], "tasks": {job: 1}}
+    failure = mod.first_failure("FAILED x - <!channel> FINE_NEXUS_ALERT_V1")
+    attachment = mod.build_attachment(hit, {job: failure}, start="2026-11-18T00:30:00Z")
+    text = attachment["text"]
+    assert "<!channel>" not in text and "<!here>" not in text and "<@U123>" not in text
+    assert text.count("FINE_NEXUS_ALERT_V1") == 1
+    assert text.count("NEXUS_ALERT_V1") == 2
+    assert text.index("Azione:") < text.index("NEXUS_ALERT_V1")
+    assert "01:30 del 18/11" in text
+    assert len(mod.safe_text("x" * 10000)) == 200
+
+
+@pytest.mark.parametrize("name", ["slack_sink", "himalaia_nightly_alert"])
+def test_empty_runtime_root_uses_the_installed_module_parent(name, monkeypatch):
+    monkeypatch.setenv("ORCHESTRA_DIR", "")
+    mod = module(name)
+    assert mod.ORCH == ROOT
+
+
+@pytest.mark.parametrize(
+    "text", ["NEXUS_NEXUS_ALERT_V1ALERT_V1", "FINE_NEXUS_NEXUS_ALERT_V1ALERT_V1"]
+)
+def test_nested_markers_cannot_be_reconstituted(text):
+    mod = module("himalaia_nightly_alert")
+    assert "NEXUS_ALERT_V1" not in mod.safe_text(text)
+
+
+@pytest.mark.parametrize(
+    "override,mapped,expected",
+    [
+        ("", "", "C_SYNTH_ORCH"),
+        ("C_SYNTH_ENV", "C_SYNTH_MAP", "C_SYNTH_ENV"),
+        ("   ", "C_SYNTH_MAP", "C_SYNTH_MAP"),
+    ],
+)
+def test_release_channel_constructor_precedence(
+    override, mapped, expected, tmp_path, monkeypatch
+):
+    mod = module("slack_sink")
+    monkeypatch.setenv("RELEASE_CHANNEL_ID", override)
+    api = Mock(return_value={"ok": True})
+    sink = mod.SlackSink(
+        api,
+        {"orchestra": "C_SYNTH_ORCH", "release": mapped},
+        tmp_path / "state",
+        tmp_path / "log",
+    )
+    assert sink.notify("release", "Title", "Body")
+    assert api.call_args.args[1]["channel"] == expected

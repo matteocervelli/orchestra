@@ -21,7 +21,7 @@ import urllib.error
 from collections.abc import Callable
 from pathlib import Path
 
-ORCH = Path(os.environ.get("ORCHESTRA_DIR", str(Path(__file__).resolve().parents[1])))
+ORCH = Path(os.environ.get("ORCHESTRA_DIR") or str(Path(__file__).resolve().parents[1]))
 SLACK_FLAG = (
     "ORCHESTRA_SLACK"  # present in ORCHESTRA_DIR: notify.py also sends to Slack
 )

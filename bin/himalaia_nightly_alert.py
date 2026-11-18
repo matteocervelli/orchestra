@@ -5,7 +5,7 @@ Alertmanager alerts.
 This optional homelab
 check reads the nightly jobs with `fj ci tasks`. For the newest finished
 nightly run:
-- a failed job -> one FIRING attachment (red bar, `NEXUS_ALERT_V1` block,
+- a failed job -> one failure attachment (orange bar, `NEXUS_ALERT_V1` block,
 Fonte: himalaia-nightly),
   with the first failed test of each job and the `fj ci log` command;
 - green after an open alert -> clear the local marker silently.
@@ -30,15 +30,15 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
-ORCH = Path(os.environ.get("ORCHESTRA_DIR", str(Path(__file__).resolve().parents[1])))
+ORCH = Path(os.environ.get("ORCHESTRA_DIR") or str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(ORCH / "bin"))
 STATE = ORCH / "scratch" / "himalaia-nightly-alert.json"
 REPO = "adlimen/app-himalaia"
 SOURCE = "himalaia-nightly"
 SENDER_HOST = os.environ.get("ALERT_SENDER_HOST", "")
 SENDER_PATH = os.environ.get("ALERT_SENDER_PATH", "")
-RED = "a30200"  # Alertmanager failure colour
 # Task names of the jobs in .forgejo/workflows/nightly.yml.
 NIGHTLY_JOBS = {
     "Backend Nightly Suite",
@@ -145,30 +145,51 @@ def iso(now: datetime.datetime) -> str:
     return now.astimezone(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
+def local_time(value: str) -> str:
+    instant = datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if instant.tzinfo is None:
+        raise ValueError("alert timestamp must include a timezone")
+    return instant.astimezone(ZoneInfo("Europe/Rome")).strftime("%H:%M del %d/%m")
+
+
+def safe_text(value: str) -> str:
+    """Preserve the live guard against Slack mentions and machine-envelope injection."""
+    value = re.sub(r"FINE_NEXUS_ALERT_V1|NEXUS_ALERT_V1", " ", value)
+    return re.sub(r"[\r\n<>]+", " ", value)[:200]
+
+
 def build_attachment(hit: dict, failures: dict[str, str], *, start: str) -> dict:
-    """Build a failure attachment with the existing Alertmanager layout."""
-    ref = f"{SOURCE}-{hit['run']}"
+    """Preserve the live Italian layout; recovery is deliberately silent."""
+    count = len(hit["jobs"])
+    jobs = "1 job fallito" if count == 1 else f"{count} job falliti"
+    title = f"🟠 Test notturni Himalaia falliti · homelab · {jobs}"
+    human = [
+        f"homelab: I test notturni Himalaia segnalano {jobs}.",
+        "Azione: Apri il run CI e controlla il primo errore prima di rilanciare.",
+        f"Urgenza: Da verificare oggi · dalle {local_time(start)}",
+        "",
+        f"Run {int(hit['run'])} su {safe_text(hit['sha'])}:",
+    ]
+    for job in hit["jobs"]:
+        human += [
+            f"• {safe_text(job)}: {safe_text(failures.get(job, '-'))}",
+            f"   `fj ci log {REPO} --task {int(hit['tasks'][job])}`",
+        ]
     block = [
+        "",
         "NEXUS_ALERT_V1",
         f"Fonte: {SOURCE}",
         f"Inizio: {start}",
-        "Fine: 0001-01-01T00:00:00Z",
         "Alert: HimalaiaNightlyFailed · stato: firing",
         "Host: homelab · gravità: warning",
-        f"Riferimento: {ref}",
+        f"Riferimento: {SOURCE}-{int(hit.get('incident_run', hit['run']))}",
         "FINE_NEXUS_ALERT_V1",
     ]
-    extra = [f"Run `{hit['run']}` su `{hit['sha']}`, {len(hit['jobs'])} job falliti:"]
-    for job in hit["jobs"]:
-        extra += [
-            f"• *{job}*: {failures.get(job, '-')}",
-            f"   `fj ci log {REPO} --task {hit['tasks'][job]}`",
-        ]
     return {
-        "color": RED,
-        "title": ":rotating_light: FIRING [1] HimalaiaNightlyFailed",
-        "text": "\n".join(block + extra),
-        "fallback": f"[FIRING] HimalaiaNightlyFailed run {hit['run']} {hit['sha']}",
+        "color": "ff8c00",
+        "title": title,
+        "text": "\n".join(human + block),
+        "fallback": title,
         "mrkdwn_in": ["fallback", "pretext", "text"],
     }
 
@@ -176,6 +197,7 @@ def build_attachment(hit: dict, failures: dict[str, str], *, start: str) -> dict
 def post_alerts(attachment: dict) -> bool:
     """Pipe the attachment to the configured sender; credentials stay there."""
     if not SENDER_HOST or not SENDER_PATH:
+        print("Nightly relay sender is not configured", file=sys.stderr)
         return False
     try:
         out = subprocess.run(
@@ -237,7 +259,10 @@ def post(attachment: dict) -> bool:
 
 
 def main(argv: list[str] | None = None) -> int:
-    if os.environ.get("HIMALAIA_NIGHTLY_ALERT_OWNER", "relay") == "workflow":
+    if (
+        os.environ.get("HIMALAIA_NIGHTLY_ALERT_OWNER", "relay").strip().lower()
+        == "workflow"
+    ):
         print("nightly: delivery owned by workflow; relay silent")
         return 0
     ap = argparse.ArgumentParser()
