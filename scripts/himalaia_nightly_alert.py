@@ -1,0 +1,1 @@
+../bin/himalaia_nightly_alert.py

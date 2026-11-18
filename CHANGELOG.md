@@ -17,6 +17,11 @@ All notable changes to Orchestra are documented here.
 
 ### Fixed
 
+- Canonical `bin/` Slack sink routes releases to the approved default channel
+  (with environment/config overrides), retries unavailable release channels once
+  on Orchestra, and clears nightly recovery silently. Nightly resolves its runtime
+  root outside the working directory; a service template preserves relay settings.
+
 - Avoid duplicate nonterminal Forgejo CI runs in the reusable pipeline.
 - Enforce the ignored tracked-file policy across every tracked path, including
   force-added credential-like filenames.
