@@ -1,0 +1,1 @@
+../bin/slack_sink.py

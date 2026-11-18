@@ -1,0 +1,11 @@
+[Unit]
+Description=Post the Himalaia nightly failures to Slack #alert
+
+[Service]
+Type=oneshot
+Environment=PATH=@CLI_PATH@:/usr/local/bin:/usr/bin:/bin
+Environment="ORCHESTRA_DIR=@ORCHESTRA_DIR@"
+Environment="ALERT_SENDER_HOST=@ALERT_SENDER_HOST@"
+Environment="ALERT_SENDER_PATH=@ALERT_SENDER_PATH@"
+Environment=HIMALAIA_NIGHTLY_ALERT_OWNER=relay
+ExecStart=/usr/bin/python3 "@ORCHESTRA_DIR@/bin/himalaia_nightly_alert.py"
