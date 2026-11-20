@@ -85,7 +85,11 @@ def relevant(path: str) -> bool:
 
 
 def pattern_source(path: str) -> bool:
-    return Path(path).name == ".env" or Path(path).suffix in _SOURCE_SUFFIXES
+    return (
+        Path(path).name == ".env"
+        or Path(path).name.startswith(".env.")
+        or Path(path).suffix in _SOURCE_SUFFIXES
+    )
 
 
 def unsupported_manifest(path: str) -> bool:
@@ -289,7 +293,9 @@ def _tree_files(
     repo: Path, git: Path, head: str, profile: TrustedProfile
 ) -> tuple[tuple[FileInput, ...], tuple[tuple[str, bytes], ...]]:
     records, contents, aggregate = [], [], 0
-    tree = git_bytes(repo, git, ("ls-tree", "-r", "-z", head))
+    tree = git_bytes(
+        repo, git, ("ls-tree", "-r", "-z", head), profile.limit("file_count") * 576
+    )
     for record in tree.split(b"\0"):
         if not record:
             continue
@@ -348,6 +354,7 @@ def capture_inventory(
             (
                 "rev-list",
                 "--objects",
+                "--quiet",
                 "--no-object-names",
                 "--missing=error",
                 head,
@@ -369,6 +376,7 @@ def capture_inventory(
             merge_base,
             head,
         ),
+        2 * profile.limit("file_count") * 513,
     )
     changed = tuple(
         sorted(
