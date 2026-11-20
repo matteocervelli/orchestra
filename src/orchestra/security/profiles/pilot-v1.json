@@ -1,0 +1,168 @@
+{
+  "adapters": [
+    {
+      "adapter_id": "bandit-json-1.9.4",
+      "asset_paths": [
+        "bandit.ini",
+        "bandit.yaml"
+      ],
+      "family": "bandit",
+      "native_schema": "bandit-json-1.9.4",
+      "recipe_id": "bandit-json-1.9.4",
+      "version": "1.9.4"
+    },
+    {
+      "adapter_id": "gitleaks-json-8.30.1",
+      "asset_paths": [
+        "gitleaks.toml"
+      ],
+      "family": "gitleaks",
+      "native_schema": "gitleaks-json-8.30.1",
+      "recipe_id": "gitleaks-json-8.30.1",
+      "version": "8.30.1"
+    },
+    {
+      "adapter_id": "npm-json-11.21.1",
+      "asset_paths": [],
+      "family": "javascript-audit",
+      "native_schema": "npm-json-11.21.1",
+      "recipe_id": "npm-json-11.21.1",
+      "version": "11.21.1"
+    },
+    {
+      "adapter_id": "osv-json-2.7.0",
+      "asset_paths": [
+        "osv.toml"
+      ],
+      "family": "osv",
+      "native_schema": "osv-json-2.7.0",
+      "recipe_id": "osv-json-2.7.0",
+      "version": "2.7.0"
+    },
+    {
+      "adapter_id": "pip-audit-json-2.10.1",
+      "asset_paths": [],
+      "family": "python-audit",
+      "native_schema": "pip-audit-json-2.10.1",
+      "recipe_id": "pip-audit-json-2.10.1",
+      "version": "2.10.1"
+    },
+    {
+      "adapter_id": "pnpm-json-10.34.8",
+      "asset_paths": [],
+      "family": "javascript-audit",
+      "native_schema": "pnpm-json-10.34.8",
+      "recipe_id": "pnpm-json-10.34.8",
+      "version": "10.34.8"
+    },
+    {
+      "adapter_id": "portable-patterns-v1",
+      "asset_paths": [],
+      "family": "patterns",
+      "native_schema": "portable-patterns-v1",
+      "recipe_id": "portable-patterns-v1",
+      "version": "1"
+    },
+    {
+      "adapter_id": "trivy-json-0.76.1",
+      "asset_paths": [
+        "trivy.yaml"
+      ],
+      "family": "trivy",
+      "native_schema": "trivy-json-0.76.1",
+      "recipe_id": "trivy-json-0.76.1",
+      "version": "0.76.1"
+    },
+    {
+      "adapter_id": "uv-pylock-0.13.5",
+      "asset_paths": [],
+      "family": "python-export",
+      "native_schema": "uv-pylock-0.13.5",
+      "recipe_id": "uv-pylock-0.13.5",
+      "version": "0.13.5"
+    }
+  ],
+  "assets": [],
+  "dependency_free_scopes": [],
+  "exclusions": [
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    ".worktrees",
+    "__pycache__",
+    "build",
+    "dist",
+    "node_modules"
+  ],
+  "limits": {
+    "aggregate_bytes": 67108864,
+    "blob_bytes": 4194304,
+    "envelope_bytes": 65536,
+    "export_seconds": 60,
+    "file_bytes": 65536,
+    "file_count": 10000,
+    "finding_count": 128,
+    "gap_count": 128,
+    "manifest_count": 256,
+    "native_seconds": 300,
+    "native_stderr_bytes": 65536,
+    "native_stdout_bytes": 65536,
+    "probe_bytes": 4096,
+    "probe_seconds": 10,
+    "receipt_count": 128,
+    "request_bytes": 2097152,
+    "root_count": 64,
+    "scan_seconds": 3600,
+    "yaml_depth": 32,
+    "yaml_nodes": 100000
+  },
+  "policy": "orchestra-high-block-v1",
+  "profile_id": "orchestra-pilot-v1",
+  "schema": "orchestra.security-profile/v1",
+  "source_bindings": {
+    "grammar": "uv1-r3/pnpm9/npm3-v1",
+    "js_overrides": [
+      [
+        "dashboard",
+        "dependencies",
+        "@tanstack/react-router",
+        "^1",
+        "@tanstack/react-router",
+        "1.168.23",
+        "1.168.23"
+      ],
+      [
+        "dashboard",
+        "devDependencies",
+        "@tanstack/router-plugin",
+        "^1",
+        "@tanstack/router-plugin",
+        "1.167.22",
+        "1.167.22"
+      ],
+      [
+        "dashboard",
+        "devDependencies",
+        "vite",
+        "^6",
+        "vite@>=6 <7",
+        "6.4.4",
+        "6.4.4"
+      ]
+    ],
+    "js_registry": "https://registry.npmjs.org",
+    "private_indexes": [
+      "https://git.adlimen.dev/api/packages/adlimen/pypi/simple/"
+    ],
+    "public_index": "https://pypi.org/simple",
+    "python_ranges": [
+      [
+        "adlimen-orchestra",
+        ">=3.12,<3.13",
+        "==3.12.*"
+      ]
+    ]
+  }
+}
