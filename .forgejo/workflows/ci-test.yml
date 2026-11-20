@@ -1,0 +1,15 @@
+# Forgejo owns executable CI.
+name: CI Tests
+
+on:
+  pull_request:
+    branches: [main, auto/integration]
+
+jobs:
+  tests:
+    uses: matteocervelli/adlimen-cicd/.forgejo/workflows/lib-py-ci-test.yml@v3.6.0
+    with:
+      caller_event_name: pull_request
+      package_path: "."
+      python_versions: '["3.12"]'
+    secrets: inherit

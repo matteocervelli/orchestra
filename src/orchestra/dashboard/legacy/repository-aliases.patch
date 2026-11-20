@@ -1,0 +1,124 @@
+--- a/assets/cb-state.js
++++ b/assets/cb-state.js
+@@ -1,4 +1,5 @@
+ import { countable } from "./cb-counts.js";
++import { repositoryFilterKey, repositoryFilters, matchesRepositoryQuery } from "./repository-filter.js";
+ 
+ // View state, URL persistence, filtering, faceted counts and sorting.
+ import { priorityOf, prioKey, PRIORITY_LABEL } from "./cb-priority.js";
+@@ -118,6 +119,7 @@
+   if (state.tab === "tabella") state.view = "table";
+   state.q = p.get("q") || "";
+   for (const f of FACETS) state[f] = list(p.get(f));
++  state.repo = repositoryFilters(state.repo);
+   for (const t of TOGGLES) state[t] = p.get(t) === "1";
+   const taken = p.get("taken");
+   state.taken = taken === "no" ? "no" : taken === "yes" || taken === "1" ? "yes" : "";
+@@ -146,7 +148,8 @@
+   if (state.tab !== "board") p.set("tab", state.tab);
+   if (state.view !== "board") p.set("view", state.view);
+   if (state.q.trim()) p.set("q", state.q.trim());
+-  for (const f of FACETS) if (state[f].length) p.set(f, state[f].join(","));
++  for (const f of FACETS) if (state[f].length)
++    p.set(f, (f === "repo" ? repositoryFilters(state[f]) : state[f]).join(","));
+   for (const t of TOGGLES) if (state[t]) p.set(t, "1");
+   if (state.taken) p.set("taken", state.taken);
+   const sort = state.sort.map((r) => `${r.f}:${r.d}`).join(",");
+@@ -249,12 +252,15 @@
+ // s: the view state (default the page's); tests and counts pass the state a click would produce.
+ export function matches(it, except = null, s = state) {
+   if (it.hidden || !releaseVisible(it,s.q)) return false;
+-  const terms = norm(s.q).split(/\s+/).filter(Boolean);
+-  if (terms.length && !terms.every((t) => haystack(it).includes(t)))
++  const query = norm(s.q).trim();
++  const terms = query.split(/\s+/).filter(Boolean);
++  if (terms.length &&
++      !(it.repos?.length ? it.repos : [it.repo]).some(r => matchesRepositoryQuery(r, query)) &&
++      !terms.every((t) => haystack(it).includes(t)))
+     return false;
+   for (const f of FACETS)
+     if (f !== except && s[f].length && !(f === "repo"
+-      ? (it.repos?.length ? it.repos : [it.repo]).some(r => s[f].includes(r))
++      ? (it.repos?.length ? it.repos : [it.repo]).some(r => repositoryFilters(s[f]).includes(repositoryFilterKey(r)))
+       : s[f].includes(facetValue(it, f))))
+       return false;
+   for (const t of TOGGLES)
+@@ -285,7 +291,9 @@
+   const counts = new Map();
+   for (const it of items)
+     if ((facet === "status" || countable(it)) && matches(it, facet)) {
+-      const values = facet === "repo" && it.repos?.length ? [...new Set(it.repos)] : [facetValue(it, facet)];
++      const values = facet === "repo"
++        ? repositoryFilters(it.repos?.length ? it.repos : [it.repo])
++        : [facetValue(it, facet)];
+       for (const v of values) counts.set(v, (counts.get(v) || 0) + 1);
+     }
+   return counts;
+@@ -301,7 +309,7 @@
+     case "updated":
+       return it.updated || null;
+     case "repo":
+-      return it.repo || null;
++      return it.repo ? repositoryFilterKey(it.repo) : null;
+     case "status": {
+       const i = statuses.indexOf(it.status);
+       return i < 0 ? null : i;
+--- a/assets/cb-dedupe.js
++++ b/assets/cb-dedupe.js
+@@ -3,6 +3,7 @@
+ // item. An action blocks a new one of the same step while it is active: the server's `active` flag
+ // (no .done, or its child not finished yet), or not done for the rows this page sent and not listed yet.
+ import { repoName } from "./v3/model.js";
++import { repositoryFilterKey } from "./repository-filter.js";
+ 
+ export const INTENT_TEXT = {
+   inizia: "start",
+@@ -40,7 +41,7 @@
+ 
+ export const scopeOf = (intent, id, item) =>
+   REPO_INTENTS.includes(intent) && item?.repo
+-    ? `repo:${item.repo}`
++    ? `repo:${repositoryFilterKey(item.repo)}`
+     : `item:${id}`;
+ 
+ const isActive = (r) => (r.active !== undefined ? r.active === true : !r.done);
+@@ -53,7 +54,10 @@
+     const item = byId.get(r.item);
+     const intent = intentOf(r, item);
+     if (!intent) continue;
+-    const key = `${intent}|${r.scope || scopeOf(intent, r.item, item)}`;
++    const rawScope = r.scope || scopeOf(intent, r.item, item);
++    const scope = rawScope.startsWith("repo:")
++      ? `repo:${repositoryFilterKey(rawScope.slice(5))}` : rawScope;
++    const key = `${intent}|${scope}`;
+     const cur = out.get(key);
+     if (!cur || String(r.received) > String(cur.received)) out.set(key, r);
+   }
+--- a/assets/cb-toolbar.js
++++ b/assets/cb-toolbar.js
+@@ -1,4 +1,5 @@
+ import { countable } from "./cb-counts.js";
++import { repositoryFilterKey } from "./repository-filter.js";
+ 
+ // Toolbar pieces (himalaia CatalogFilterBar / CatalogActiveFilters / CatalogSortMenu) in adlimen-ui classes.
+ import { h } from "./cb-util.js";
+@@ -39,7 +40,9 @@
+ const valueLabel = filterValueLabel;
+ 
+ function options(items, facet, statuses) {
+-  const values = [...new Set(items.map((it) => facetValue(it, facet)).filter(Boolean))];
++  const values = [...new Set((facet === "repo"
++    ? items.flatMap(it => (it.repos?.length ? it.repos : [it.repo]).map(repositoryFilterKey))
++    : items.map(it => facetValue(it, facet))).filter(Boolean))];
+   if (facet === "status")
+     values.sort((a, b) => statuses.indexOf(a) - statuses.indexOf(b));
+   else if (facet === "call")
+@@ -57,7 +60,7 @@
+     value: v,
+     label: valueLabel(facet, v),
+     count: counts.get(v) || 0,
+-    summary: countSummary(counts.get(v) || 0, items.filter(it => (facet === "status" ? !it.hidden : countable(it)) && (facet === "repo" ? (it.repos?.length ? it.repos : [it.repo]).includes(v) : facetValue(it, facet) === v)).length, state, facet).label,
++    summary: countSummary(counts.get(v) || 0, items.filter(it => (facet === "status" ? !it.hidden : countable(it)) && (facet === "repo" ? (it.repos?.length ? it.repos : [it.repo]).some(r => repositoryFilterKey(r) === v) : facetValue(it, facet) === v)).length, state, facet).label,
+   }));
+ }
+ 

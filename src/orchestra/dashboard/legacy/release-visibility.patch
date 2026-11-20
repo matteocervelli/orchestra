@@ -1,0 +1,12 @@
+--- a/assets/cb-state.js
++++ b/assets/cb-state.js
+@@ -245,8 +245,7 @@
+ 
+ // Operational release cards live in Rilasci; an explicit search still finds their drawers.
+ export const releaseItem = it => it.release_operation === true ||
+-  ['release','tag','promotion','deploy','release_prepare'].includes(it.kind) ||
+-  [it.id,...(it.slugs || [])].some(id=>/^(?:release|promotion|promotions|deploy|tag)(?:-|$)|(?:^|-)(?:tag|deploy)(?:-|$)/.test(id || ''));
++  ['release','tag','promotion','deploy','release_prepare'].includes(it.kind);
+ export const releaseVisible = (it,q='') => !releaseItem(it) || Boolean(q.trim());
+ 
+ // s: the view state (default the page's); tests and counts pass the state a click would produce.

@@ -1,0 +1,17 @@
+{
+  "source_path": "bin/workitems.py",
+  "source_sha256": "651d2b9c4bd204bf93649ffbbf8d1e01351c6633cd1c947c3a11803939d1f26e",
+  "selected_symbols": [
+    "PUBLIC_ITEM_KEYS",
+    "PUBLIC_LIST_LIMIT",
+    "TERMINAL_STATUSES",
+    "_SAFE_ITEM_ID",
+    "_compact_fields",
+    "_detail_item",
+    "_ledger_for",
+    "_public_item",
+    "_write_compact",
+    "publish"
+  ],
+  "fixture_sha256": "e75bd3cd9a9b78710d561ecd56f3e0fc053e80d2f52c5709935b9bf246be38b0"
+}

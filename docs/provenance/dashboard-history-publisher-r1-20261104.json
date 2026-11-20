@@ -1,0 +1,18 @@
+{
+  "schema": "orchestra-dashboard-history-source/v1",
+  "interface_sha256": "2774d05a3b1be326ae2d3d6b1f4bf0c3ce00e9ac2c8c7deea269df2b4797463f",
+  "python": "3.12",
+  "runtime_targets": {
+    "bin/workitems.py": "651d2b9c4bd204bf93649ffbbf8d1e01351c6633cd1c947c3a11803939d1f26e",
+    "bin/orchestra_dashboard/quality.py": "d76696a6836e1fa21527d7fdcd9377269bde4303c2fbbe36dfe4caf2e3812996"
+  },
+  "publish_ast_sha256": "f0accf0843aaab003f15e1a0b0cf30fc63457bea7f4aea15a0e20ea7db048bce",
+  "quality_function_ast_sha256": {
+    "bind_detail": "524413202d5ba1b69429b33f559a7f536f6a5c814a902d3bde3c53c8430e4704",
+    "board_digest": "41ad7ed800dff6c0335c09fa0c4f2fdc74f3b3653f6c978df3db89c85f6d5d3a",
+    "publication_generated": "c5b2471cf10d4d419b576b79f568a70a54a2cf08aa41a430e96be5656e635a16",
+    "detail_matches_board": "dc70ac3fd407e994541e457facb7c8cff9793f3f50b1649ced8cba6843050d79"
+  },
+  "applied": false,
+  "runtime_ready": false
+}

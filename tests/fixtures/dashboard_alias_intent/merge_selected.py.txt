@@ -1,0 +1,106 @@
+def unique(rows: list) -> list:
+    out = []
+    for row in rows:
+        if row not in out:
+            out.append(row)
+    return out
+
+def merge_steps(out: dict, note: dict, alias: str) -> None:
+    """Separate different steps with the same local id; retain old checkbox routes."""
+    steps = out.setdefault('steps', [])
+    checked = out.setdefault('steps_checked', {})
+    routes = out.setdefault('step_aliases', {})
+    routes.update(note.get('step_aliases') or {})
+    for step in clean_steps(note.get('steps')):
+        if not isinstance(step, dict) or not step.get('id'):
+            continue
+        sid = step['id']
+        prior = next((s for s in steps if s['id'] == sid), None)
+        if prior and prior != step:
+            sid = 'dedupe-' + hashlib.sha256(f'{alias}:{sid}'.encode()).hexdigest()[:12]
+        value = {**step, 'id': sid}
+        if value not in steps:
+            steps.append(value)
+        routes[f"{alias}:{step['id']}"] = sid
+        if step['id'] in (note.get('steps_checked') or {}):
+            checked[sid] = note['steps_checked'][step['id']]
+
+def merge_notes(notes: dict, aliases: list[str], target: str, target_card: dict | None=None) -> dict:
+    """Specific child text wins; collections, pins and most urgent priority survive."""
+    out: dict = {}
+    merge_steps(out, notes.get(target, {}) if 'steps' in notes.get(target, {}) else target_card or {}, target)
+    collections = ('ask', 'proposals')
+    ordered = sorted(aliases, key=lambda s: (len(s), s))
+    if notes.get(target, {}).get('edited_fields') or any((notes.get(a, {}).get('merged_into') == target for a in aliases if a != target)):
+        ordered = [a for a in ordered if a != target] + [target]
+    for alias in ordered:
+        note = notes.get(alias, {})
+        if alias != target and note.get('merged_into') == target:
+            continue
+        superseded = note.get('status') == 'Dropped' or str(note.get('needs', '')).startswith('Niente: vedi')
+        for key, value in note.items():
+            if not superseded and key not in (*collections, 'steps', 'step_aliases', 'pages', 'pin', 'hide', 'merged_into', 'priority', 'status', 'steps_checked', 'step_checks', 'ask_overrides', 'step_overrides'):
+                out[key] = copy.deepcopy(value)
+        for key in collections:
+            if key not in note:
+                continue
+            rows = note.get(key, [])
+            if key == 'ask' and isinstance(rows, dict):
+                rows = [rows]
+            if isinstance(rows, list):
+                entries = [{**r, '_item': r.get('_item', alias), '_answered': bool(r.get('_answered') or (note.get('needs') and is_nothing(note['needs'])))} if key == 'ask' and isinstance(r, dict) else r for r in rows]
+                out[key] = unique(out.get(key, []) + entries)
+        for key, links in (note.get('pages') or {}).items():
+            bucket = out.setdefault('pages', {})
+            if key == 'preview':
+                bucket[key] = links
+            else:
+                bucket[key] = unique(bucket.get(key, []) + (links if isinstance(links, list) else [links]))
+        if note.get('pin'):
+            out['pin'] = True
+        merge_steps(out, note, alias)
+        out.setdefault('step_checks', {}).update(note.get('step_checks') or {alias: note.get('steps_checked') or {}})
+        for key, name in (('ask', 'ask_overrides'), ('steps', 'step_overrides')):
+            overrides = note.get(name)
+            if overrides is None:
+                overrides = [alias] if key in note else []
+                if alias == target and target.startswith(('pr-', 'issue-')) and (key in note):
+                    overrides = aliases
+            out[name] = unique(out.get(name, []) + overrides)
+    priorities = [notes[a]['priority'] for a in aliases if notes.get(a, {}).get('priority') in ('P0', 'P1', 'P2', 'P3') and (not notes[a].get('merged_into'))]
+    if priorities:
+        out['priority'] = min(priorities)
+        if 'priority' in notes.get(target, {}).get('edited_fields', []):
+            out['priority'] = notes[target]['priority']
+    statuses = [notes[a]['status'] for a in aliases if notes.get(a, {}).get('status') in STATUSES and (not notes[a].get('merged_into'))]
+    if statuses:
+        real = [s for s in statuses if s != 'Dropped']
+        if real:
+            out['status'] = max(real, key=STATUSES.index)
+    migrated = any((notes.get(a, {}).get('merged_into') == target for a in aliases))
+    if migrated and notes.get(target, {}).get('hide') or all((notes.get(a, {}).get('hide') for a in aliases)):
+        out['hide'] = True
+    if not out.get('title_it'):
+        titles = [a for a in aliases if notes.get(a, {}).get('title_it')]
+        if titles:
+            out['title_it'] = notes[max(titles, key=lambda a: (len(a), a))]['title_it']
+    return out
+
+def card_steps(note: dict, children: list[dict], target: str='') -> None:
+    """Build checkbox routes before attaching checks from their original owners."""
+    for child in sorted(children, key=lambda c: (c['slug'] != target, c['start'])):
+        if child['slug'] not in note.get('step_overrides', []):
+            merge_steps(note, child.get('card', {}), child['slug'])
+    checked = note.setdefault('steps_checked', {})
+    routes = note.get('step_aliases', {})
+    for alias, checks in note.get('step_checks', {}).items():
+        for sid, value in checks.items():
+            checked[routes.get(f'{alias}:{sid}', sid)] = value
+
+def effective_note(notes: dict, aliases: list[str], target: str, children: list[dict]) -> dict:
+    aliases = unique(aliases + ([target] if target in notes else []))
+    target_card = next((c.get('card', {}) for c in children if c['slug'] == target), {})
+    note = merge_notes(notes, aliases, target, target_card)
+    card_steps(note, children, target)
+    note['steps_checked'].update(notes.get(target, {}).get('steps_checked') or {})
+    return note

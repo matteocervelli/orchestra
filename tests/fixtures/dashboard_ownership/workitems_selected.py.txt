@@ -1,0 +1,110 @@
+def identify(it: dict, iid: str, repo: str, ctx: Ctx) -> None:
+    """Title, kind and branch from the sources, before any curated text."""
+    if it['issue']:
+        t = issue_title(repo, it['issue']['number'], ctx.triage, ctx.probes)
+        it['title'] = it['title'] or t
+    it['title'] = it['title'] or (it['pr'] or {}).get('title', '') or it.get('goal', iid)
+    if not it['kind']:
+        it['kind'] = kind_of(iid, it['title'])
+    elif iid.startswith('issue-') and it['kind'] in ('issue', 'feature', 'test', 'docs', 'fix'):
+        it['kind'] = kind_of('issue-x', it['title'])
+    if not it['branch'] and it['slugs']:
+        s = [x for x in it['slugs'] if not x.endswith(('-fix', '-review'))]
+        it['branch'] = f'auto/{s[0]}' if s and it['pr'] else ''
+
+def finish(it: dict, iid: str, ctx: Ctx) -> None:
+    note = ctx.notes.get(iid) or {}
+    ch = sorted(it['children'], key=lambda c: c['start'])
+    card = next((c['card'] for c in reversed(ch) if c.get('card')), {})
+    rows = [r for slug in it['slugs'] for r in ctx.ledger.get(slug, [])]
+    it['repos'] = wi_repos.derive(it, card, note, ctx.tasks, ctx.spawns, rows)
+    if not (it.get('pr') or it.get('issue')):
+        it['repo'] = it['repos'][0]
+    repo = REPOS.get(it['repo'], it['repo'])
+    identify(it, iid, repo, ctx)
+    match_pages(it, iid, repo, ctx.pages, number_repos=ctx.number_repos, html=ctx.html)
+    ch = sorted(it['children'], key=lambda c: c['start'])
+    running = any((c['running'] for c in ch))
+    if ch:
+        active = [c for c in ch if c['running']]
+        it['child'] = {k: (active or ch)[-1][k] for k in ('slug', 'tool', 'model', 'duration', 'cost', 'running')}
+    outcomes = it.get('outcomes', [])
+    it['evidence'] = ' · '.join((clip(o.get('gates') or '', 200) for o in outcomes if o.get('gates')))
+    res = compute(it, outcomes, ctx.probes)
+    it['status'] = res['status']
+    heuristic_text(it, outcomes)
+    card = next((c['card'] for c in reversed(ch) if c.get('card')), {})
+    it['raw_title'] = it['title']
+    it['steps'] = steps_of(note, card)
+    curated, preview = curate(it, note, card)
+    preview = preview or ctx.previews.get(iid, '')
+    if 'needs' in curated:
+        settle(it, res, it['needs'])
+    override = None if running else note_status(note.get('status'), res['status'])
+    if ch and (not running) and (override == 'Doing'):
+        override = None
+    if it.get('_deduped') and res['status'] in ('Integration', 'Main', 'Deployed') and override:
+        if override == 'Dropped' or STATUSES.index(override) < STATUSES.index(res['status']):
+            override = None
+    it['status'] = override or res['status']
+    if note.get('status') in ASKING_OLD and (not running):
+        res['asking'] = True
+    if isinstance(note.get('blocked'), str):
+        res['blocked'] = clip(note['blocked'], 160)
+    it['blocked'] = res['blocked']
+    it['dropped'] = drop_reason(res, note, it['needs']) if it['status'] == 'Dropped' else ''
+    it['stage'] = res['stage']
+    it['repo'] = it['repo'] or 'orchestra'
+    it['hidden'] = bool(note.get('hide'))
+    fill_text(it, curated, res['asking'])
+    it['ui'] = ui_of(it, note)
+    it['gates'] = gates_of(it, preview, note, ctx.probes, ctx.html)
+    ask_note = note if 'health' in it else merged_asks(it, note, card)
+    asks(it, ask_note, curated, res['asking'], ctx)
+    if it['ask'] and note.get('ask') and (res['done'] == 'Deployed') and (not (running or override or it['pr'])):
+        it['status'] = 'Backlog'
+    it['links'] = links_of(it)
+    led_rows = [r for s in it['slugs'] for r in ctx.ledger.get(s, [])]
+    attach_refs(it, note, it.pop('_reftext', []) + [f"{r.get('note') or ''} {r.get('gates') or ''}" for r in led_rows])
+    it['agent'], it['reviewer'] = (agent_of(ch), reviewer_of(it))
+    it['history'] = history_of(it, led_rows)
+    for c in it['children']:
+        c.pop('card', None)
+    it.pop('goal', None)
+    it['cost'] = round(sum((c['cost'] or 0 for c in it['children'])), 2)
+    it['priority'], it['priority_src'] = priority_of(it, note, ctx.issue_prio)
+    it['order'] = order_of(note)
+    it['proposals'] = [p for p in note.get('proposals') or [] if isinstance(p, dict)][-5:]
+    it.pop('_deduped', None)
+    it.pop('_ask_overrides', None)
+    it.pop('_note_aliases', None)
+
+def asks(it: dict, note: dict, curated: set[str], asking: bool, ctx: Ctx) -> None:
+    """Your call: notes ask > decisions > needs; a curated "Niente…" answers every question."""
+    it['ask'] = ask_of(it, note.get('ask'))
+    raw_asks = note.get('ask')
+    raw_asks = [raw_asks] if isinstance(raw_asks, dict) else raw_asks
+    raw_asks = [a for a in raw_asks if isinstance(a, dict)] if raw_asks else raw_asks
+    for a, raw in zip(it['ask'], raw_asks or it['ask']):
+        if isinstance(raw, dict):
+            a['_item'] = raw.get('_item', it['id'])
+            a['_answered'] = raw.get('_answered', False)
+    if 'needs' in curated and is_nothing(it['needs']) and (not (it.get('_deduped') and note.get('ask'))):
+        it['ask'] = []
+    elif asking and (not it['ask']) and ('ask' not in note):
+        it['ask'] = [split_advice({'link': ask_link(it)}, it['needs'])]
+    for a in it['ask']:
+        a['question'] = a['question'] or it['needs']
+        a['rec'] = a['rec'] or NO_REC
+    enrich_asks(it, ctx.decisions, ctx.answered)
+    for a in it['ask']:
+        if 'health' not in it and (a.get('_item', it['id']) in ctx.acted or card_ids(it) & ctx.acted):
+            a['answered'] = True
+    open_asks = [a for a in it['ask'] if not a['answered']]
+    if ctx.notes.get(it['id'], {}).get('status') in ('Deployed', 'Dropped'):
+        open_asks = []
+    it['your_call'] = bool(open_asks)
+    it['call_kind'] = (open_asks or it['ask'] or [{'kind': ''}])[0]['kind']
+    if it.get('steps') and (not open_asks):
+        it['call_kind'] = 'action'
+    it['serve_te'] = it['your_call']
