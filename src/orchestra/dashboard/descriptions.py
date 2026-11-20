@@ -240,12 +240,12 @@ def valid_description_provenance(item: dict[Any, Any], field: str) -> bool:
     return bool(primary and raw["url"] == primary["url"])
 
 
-def _retained_provenance(item: dict[Any, Any], curated: set[str]) -> dict[str, Any]:
+def _automatic_fields(item: dict[Any, Any], curated: set[str]) -> set[str]:
     existing = item.get("description_provenance")
     if not isinstance(existing, dict):
-        return {}
+        return set()
     return {
-        field: existing[field]
+        field
         for field in FIELDS
         if field not in curated and valid_description_provenance(item, field)
     }
@@ -253,7 +253,9 @@ def _retained_provenance(item: dict[Any, Any], curated: set[str]) -> dict[str, A
 
 def _eligible(item: dict[Any, Any], curated: set[str], field: str) -> bool:
     return field not in curated and (
-        not str(item.get(field) or "").strip() or technical_fallback(item, field)
+        not str(item.get(field) or "").strip()
+        or technical_fallback(item, field)
+        or item.get(field) == MISSING[field]
     )
 
 
@@ -261,13 +263,19 @@ def fill_descriptions(
     item: dict[Any, Any], curated: set[str], source_prs: list[dict[Any, Any]]
 ) -> set[str]:
     """Recover after curation, with provenance tied to the final selected text."""
-    retained = _retained_provenance(item, curated)
+    automatic = _automatic_fields(item, curated)
+    eligible = {
+        field
+        for field in FIELDS
+        if _eligible(item, curated, field) or field in automatic
+    }
+    retained = {}
     item.pop("description_provenance", None)
     if not isinstance(item.get("pr"), dict):
         return set()
     recovered = recover_descriptions(item, source_prs)
     for field in FIELDS:
-        if not _eligible(item, curated, field):
+        if field not in eligible:
             continue
         if recovered and recovered.get(field):
             item[field] = ATTRIBUTION + recovered[field]
@@ -276,7 +284,7 @@ def fill_descriptions(
                 "field_sha256": _sha(item[field]),
                 "body_sha256": recovered["body_sha256"],
             }
-        elif technical_fallback(item, field):
+        elif technical_fallback(item, field) or field in automatic:
             item[field] = MISSING[field]
     if retained:
         item["description_provenance"] = retained

@@ -188,7 +188,11 @@ def test_partial_evidence_and_stale_provenance_do_not_follow_edited_field():
     row["problem"] = "Edited elsewhere"
     assert "stale_description_provenance" in {r["code"] for r in findings(row)}
     fill_text(row, {"problem"}, False, source_prs=[source()])
-    assert "description_provenance" not in row
+    assert row["problem"] == "Edited elsewhere"
+    assert set(row["description_provenance"]) == {"solution"}
+    assert row["solution"].endswith(
+        "Accept `execution_id` and preserve package fields."
+    )
 
 
 def test_nonpr_fallback_unchanged_and_quality_is_read_only():
@@ -364,3 +368,43 @@ def test_long_unsupported_heading_is_bounded_without_backtracking():
 def test_credential_filter_does_not_match_arbitrary_keyword_suffixes(text):
     result = recover_descriptions(item(), [source(body=f"## Summary\n{text}")])
     assert result["solution"] == text
+
+
+def test_missing_description_is_recovered_when_primary_body_gains_section():
+    row = item()
+    fill_text(
+        row, set(), False, source_prs=[source(body="## Problem\nInitial problem")]
+    )
+    assert row["solution"].startswith("Descrizione della soluzione non disponibile")
+    fill_text(row, set(), False, source_prs=[source()])
+    assert row["solution"].endswith(
+        "Accept `execution_id` and preserve package fields."
+    )
+    assert set(row["description_provenance"]) == {"problem", "solution"}
+
+
+def test_automatic_descriptions_follow_current_primary_body_and_digest():
+    from hashlib import sha256
+
+    row = item()
+    fill_text(row, set(), False, source_prs=[source()])
+    body = "## Problem\nUpdated problem\n## Solution\nUpdated solution"
+    fill_text(row, set(), False, source_prs=[source(body=body)])
+    assert row["problem"].endswith("Updated problem")
+    assert row["solution"].endswith("Updated solution")
+    for field in ("problem", "solution"):
+        assert (
+            row["description_provenance"][field]["body_sha256"]
+            == sha256(body.encode()).hexdigest()
+        )
+
+
+def test_removed_primary_section_drops_its_automatic_text_and_provenance():
+    row = item()
+    fill_text(row, set(), False, source_prs=[source()])
+    fill_text(
+        row, set(), False, source_prs=[source(body="## Problem\nUpdated problem")]
+    )
+    assert row["problem"].endswith("Updated problem")
+    assert row["solution"].startswith("Descrizione della soluzione non disponibile")
+    assert set(row["description_provenance"]) == {"problem"}

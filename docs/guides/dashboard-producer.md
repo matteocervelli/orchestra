@@ -459,3 +459,8 @@ the output still contains four. Fixture byte/AST pins and output preservation
 checks are enforced before export. Adding Ctx.source_prs invalidates dormant
 closed shadow schema/callable pins: shadow remains OFF pending separately
 reviewed profile/schema updates.
+
+Automatically recovered PR descriptions refresh from the current primary body on
+each fill. Missing-section placeholders remain eligible for later recovery; removed
+sections lose their automatic text and provenance. Curated or manually edited fields
+remain authoritative.
