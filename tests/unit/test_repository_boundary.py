@@ -119,11 +119,13 @@ def test_forgejo_ci_callers_are_bounded_and_pinned(
     source = workflow.read_text(encoding="utf-8")
     triggers, jobs = source.split("\njobs:\n")
     assert set(re.findall(r"(?m)^  (\w+):$", triggers)) == events
-    branches = re.findall(r"(?m)^    branches: \[(.+)\]$", triggers)
-    expected_branches = ["main, auto/integration"] if "pull_request" in events else []
-    if "push" in events:
-        expected_branches.append("main")
-    assert sorted(branches) == sorted(expected_branches)
+    branch_mapping = dict(
+        re.findall(r"(?m)^  (\w+):\n    branches: \[(.+)\]$", triggers)
+    )
+    assert branch_mapping == {
+        event: "main" if event == "push" else "main, auto/integration"
+        for event in events
+    }
     assert re.findall(r"(?m)^  (\w+):$", jobs) == [job]
     pins = [line.strip() for line in source.splitlines() if "uses:" in line]
     assert pins == [
