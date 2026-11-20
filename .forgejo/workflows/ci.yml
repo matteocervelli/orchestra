@@ -14,4 +14,3 @@ jobs:
       package_path: "."
       typecheck_target: "src"
     secrets: inherit
-
