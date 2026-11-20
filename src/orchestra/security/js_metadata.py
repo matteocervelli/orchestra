@@ -7,6 +7,7 @@ import re
 from collections.abc import Mapping
 from pathlib import PurePosixPath
 from typing import Any, cast
+from urllib.parse import SplitResult, urlsplit
 
 from orchestra.security.contracts import Package
 from orchestra.security.inventory import WorkspaceInput
@@ -249,19 +250,25 @@ def _profile_yaml(raw: bytes, profile: TrustedProfile) -> dict[str, Any]:
     )
 
 
-def _registry_url(value: str, profile: TrustedProfile) -> None:
-    from urllib.parse import urlsplit
-
-    url = urlsplit(value)
-    trusted = urlsplit(profile.bindings()["js_registry"])
+def _https_url(value: str) -> SplitResult:
+    url = urlsplit(safe_text(value, 2048))
     require(
         url.scheme == "https"
         and bool(url.hostname)
         and url.username is None
         and url.password is None
         and not url.query
-        and not url.fragment
-        and url.hostname == trusted.hostname
+        and not url.fragment,
+        "unsupported_dependency_source",
+    )
+    return url
+
+
+def _registry_url(value: str, profile: TrustedProfile) -> None:
+    url = _https_url(value)
+    trusted = urlsplit(profile.bindings()["js_registry"])
+    require(
+        url.hostname == trusted.hostname
         and url.port == trusted.port
         and url.path.startswith(trusted.path.rstrip("/") + "/")
         and not any(part in {".", ".."} for part in url.path.split("/"))
