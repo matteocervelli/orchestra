@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -95,24 +98,39 @@ def test_ignore_policy_detects_force_tracked_secret(tmp_path: Path) -> None:
 
 def test_no_deploy_or_release_workflow_exists() -> None:
     workflow_root = ROOT / ".forgejo" / "workflows"
-    names = {path.name for path in workflow_root.glob("*.yml")}
-    assert names <= {"ci.yml"}
+    names = {path.name for path in workflow_root.glob("*.y*ml")}
+    assert names == {"ci.yml", "ci-test.yml", "ci-test-push.yml"}
     github_workflows = ROOT / ".github" / "workflows"
-    assert not github_workflows.exists() or not list(github_workflows.glob("*.yml"))
+    assert not github_workflows.exists() or not list(github_workflows.glob("*.y*ml"))
 
 
-def test_forgejo_ci_is_single_and_pinned_to_approved_release() -> None:
-    workflow = ROOT / ".forgejo" / "workflows" / "ci.yml"
+@pytest.mark.parametrize(
+    ("filename", "job", "library", "events"),
+    [
+        ("ci.yml", "quality", "lib-py-ci.yml", {"push", "pull_request"}),
+        ("ci-test.yml", "tests", "lib-py-ci-test.yml", {"pull_request"}),
+        ("ci-test-push.yml", "tests", "lib-py-ci-test.yml", {"push"}),
+    ],
+)
+def test_forgejo_ci_callers_are_bounded_and_pinned(
+    filename: str, job: str, library: str, events: set[str]
+) -> None:
+    workflow = ROOT / ".forgejo" / "workflows" / filename
     source = workflow.read_text(encoding="utf-8")
+    triggers, jobs = source.split("\njobs:\n")
+    assert set(re.findall(r"(?m)^  (\w+):$", triggers)) == events
+    branch_mapping = dict(
+        re.findall(r"(?m)^  (\w+):\n    branches: \[(.+)\]$", triggers)
+    )
+    assert branch_mapping == {
+        event: "main" if event == "push" else "main, auto/integration"
+        for event in events
+    }
+    assert re.findall(r"(?m)^  (\w+):$", jobs) == [job]
     pins = [line.strip() for line in source.splitlines() if "uses:" in line]
-    assert len(pins) == 2
-    assert all(
-        "matteocervelli/adlimen-cicd/.forgejo/workflows/" in pin
-        and pin.endswith("@v3.6.0")
-        for pin in pins
-    )
-    assert "pull_request:" in source and "auto/integration" in source
-    assert all(
-        word not in source.lower()
-        for word in ("deploy.yml", "release.yml", "publish.yml")
-    )
+    assert pins == [
+        f"uses: matteocervelli/adlimen-cicd/.forgejo/workflows/{library}@v3.6.0"
+    ]
+    assert not re.search(r"(?m)^\s*(?:run|steps):", jobs)
+    if job == "tests":
+        assert re.findall(r"caller_event_name: (\w+)", jobs) == sorted(events)
