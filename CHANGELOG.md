@@ -17,6 +17,7 @@ All notable changes to Orchestra are documented here.
 
 ### Fixed
 
+- Reject Windows drive-qualified paths in stateless security envelope records.
 - Avoid duplicate nonterminal Forgejo CI runs in the reusable pipeline.
 - Enforce the ignored tracked-file policy across every tracked path, including
   force-added credential-like filenames.
