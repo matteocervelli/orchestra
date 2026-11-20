@@ -167,18 +167,28 @@ class _ProtocolIO:
         self.error = False
         self.exited = False
         self.selector = selectors.DefaultSelector()
-        if process.stdin is None or process.stdout is None or process.stderr is None:
-            raise ValueError("protocol_io_failed")
-        for index, stream in enumerate((process.stdout, process.stderr, process.stdin)):
-            os.set_blocking(stream.fileno(), False)
-            if index != 2 or launch.stdin:
-                self.selector.register(
-                    stream,
-                    selectors.EVENT_WRITE if index == 2 else selectors.EVENT_READ,
-                    index,
-                )
-            else:
-                stream.close()
+        try:
+            if (
+                process.stdin is None
+                or process.stdout is None
+                or process.stderr is None
+            ):
+                raise ValueError("protocol_io_failed")
+            for index, stream in enumerate(
+                (process.stdout, process.stderr, process.stdin)
+            ):
+                os.set_blocking(stream.fileno(), False)
+                if index != 2 or launch.stdin:
+                    self.selector.register(
+                        stream,
+                        selectors.EVENT_WRITE if index == 2 else selectors.EVENT_READ,
+                        index,
+                    )
+                else:
+                    stream.close()
+        except (OSError, ValueError):
+            self.selector.close()
+            raise
 
     def step(self) -> None:
         for key, _ in self.selector.select(0):
@@ -236,7 +246,7 @@ def _protocol_start(
     )
     try:
         state = _ProtocolIO(process, launch)
-    except OSError:
+    except (OSError, ValueError):
         _terminate(process)
         for stream in (process.stdin, process.stdout, process.stderr):
             if stream is not None:
