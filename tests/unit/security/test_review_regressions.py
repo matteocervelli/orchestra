@@ -133,3 +133,114 @@ def test_dotenv_variants_in_excluded_scope_block(tmp_path: Path, name: str) -> N
             load(folder, data),
             GIT,
         )
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://registry.npmjs.org:abc/foo.tgz",
+        "https://registry.npmjs.org:99999/foo.tgz",
+        "https://[invalid/foo.tgz",
+        42,
+        None,
+    ],
+)
+def test_malformed_registry_values_never_escape_as_native_errors(
+    tmp_path: Path, url: object
+) -> None:
+    import yaml
+
+    lock = yaml.safe_load(PNPMLOCK)
+    lock["packages"]["foo@1.2.3"]["resolution"]["tarball"] = url
+    with pytest.raises(ProfileError):
+        validate_js(
+            js_manifests(),
+            "dashboard/pnpm-lock.yaml",
+            yaml.safe_dump(lock).encode(),
+            metadata_profile(tmp_path),
+        )
+
+
+def test_inventory_accepts_history_larger_than_old_capture_limit(
+    tmp_path: Path,
+) -> None:
+    import subprocess
+
+    from test_inventory import GIT, git, repository
+
+    from orchestra.security.inventory import capture_inventory
+
+    repo, base = repository(tmp_path)
+    branch = git(repo, "symbolic-ref", "HEAD").decode().strip()
+    original = git(repo, "rev-parse", "HEAD:unchanged.py").decode().strip()
+    stream = bytearray()
+    count = 52000
+    for index in range(1, count + 1):
+        content = f"unique-{index}".encode()
+        stream.extend(
+            f"blob\nmark :{index}\ndata {len(content)}\n".encode() + content + b"\n"
+        )
+    stream.extend(
+        (
+            f"commit {branch}\n"
+            "committer Fixture <fixture@example.invalid> 1 +0000\n"
+            f"data 4\nwide\nfrom {base}\n"
+        ).encode()
+    )
+    for index in range(1, count + 1):
+        stream.extend(f"M 100644 :{index} historical-{index}.md\n".encode())
+    stream.extend(
+        (
+            f"\ncommit {branch}\n"
+            "committer Fixture <fixture@example.invalid> 2 +0000\n"
+            f"data 6\nnarrow\ndeleteall\nM 100644 {original} unchanged.py\n\ndone\n"
+        ).encode()
+    )
+    subprocess.run(
+        [
+            str(GIT),
+            "-c",
+            "core.hooksPath=/dev/null",
+            "fast-import",
+            "--quiet",
+            "--done",
+        ],
+        cwd=repo,
+        input=stream,
+        check=True,
+        capture_output=True,
+    )
+    head = git(repo, "rev-parse", "HEAD").decode().strip()
+    assert len(git(repo, "rev-list", "--objects", "--no-object-names", head)) > 2097152
+    folder = tmp_path / "profile"
+    folder.mkdir()
+    inventory = capture_inventory(repo, head, head, load(folder, document()), GIT)
+    assert [item.path for item in inventory.files] == ["unchanged.py"]
+
+
+def test_inventory_accepts_maximum_path_in_tree_and_nul_diff(tmp_path: Path) -> None:
+    from test_inventory import GIT, git, repository
+
+    from orchestra.security.inventory import capture_inventory
+
+    repo, base = repository(tmp_path)
+    name = "a" * 250 + "/" + "b" * 250 + "/" + "c" * 7 + ".md"
+    assert len(name.encode()) == 512
+    target = repo / name
+    target.parent.mkdir(parents=True)
+    target.write_text("bounded input\n")
+    git(repo, "add", "-A")
+    git(repo, "commit", "--quiet", "-m", "maximum path")
+    folder = tmp_path / "profile"
+    folder.mkdir()
+    data = document()
+    data["limits"]["file_count"] = 2
+    inventory = capture_inventory(
+        repo,
+        git(repo, "rev-parse", "HEAD").decode().strip(),
+        base,
+        load(folder, data),
+        GIT,
+    )
+    assert name in inventory.changed
+    assert name in {item.path for item in inventory.files}
