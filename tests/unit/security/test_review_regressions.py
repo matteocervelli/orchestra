@@ -119,7 +119,7 @@ def test_dotenv_variants_in_excluded_scope_block(tmp_path: Path, name: str) -> N
     repo, base = repository(tmp_path)
     (repo / "excluded").mkdir()
     (repo / "excluded" / name).write_text("SYNTHETIC=value\n")
-    git(repo, "add", "-A")
+    git(repo, "-c", "core.excludesFile=/dev/null", "add", "-A")
     git(repo, "commit", "--quiet", "-m", "dotenv variant")
     data = document()
     data["exclusions"] = [".git", ".worktrees", "excluded"]
