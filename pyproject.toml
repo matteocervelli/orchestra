@@ -8,7 +8,10 @@ version = "0.1.0"
 description = "Reusable, reviewable SDLC workflow sources for Nexus Orchestra"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+  "packaging==26.3", # Requirement/marker equality without a new resolver.
+  "PyYAML==6.0.3", # Restricted pure-Python loader, not a new YAML parser.
+]
 
 [dependency-groups]
 dev = [
