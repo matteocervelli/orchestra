@@ -122,6 +122,7 @@ def _path(value: object) -> None:
     _text(value, 512)
     path = cast(str, value)
     _require("\\" not in path and not path.startswith("/"))
+    _require(re.match(r"[A-Za-z]:", path) is None)
     _require(all(part not in {"", ".", ".."} for part in path.split("/")))
 
 

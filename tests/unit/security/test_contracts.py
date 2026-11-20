@@ -334,7 +334,21 @@ def test_na_receipt_cannot_claim_execution(field: str, value: object) -> None:
 
 @pytest.mark.parametrize(
     "scope",
-    [".", "", "../a", "a/../b", "/a", "a//b", "a\\b", "a/./b", "a\n", "a" * 513],
+    [
+        ".",
+        "",
+        "../a",
+        "a/../b",
+        "/a",
+        "a//b",
+        "a\\b",
+        "a/./b",
+        "a\n",
+        "a" * 513,
+        "C:/a",
+        "C:a",
+        "Z:",
+    ],
 )
 def test_unsafe_path_rejected(scope: str) -> None:
     payload = fixture()
