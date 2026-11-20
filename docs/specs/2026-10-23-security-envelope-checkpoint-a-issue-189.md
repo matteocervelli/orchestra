@@ -154,6 +154,18 @@ trusted credential-free registry/index URLs, Orchestra Python-range pair and
 three Nexus dashboard override bindings in original §6. No host marker pruning,
 directURL/Git/external path or new resolution behavior is inferred.
 
+Promotion review clarification: JS lock metadata containing explicit registry
+or tarball URLs must remain under the trusted `js_registry` origin and path
+prefix; absent URLs retain that registry's implicit selection. A validates
+metadata and source selection only: archive fetching and cryptographic SRI
+verification remain outside this checkpoint and cannot establish artifact trust.
+Smaller profile blob/YAML limits apply to every JS manifest, workspace and lock
+parser. Git tree/diff capture bounds derive from file count and the 512-byte path
+bound; history completeness traverses objects with `rev-list --quiet` rather
+than capturing an unused object list. Git's `100644`/`100755` inventory mode binds
+the owner executable bit, as Git does; it does not represent full filesystem
+permissions. Dotenv variants such as `.env.local` are source coverage inputs.
+
 Policy is fixed orchestra-high-block-v1. Reject a profile weakening all-secret,
 all-pip or Bandit-MEDIUM+ rules. Assets is sorted {path,sha256,size}, byte hashes
 for configs/rules, excluding profile itself. Profile_digest is canonical full

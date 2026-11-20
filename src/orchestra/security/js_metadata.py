@@ -44,11 +44,14 @@ def _declared(value: object) -> dict[str, str]:
 
 
 def _workspace_patterns(
-    manifests: Mapping[str, bytes], root: str, root_manifest: dict[str, Any]
+    manifests: Mapping[str, bytes],
+    root: str,
+    root_manifest: dict[str, Any],
+    profile: TrustedProfile,
 ) -> list[str]:
     patterns = root_manifest.get("workspaces", [])
     if root + "pnpm-workspace.yaml" in manifests:
-        workspace = load_yaml(manifests[root + "pnpm-workspace.yaml"])
+        workspace = _profile_yaml(manifests[root + "pnpm-workspace.yaml"], profile)
         require(set(workspace) == {"packages"}, "unsupported_dependency_syntax")
         require(not patterns or patterns == workspace["packages"], "stale_lock")
         patterns = workspace["packages"]
@@ -84,11 +87,13 @@ def _workspace_matches(patterns: list[str], result: dict[str, Any]) -> None:
         )
 
 
-def _member_map(manifests: Mapping[str, bytes], root: str) -> dict[str, dict[str, Any]]:
+def _member_map(
+    manifests: Mapping[str, bytes], root: str, profile: TrustedProfile
+) -> dict[str, dict[str, Any]]:
     root_path = root + "package.json"
     require(root_path in manifests, "missing_lockfile")
-    root_manifest = decode_json(manifests[root_path], 4194304)
-    patterns = _workspace_patterns(manifests, root, root_manifest)
+    root_manifest = decode_json(manifests[root_path], profile.limit("blob_bytes"))
+    patterns = _workspace_patterns(manifests, root, root_manifest, profile)
     result = {".": root_manifest}
     for path, raw in manifests.items():
         if (
@@ -98,7 +103,7 @@ def _member_map(manifests: Mapping[str, bytes], root: str) -> dict[str, dict[str
         ):
             directory = path[len(root) :].removesuffix("/package.json")
             if any(PurePosixPath(directory).match(pattern) for pattern in patterns):
-                result[directory] = decode_json(raw, 4194304)
+                result[directory] = decode_json(raw, profile.limit("blob_bytes"))
     _workspace_matches(patterns, result)
     for manifest in result.values():
         _member_configuration(manifest)
@@ -235,17 +240,33 @@ def _pnpm_importers(
                     _pnpm_target(name, resolved, lock)
 
 
-def _registry_url(value: str) -> None:
+def _profile_yaml(raw: bytes, profile: TrustedProfile) -> dict[str, Any]:
+    return load_yaml(
+        raw,
+        byte_limit=profile.limit("blob_bytes"),
+        depth_limit=profile.limit("yaml_depth"),
+        node_limit=profile.limit("yaml_nodes"),
+    )
+
+
+def _registry_url(value: str, profile: TrustedProfile) -> None:
     from urllib.parse import urlsplit
 
     url = urlsplit(value)
+    trusted = urlsplit(profile.bindings()["js_registry"])
     require(
         url.scheme == "https"
         and bool(url.hostname)
         and url.username is None
         and url.password is None
         and not url.query
-        and not url.fragment,
+        and not url.fragment
+        and url.hostname == trusted.hostname
+        and url.port == trusted.port
+        and url.path.startswith(trusted.path.rstrip("/") + "/")
+        and not any(part in {".", ".."} for part in url.path.split("/"))
+        and "%" not in url.path
+        and "\\" not in value,
         "unsupported_dependency_source",
     )
 
@@ -264,7 +285,9 @@ def _pnpm_snapshots(
                 _pnpm_target(safe_text(name, 200), safe_text(resolved, 512), lock)
 
 
-def _pnpm_packages(lock: dict[str, Any]) -> tuple[Package, ...]:
+def _pnpm_packages(
+    lock: dict[str, Any], profile: TrustedProfile
+) -> tuple[Package, ...]:
     packages, snapshots = lock.get("packages", {}), lock.get("snapshots", {})
     require(
         type(packages) is dict and type(snapshots) is dict,
@@ -284,7 +307,7 @@ def _pnpm_packages(lock: dict[str, Any]) -> tuple[Package, ...]:
             "unsupported_dependency_source",
         )
         if "tarball" in resolution:
-            _registry_url(resolution["tarball"])
+            _registry_url(resolution["tarball"], profile)
         result[(name, version)] = Package(ecosystem="npm", name=name, version=version)
     _pnpm_snapshots(lock, packages, snapshots)
     return tuple(result[key] for key in sorted(result))
@@ -386,7 +409,7 @@ def _npm_packages(
         name, version = safe_text(name, 200), _version(item.get("version"))
         resolved = item.get("resolved")
         if resolved is not None:
-            _registry_url(resolved)
+            _registry_url(resolved, profile)
         result[(name, version)] = Package(ecosystem="npm", name=name, version=version)
     return tuple(result[key] for key in sorted(result))
 
@@ -410,14 +433,18 @@ def _validate_js(
         pnpm or lock_path.endswith("package-lock.json"), "unsupported_stack_or_lock"
     )
     root = lock_path.removesuffix("pnpm-lock.yaml" if pnpm else "package-lock.json")
-    members = _member_map(manifests, root)
+    members = _member_map(manifests, root, profile)
     require(len(members) <= profile.limit("root_count"), "scope_overflow")
-    lock = load_yaml(raw) if pnpm else decode_json(raw, 4194304)
+    lock = (
+        _profile_yaml(raw, profile)
+        if pnpm
+        else decode_json(raw, profile.limit("blob_bytes"))
+    )
     overrides = _overrides(members["."], lock, pnpm)
     if pnpm:
         require(lock.get("lockfileVersion") == "9.0", "unsupported_stack_or_lock")
         _pnpm_importers(root, members, lock, overrides, profile)
-        packages = _pnpm_packages(lock)
+        packages = _pnpm_packages(lock, profile)
     else:
         packages = _npm_packages(root, members, lock, overrides, profile)
     paths = tuple(
