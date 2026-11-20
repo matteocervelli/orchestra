@@ -17,6 +17,8 @@ All notable changes to Orchestra are documented here.
 
 ### Fixed
 
+- Escape Slack control sequences in release text and fail visibly when nightly
+  CI queries fail, preserving the existing alert state.
 - Canonical `bin/` Slack sink routes releases to the approved default channel
   (with environment/config overrides), retries unavailable release channels once
   on Orchestra, and clears nightly recovery silently. Nightly resolves its runtime

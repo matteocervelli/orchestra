@@ -117,13 +117,14 @@ def first_failure(log: str) -> str:
 def fetch(pages: int) -> list[dict]:
     rows: list[dict] = []
     for page in range(1, pages + 1):
-        out = subprocess.run(
+        result = subprocess.run(
             ["fj", "ci", "tasks", REPO, "--limit", "50", "--page", str(page)],
             capture_output=True,
             text=True,
             timeout=60,
-        ).stdout
-        rows += parse_rows(out)
+        )
+        result.check_returncode()
+        rows += parse_rows(result.stdout)
     return rows
 
 
@@ -269,7 +270,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--pages", type=int, default=20)
     args = ap.parse_args(argv)
-    latest = newest_finished(fetch(args.pages))
+    try:
+        latest = newest_finished(fetch(args.pages))
+    except (OSError, subprocess.SubprocessError) as error:
+        print(f"nightly: CI query failed: {type(error).__name__}", file=sys.stderr)
+        return 1
     if not latest:
         print("nightly: no finished run")
         return 0

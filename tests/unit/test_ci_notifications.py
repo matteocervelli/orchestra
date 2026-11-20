@@ -386,3 +386,51 @@ def test_release_channel_constructor_precedence(
     )
     assert sink.notify("release", "Title", "Body")
     assert api.call_args.args[1]["channel"] == expected
+
+
+@pytest.mark.parametrize("kind", ["release", "<!here>"])
+def test_release_data_cannot_inject_slack_controls(kind):
+    mod = module("slack_sink")
+    text = mod.format_message(
+        kind,
+        "Release <!channel> <@U123> & updates",
+        "[Docs](https://example.com/docs?a=1&b=2)\n<!here> <@U456>",
+    )
+    for control in ("<!channel>", "<!here>", "<@U123>", "<@U456>"):
+        assert control not in text
+    assert "<https://example.com/docs?a=1&amp;b=2|Docs>" in text
+    assert "&amp; updates" in text
+
+
+def test_nightly_fetch_rejects_failed_cli(monkeypatch):
+    mod = module("himalaia_nightly_alert")
+    monkeypatch.setattr(
+        mod.subprocess,
+        "run",
+        Mock(return_value=subprocess.CompletedProcess(["fj"], 1, "", "private error")),
+    )
+    with pytest.raises(subprocess.CalledProcessError):
+        mod.fetch(1)
+
+
+def test_nightly_main_reports_ci_query_failure(tmp_path, monkeypatch, capsys):
+    mod = module("himalaia_nightly_alert")
+    state = tmp_path / "state.json"
+    before = json.dumps({"_open": 42, "_start": "yesterday"})
+    state.write_text(before)
+    monkeypatch.setattr(mod, "STATE", state)
+    monkeypatch.setattr(
+        mod,
+        "fetch",
+        Mock(
+            side_effect=subprocess.CalledProcessError(1, ["fj"], stderr="private error")
+        ),
+    )
+    post = Mock(side_effect=AssertionError("Unexpected delivery"))
+    monkeypatch.setattr(mod, "post", post)
+    assert mod.main([]) == 1
+    assert state.read_text() == before
+    error = capsys.readouterr().err
+    assert "CI query failed" in error
+    assert "private error" not in error
+    post.assert_not_called()

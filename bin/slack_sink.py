@@ -108,6 +108,7 @@ def esc(text: str) -> str:
 
 
 def to_mrkdwn(text: str) -> str:
+    text = esc(text)
     text = re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r"<\2|\1>", text)
     text = re.sub(r"^#{1,6}\s+(.+)$", r"*\1*", text, flags=re.M)
     return re.sub(r"\*\*(.+?)\*\*", r"*\1*", text)
@@ -118,7 +119,7 @@ def format_message(kind: str, subject: str, body: str) -> str:
     already has them)."""
     head = (
         f"{EMOJI.get(kind, ':information_source:')} "
-        f"*{LABELS.get(kind, kind)}: {subject.strip()}*"
+        f"*{esc(LABELS.get(kind, kind))}: {esc(subject.strip())}*"
     )
     body = to_mrkdwn(body.strip())
     if len(body) > MAX_BODY:
