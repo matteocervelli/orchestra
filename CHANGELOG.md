@@ -6,6 +6,9 @@ All notable changes to Orchestra are documented here.
 
 ### Fixed
 
+- Dashboard export preserves explicit canonical card closure through aggregation,
+  including curated text and provenance, without claiming deployment.
+
 - Canonical `bin/` Slack sink routes releases to the approved default channel
   (with environment/config overrides), retries unavailable release channels once
   on Orchestra, and clears nightly recovery silently. Nightly resolves its runtime
