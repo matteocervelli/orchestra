@@ -176,6 +176,19 @@ def _ownership_finish(finish: ast.FunctionDef) -> None:
 
 def _workitems(source: str, *, include_project_ownership: bool = False) -> str:
     finish = _function(source, "finish")
+    # Explicit closure is terminal; only stale earlier pipeline overrides regress.
+    stale_override = ast.parse(
+        "override == 'Dropped' or "
+        "STATUSES.index(override) < STATUSES.index(res['status'])",
+        mode="eval",
+    ).body
+    for node in ast.walk(finish):
+        if isinstance(node, ast.If) and ast.dump(node.test) == ast.dump(stale_override):
+            node.test = ast.parse(
+                "override != 'Dropped' and "
+                "STATUSES.index(override) < STATUSES.index(res['status'])",
+                mode="eval",
+            ).body
     _quality_text_finish(finish)
     if include_project_ownership:
         _ownership_finish(finish)
@@ -561,6 +574,29 @@ def dedupe_intent_adapter(source: str) -> str:
     aliases.body[index + 1 : index + 1] = ast.parse(
         "if not superseded and 'needs' in note:\n    select_needs_intent(out, note)"
     ).body
+    # A canonical closure is authoritative; dropped aliases remain superseded.
+    superseded = next(
+        node
+        for node in aliases.body
+        if isinstance(node, ast.Assign)
+        and any(isinstance(t, ast.Name) and t.id == "superseded" for t in node.targets)
+    )
+    superseded.value.values[0] = (
+        ast.parse("alias != target and note.get('status') == 'Dropped'").body[0].value
+    )
+    status_guard = next(
+        node
+        for node in merge.body
+        if isinstance(node, ast.If)
+        and isinstance(node.test, ast.Name)
+        and node.test.id == "statuses"
+    )
+    closure_guard = ast.parse(
+        "if notes.get(target, {}).get('status') == 'Dropped' "
+        "and not notes[target].get('merged_into'):\n    out['status'] = 'Dropped'"
+    ).body[0]
+    closure_guard.orelse = [status_guard]
+    merge.body[merge.body.index(status_guard)] = closure_guard
     changed = replace_symbols(
         source, {"merge_notes": ast.unparse(ast.fix_missing_locations(merge))}
     )

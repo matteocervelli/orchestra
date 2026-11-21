@@ -124,6 +124,11 @@ Display aliases and bare task/card numbers remain insufficient primary evidence.
 
 ## Preserve curated text
 
+An explicit `Dropped` on the canonical card closes grouped work, including work
+already at Integration/Main. Its curated fields and provenance survive note
+aggregation. A dropped alias does not close the canonical card; running children
+still prevent a closure override. Closure does not attest production deployment.
+
 Nonblank note titles win even without `pin`. For other text keys, a value present
 in both the note and `edited_fields` wins over an older child report. Fields not
 explicitly edited retain the existing card/pin precedence. An edited empty value
